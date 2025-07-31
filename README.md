@@ -235,7 +235,7 @@ my-app-backend/
 
 ## 📝 License
 
-This project is proprietary and confidential.
+This project is open source and available under the MIT License.
 
 ## 🆘 Support
 
