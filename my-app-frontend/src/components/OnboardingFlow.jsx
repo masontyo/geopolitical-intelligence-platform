@@ -19,7 +19,11 @@ export default function OnboardingFlow() {
 
   if (!profile) {
     return (
-      <CROOnboardingForm onSubmit={data => { setProfile(data); setIsReviewing(true); }} />
+      <CROOnboardingForm onSubmit={data => { 
+        console.log('CROOnboardingForm submitted, data:', data);
+        setProfile(data); 
+        setIsReviewing(true); 
+      }} />
     );
   }
 
@@ -35,10 +39,14 @@ export default function OnboardingFlow() {
 
   if (isSuggesting) {
     return (
-      <ProfileSuggestions onComplete={suggestions => {
-        setFinalProfile({ ...profile, enrichedSuggestions: suggestions });
-        setIsSuggesting(false);
-      }} />
+      <ProfileSuggestions 
+        profileId={profile.id}
+        onComplete={suggestions => {
+          console.log('ProfileSuggestions completed, profile ID:', profile.id);
+          setFinalProfile({ ...profile, enrichedSuggestions: suggestions });
+          setIsSuggesting(false);
+        }} 
+      />
     );
   }
 

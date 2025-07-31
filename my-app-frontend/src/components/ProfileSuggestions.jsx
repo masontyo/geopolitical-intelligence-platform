@@ -16,7 +16,7 @@ const SAMPLE_SUGGESTIONS = [
   }
 ];
 
-export default function ProfileSuggestions({ onComplete }) {
+export default function ProfileSuggestions({ onComplete, profileId }) {
   const [selected, setSelected] = useState(SAMPLE_SUGGESTIONS.map(s => s.id));
 
   function toggle(id) {
