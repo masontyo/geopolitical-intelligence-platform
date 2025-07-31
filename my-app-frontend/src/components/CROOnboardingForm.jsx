@@ -54,27 +54,36 @@ export default function CROOnboardingForm({ onSubmit }) {
         title: 'CRO', // Changed from 'role' to 'title'
         company: formData.companyName,
         industry: 'Technology', // Added required industry field
-        businessUnits: formData.businessUnits.split(',').map(unit => unit.trim()).filter(unit => unit).map(unit => ({
+        businessUnits: (formData.businessUnits || '').split(',').map(unit => unit.trim()).filter(unit => unit).map(unit => ({
           name: unit,
           description: `${unit} business unit`,
           regions: [],
           products: []
         })),
-        areasOfConcern: formData.eventTypesConcerned.map(concern => ({
+        areasOfConcern: (formData.eventTypesConcerned || []).map(concern => ({
           category: concern,
           description: `${concern} related concerns`,
           priority: 'medium'
         })),
-        regions: formData.criticalRegions.split(',').map(region => region.trim()).filter(region => region),
+        regions: (formData.criticalRegions || '').split(',').map(region => region.trim()).filter(region => region),
         riskTolerance: 'medium', // Default value
         additionalInfo: {
-          hqLocation: formData.hqLocation,
-          supplyChainNodes: formData.supplyChainNodes,
-          pastDisruptions: formData.pastDisruptions,
-          stakeholders: formData.stakeholders,
-          deliveryPreference: formData.deliveryPreference
+          hqLocation: formData.hqLocation || '',
+          supplyChainNodes: formData.supplyChainNodes || '',
+          pastDisruptions: formData.pastDisruptions || '',
+          stakeholders: formData.stakeholders || '',
+          deliveryPreference: formData.deliveryPreference || 'dashboard'
         }
       };
+
+      // Validate required fields
+      if (!profileData.businessUnits || profileData.businessUnits.length === 0) {
+        throw new Error('At least one business unit is required');
+      }
+      
+      if (!profileData.areasOfConcern || profileData.areasOfConcern.length === 0) {
+        throw new Error('At least one area of concern is required');
+      }
 
       console.log('Submitting profile data:', profileData);
       console.log('API URL:', process.env.REACT_APP_API_URL || 'Using default URL');
@@ -98,8 +107,19 @@ export default function CROOnboardingForm({ onSubmit }) {
         errorMessage = 'Server endpoint not found. Please contact support.';
       } else if (err.response?.status === 500) {
         errorMessage = 'Server error occurred. Please try again later.';
+      } else if (err.response?.status === 400) {
+        // Handle validation errors from backend
+        if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
+          errorMessage = `Validation errors: ${err.response.data.errors.join(', ')}`;
+        } else if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else {
+          errorMessage = 'Invalid data provided. Please check your form inputs.';
+        }
       } else if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
       }
       
       setError(errorMessage);
