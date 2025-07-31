@@ -123,7 +123,7 @@ export default function Dashboard({ profileId }) {
               {profile.businessUnits?.map((unit, index) => (
                 <Chip 
                   key={index} 
-                  label={unit} 
+                  label={unit.name || unit} 
                   size="small" 
                   sx={{ mr: 1, mb: 1 }} 
                 />
@@ -137,7 +137,7 @@ export default function Dashboard({ profileId }) {
               {profile.areasOfConcern?.map((concern, index) => (
                 <Chip 
                   key={index} 
-                  label={concern} 
+                  label={concern.category || concern} 
                   color="warning" 
                   size="small" 
                   sx={{ mr: 1, mb: 1 }} 
