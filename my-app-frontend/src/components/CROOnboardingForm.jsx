@@ -92,9 +92,18 @@ export default function CROOnboardingForm({ onSubmit }) {
       const savedProfile = await userProfileAPI.createProfile(profileData);
       
       console.log('Profile saved successfully:', savedProfile);
+      console.log('Response structure:', {
+        hasProfile: !!savedProfile.profile,
+        profileKeys: savedProfile.profile ? Object.keys(savedProfile.profile) : 'No profile',
+        profileId: savedProfile.profile?._id,
+        profileIdAlt: savedProfile.profile?.id
+      });
       
       // Pass the saved profile (with ID) to parent component
-      onSubmit({ ...formData, id: savedProfile.profile.id });
+      // MongoDB uses _id, not id
+      const profileId = savedProfile.profile._id || savedProfile.profile.id;
+      console.log('Extracted profile ID:', profileId);
+      onSubmit({ ...formData, id: profileId });
     } catch (err) {
       console.error('Error saving profile:', err);
       
