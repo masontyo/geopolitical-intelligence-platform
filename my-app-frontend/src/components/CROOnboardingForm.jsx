@@ -51,10 +51,20 @@ export default function CROOnboardingForm({ onSubmit }) {
       // Transform form data to match backend API structure
       const profileData = {
         name: formData.companyName,
-        role: 'CRO',
+        title: 'CRO', // Changed from 'role' to 'title'
         company: formData.companyName,
-        businessUnits: formData.businessUnits.split(',').map(unit => unit.trim()).filter(unit => unit),
-        areasOfConcern: formData.eventTypesConcerned,
+        industry: 'Technology', // Added required industry field
+        businessUnits: formData.businessUnits.split(',').map(unit => unit.trim()).filter(unit => unit).map(unit => ({
+          name: unit,
+          description: `${unit} business unit`,
+          regions: [],
+          products: []
+        })),
+        areasOfConcern: formData.eventTypesConcerned.map(concern => ({
+          category: concern,
+          description: `${concern} related concerns`,
+          priority: 'medium'
+        })),
         regions: formData.criticalRegions.split(',').map(region => region.trim()).filter(region => region),
         riskTolerance: 'medium', // Default value
         additionalInfo: {
@@ -66,14 +76,33 @@ export default function CROOnboardingForm({ onSubmit }) {
         }
       };
 
+      console.log('Submitting profile data:', profileData);
+      console.log('API URL:', process.env.REACT_APP_API_URL || 'Using default URL');
+
       // Save to backend
       const savedProfile = await userProfileAPI.createProfile(profileData);
+      
+      console.log('Profile saved successfully:', savedProfile);
       
       // Pass the saved profile (with ID) to parent component
       onSubmit({ ...formData, id: savedProfile.profile.id });
     } catch (err) {
       console.error('Error saving profile:', err);
-      setError(err.response?.data?.message || 'Failed to save profile. Please try again.');
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to save profile. Please try again.';
+      
+      if (err.code === 'ECONNREFUSED' || err.message.includes('Network Error')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection and try again.';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'Server endpoint not found. Please contact support.';
+      } else if (err.response?.status === 500) {
+        errorMessage = 'Server error occurred. Please try again later.';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
