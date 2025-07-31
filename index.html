@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contextual Intelligence Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --primary-color: #0052cc;
+    --secondary-color: #f4f5f7;
+    --border-color: #dfe1e6;
+    --text-color: #172b4d;
+    --text-light: #5e6c84;
+    --white: #ffffff;
+    --red: #de350b;
+    --orange: #ffab00;
+    --green: #36b37e;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--secondary-color);
+    margin: 0;
+    color: var(--text-color);
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.nav-btn {
+    font-family: 'Inter', sans-serif;
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-light);
+    border-bottom: 2px solid transparent;
+}
+
+.nav-btn.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+}
+
+.user-profile span {
+    margin-right: 1rem;
+    font-weight: 500;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+}
+
+main {
+    padding: 2rem;
+}
+
+h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.alerts-container {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+.alert-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.alert-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+}
+
+.alert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.alert-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.alert-tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tag-risk { background-color: var(--red); color: var(--white); }
+.tag-opportunity { background-color: var(--green); color: var(--white); }
+.tag-watch { background-color: var(--orange); color: var(--white); }
+
+
+.alert-impact {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.alert-summary {
+    color: var(--text-light);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.alert-context {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Settings Form */
+.settings-form {
+    max-width: 800px;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box; /* Important for width */
+    margin-bottom: 1rem;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.cta-button {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.cta-button:hover {
+    background-color: #00419e;
+}
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="logo">ContextIntel</div>
+        <nav>
+            <button id="dashboard-btn" class="nav-btn active">Dashboard</button>
+            <button id="settings-btn" class="nav-btn">My Profile & Business</button>
+        </nav>
+        <div class="user-profile">
+            <span>Welcome, CRO</span>
+            <div class="avatar">C</div>
+        </div>
+    </header>
+
+    <main id="dashboard-view" class="content-view">
+        <h1>Active Alerts</h1>
+        <div class="alerts-container">
+            </div>
+    </main>
+
+    <main id="settings-view" class="content-view" style="display: none;">
+        <h1>My Profile & Business Units</h1>
+        <div class="settings-form">
+            <form id="user-info-form">
+                <div class="form-section">
+                    <h3>User Profile</h3>
+                    <label for="user-name">Name:</label>
+                    <input type="text" id="user-name" name="user-name" value="Alex Chen">
+                    <label for="user-role">Role:</label>
+                    <input type="text" id="user-role" name="user-role" value="Chief Risk Officer">
+                </div>
+                <div class="form-section">
+                    <h3>Business Context</h3>
+                    <label for="company-name">Company Name:</label>
+                    <input type="text" id="company-name" name="company-name" value="Global Logistics Inc.">
+                    
+                    <label for="business-units">Key Business Units / Areas of Concern:</label>
+                    <textarea id="business-units" name="business-units" rows="6">Southeast Asia shipping routes
+Brazilian coffee bean supply chain
+European semiconductor manufacturing partners
+Currency fluctuation risk (USD/EUR)
+Cybersecurity threats to cloud infrastructure</textarea>
+                </div>
+                <button type="submit" class="cta-button">Save Changes</button>
+            </form>
+        </div>
+    </main>
+    
+    <script>
+        // Mock data representing what your backend would generate
+const mockAlerts = [
+    {
+        id: 1,
+        title: "Thailand Port Union Announces Strike",
+        type: "risk",
+        impact: "High Impact on SEA Shipping Routes",
+        summary: "The main port union in Laem Chabang, Thailand, has announced a 48-hour strike starting next Monday. This will halt all container processing, directly affecting two of our primary shipping lanes.",
+        context: "Relevant Business Unit: Southeast Asia shipping routes"
+    },
+    {
+        id: 2,
+        title: "New Brazilian Subsidy for Coffee Exporters",
+        type: "opportunity",
+        impact: "Potential 5-8% Cost Reduction",
+        summary: "Brazil's government has introduced a new subsidy for sustainable coffee bean exporters, effective immediately. As we source 40% of our beans from qualifying regions, this presents a significant cost-saving opportunity.",
+        context: "Relevant Business Unit: Brazilian coffee bean supply chain"
+    },
+    {
+        id: 3,
+        title: "Minor Earthquake near Taiwan Chip Plant",
+        type: "watch",
+        impact: "Low Impact - Monitoring",
+        summary: "A 4.5 magnitude earthquake was reported 50km from a key semiconductor supplier in Hsinchu, Taiwan. Initial reports indicate no damage to the facility, but we are monitoring for any potential supply chain disruptions.",
+        context: "Relevant Business Unit: European semiconductor manufacturing partners"
+    }
+];
+
+// --- DOM Elements ---
+const dashboardView = document.getElementById('dashboard-view');
+const settingsView = document.getElementById('settings-view');
+const dashboardBtn = document.getElementById('dashboard-btn');
+const settingsBtn = document.getElementById('settings-btn');
+const alertsContainer = document.querySelector('.alerts-container');
+const userInfoForm = document.getElementById('user-info-form');
+
+// --- Functions ---
+
+function displayAlerts() {
+    alertsContainer.innerHTML = ''; // Clear existing alerts
+    mockAlerts.forEach(alert => {
+        const tagClass = `tag-${alert.type}`;
+        const card = `
+            <div class="alert-card" data-id="${alert.id}">
+                <div class="alert-header">
+                    <h2 class="alert-title">${alert.title}</h2>
+                    <span class="alert-tag ${tagClass}">${alert.type.toUpperCase()}</span>
+                </div>
+                <p class="alert-impact">${alert.impact}</p>
+                <p class="alert-summary">${alert.summary}</p>
+                <p class="alert-context">${alert.context}</p>
+            </div>
+        `;
+        alertsContainer.insertAdjacentHTML('beforeend', card);
+    });
+}
+
+function showDashboard() {
+    settingsView.style.display = 'none';
+    dashboardView.style.display = 'block';
+    settingsBtn.classList.remove('active');
+    dashboardBtn.classList.add('active');
+}
+
+function showSettings() {
+    dashboardView.style.display = 'none';
+    settingsView.style.display = 'block';
+    dashboardBtn.classList.remove('active');
+    settingsBtn.classList.add('active');
+}
+
+// --- Event Listeners ---
+dashboardBtn.addEventListener('click', showDashboard);
+settingsBtn.addEventListener('click', showSettings);
+
+userInfoForm.addEventListener('submit', (e) => {
+    e.preventDefault(); // Prevent actual form submission
+    alert('User and business information saved! The system will now recalibrate alerts based on this new context.');
+    showDashboard();
+});
+
+// --- Initial Load ---
+document.addEventListener('DOMContentLoaded', () => {
+    displayAlerts();
+});
+    </script>
+
+</body>
+</html>
