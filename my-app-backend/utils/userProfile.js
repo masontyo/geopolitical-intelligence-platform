@@ -90,7 +90,9 @@ const calculateRelevanceScore = (userProfile, event) => {
   
   // Text content matching (weight: 0.2)
   const eventText = `${event.title} ${event.description}`.toLowerCase();
-  const profileText = `${userProfile.businessUnits.join(' ')} ${userProfile.areasOfConcern.join(' ')}`.toLowerCase();
+  const businessUnitNames = userProfile.businessUnits.map(unit => unit.name).join(' ');
+  const concernCategories = userProfile.areasOfConcern.map(concern => concern.category).join(' ');
+  const profileText = `${businessUnitNames} ${concernCategories}`.toLowerCase();
   
   const profileWords = profileText.split(' ');
   const matchingWords = profileWords.filter(word => 
