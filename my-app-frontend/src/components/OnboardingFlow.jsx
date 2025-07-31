@@ -12,6 +12,8 @@ export default function OnboardingFlow() {
   const [finalProfile, setFinalProfile] = useState(null);
 
   if (finalProfile) {
+    console.log('Rendering Dashboard with profileId:', finalProfile.id);
+    console.log('Final profile data:', finalProfile);
     return <Dashboard profileId={finalProfile.id} />;
   }
 

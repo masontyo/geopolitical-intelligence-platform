@@ -21,23 +21,34 @@ export default function Dashboard({ profileId }) {
   }, [profileId]);
 
   const loadDashboardData = async () => {
-    if (!profileId) return;
+    if (!profileId) {
+      console.log('No profileId provided to Dashboard');
+      setError('No profile ID provided');
+      setLoading(false);
+      return;
+    }
     
+    console.log('Loading dashboard data for profileId:', profileId);
     setLoading(true);
     setError(null);
     
     try {
       // Load profile and relevant events in parallel
+      console.log('Making API calls...');
       const [profileResponse, eventsResponse] = await Promise.all([
         userProfileAPI.getProfile(profileId),
         userProfileAPI.getRelevantEvents(profileId)
       ]);
       
+      console.log('Profile response:', profileResponse);
+      console.log('Events response:', eventsResponse);
+      
       setProfile(profileResponse.profile);
       setRelevantEvents(eventsResponse.events || []);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
-      setError('Failed to load dashboard data. Please refresh the page.');
+      console.error('Error details:', err.response?.data);
+      setError(`Failed to load dashboard data: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
     }
