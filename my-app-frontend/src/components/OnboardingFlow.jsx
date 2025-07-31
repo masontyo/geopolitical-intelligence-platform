@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CROOnboardingForm from "./CROOnboardingForm";
 import CROProfileReview from "./CROProfileReview";
 import ProfileSuggestions from "./ProfileSuggestions";
+import Dashboard from "./Dashboard";
 import { Paper, Typography } from "@mui/material";
 
 export default function OnboardingFlow() {
@@ -11,20 +12,7 @@ export default function OnboardingFlow() {
   const [finalProfile, setFinalProfile] = useState(null);
 
   if (finalProfile) {
-    return (
-      <Paper elevation={3} sx={{ maxWidth: 620, mx: "auto", my: 8, p: 4, textAlign: "center" }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>Onboarding Complete!</Typography>
-        <Typography variant="body1" sx={{ mb: 1 }}>
-          Your personalized risk profile is set up.
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 3 }}>
-          In future steps, you’ll receive bespoke intelligence and real-time alerts based on this profile.
-        </Typography>
-        <Typography variant="caption" color="grey.700">
-          (Continue to dashboard or main app here.)
-        </Typography>
-      </Paper>
-    );
+    return <Dashboard profileId={finalProfile.id} />;
   }
 
   if (!profile) {

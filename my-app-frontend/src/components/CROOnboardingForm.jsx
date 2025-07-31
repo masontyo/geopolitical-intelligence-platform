@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import {
   Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup,
-  Paper, Stepper, Step, StepLabel, TextField, Typography, Divider, MenuItem, Tooltip as MUITooltip
+  Paper, Stepper, Step, StepLabel, TextField, Typography, Divider, MenuItem, Tooltip as MUITooltip,
+  Alert, CircularProgress
 } from '@mui/material';
+import { userProfileAPI } from '../services/api';
 
 const eventOptions = [
   'Shipping Disruption', 'Sanctions', 'Trade Wars',
@@ -23,6 +25,8 @@ const initialState = {
 
 export default function CROOnboardingForm({ onSubmit }) {
   const [formData, setFormData] = useState(initialState);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -38,9 +42,41 @@ export default function CROOnboardingForm({ onSubmit }) {
     );
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSubmit(formData);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Transform form data to match backend API structure
+      const profileData = {
+        name: formData.companyName,
+        role: 'CRO',
+        company: formData.companyName,
+        businessUnits: formData.businessUnits.split(',').map(unit => unit.trim()).filter(unit => unit),
+        areasOfConcern: formData.eventTypesConcerned,
+        regions: formData.criticalRegions.split(',').map(region => region.trim()).filter(region => region),
+        riskTolerance: 'medium', // Default value
+        additionalInfo: {
+          hqLocation: formData.hqLocation,
+          supplyChainNodes: formData.supplyChainNodes,
+          pastDisruptions: formData.pastDisruptions,
+          stakeholders: formData.stakeholders,
+          deliveryPreference: formData.deliveryPreference
+        }
+      };
+
+      // Save to backend
+      const savedProfile = await userProfileAPI.createProfile(profileData);
+      
+      // Pass the saved profile (with ID) to parent component
+      onSubmit({ ...formData, id: savedProfile.profile.id });
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      setError(err.response?.data?.message || 'Failed to save profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -61,6 +97,12 @@ export default function CROOnboardingForm({ onSubmit }) {
       <Typography variant="body2" sx={{ mb: 2, background: "#eef5fc", p: 1.5, borderRadius: 1 }}>
         The more complete your profile, the more timely and targeted your intelligence will be.
       </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <Box component="form" onSubmit={handleSubmit}>
         <Divider sx={{ my: 2 }}>Company Details</Divider>
@@ -177,8 +219,15 @@ export default function CROOnboardingForm({ onSubmit }) {
         </TextField>
 
         <Box sx={{ mt: 2 }}>
-          <Button type="submit" variant="contained" color="primary" size="large">
-            Submit &amp; Preview Profile
+          <Button 
+            type="submit" 
+            variant="contained" 
+            color="primary" 
+            size="large"
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            {loading ? 'Saving Profile...' : 'Submit & Preview Profile'}
           </Button>
         </Box>
       </Box>
