@@ -6,6 +6,11 @@ const API_BASE_URL = process.env.REACT_APP_API_URL ||
     ? 'http://localhost:3001' 
     : 'https://geop-backend.onrender.com');
 
+console.log('🔍 API Configuration Debug:');
+console.log('Current hostname:', window.location.hostname);
+console.log('Environment API URL:', process.env.REACT_APP_API_URL);
+console.log('Final API Base URL:', API_BASE_URL);
+
 // Create axios instance with default configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
