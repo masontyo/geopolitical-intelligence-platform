@@ -1,17 +1,15 @@
 const express = require('express');
 const { validateUserProfile, calculateRelevanceScore } = require('../utils/userProfile');
+const UserProfile = require('../models/UserProfile');
+const GeopoliticalEvent = require('../models/GeopoliticalEvent');
 
 const router = express.Router();
-
-// In-memory storage for MVP (will be replaced with database)
-let userProfiles = [];
-let geopoliticalEvents = [];
 
 /**
  * POST /api/user-profile
  * Create or update a user profile
  */
-router.post('/user-profile', (req, res) => {
+router.post('/user-profile', async (req, res) => {
   try {
     const profile = req.body;
     
@@ -25,31 +23,30 @@ router.post('/user-profile', (req, res) => {
       });
     }
     
-    // Check if profile already exists (by name for MVP)
-    const existingIndex = userProfiles.findIndex(p => p.name === profile.name);
+    // Check if profile already exists (by name and company)
+    const existingProfile = await UserProfile.findOne({ 
+      name: profile.name, 
+      company: profile.company 
+    });
     
-    if (existingIndex >= 0) {
+    let savedProfile;
+    
+    if (existingProfile) {
       // Update existing profile
-      userProfiles[existingIndex] = {
-        ...profile,
-        id: userProfiles[existingIndex].id,
-        updatedAt: new Date().toISOString()
-      };
+      savedProfile = await UserProfile.findByIdAndUpdate(
+        existingProfile._id,
+        profile,
+        { new: true, runValidators: true }
+      );
     } else {
       // Create new profile
-      const newProfile = {
-        ...profile,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      userProfiles.push(newProfile);
+      savedProfile = await UserProfile.create(profile);
     }
     
     res.status(200).json({
       success: true,
-      message: existingIndex >= 0 ? 'Profile updated successfully' : 'Profile created successfully',
-      profile: existingIndex >= 0 ? userProfiles[existingIndex] : userProfiles[userProfiles.length - 1]
+      message: existingProfile ? 'Profile updated successfully' : 'Profile created successfully',
+      profile: savedProfile
     });
     
   } catch (error) {
@@ -65,10 +62,10 @@ router.post('/user-profile', (req, res) => {
  * GET /api/user-profile/:id
  * Get a specific user profile
  */
-router.get('/user-profile/:id', (req, res) => {
+router.get('/user-profile/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const profile = userProfiles.find(p => p.id === id);
+    const profile = await UserProfile.findById(id);
     
     if (!profile) {
       return res.status(404).json({
@@ -95,12 +92,12 @@ router.get('/user-profile/:id', (req, res) => {
  * GET /api/user-profile/:id/relevant-events
  * Get relevant geopolitical events for a user profile
  */
-router.get('/user-profile/:id/relevant-events', (req, res) => {
+router.get('/user-profile/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
     const { threshold = 0.5 } = req.query; // Minimum relevance score
     
-    const profile = userProfiles.find(p => p.id === id);
+    const profile = await UserProfile.findById(id);
     
     if (!profile) {
       return res.status(404).json({
@@ -109,10 +106,13 @@ router.get('/user-profile/:id/relevant-events', (req, res) => {
       });
     }
     
+    // Get all events from database
+    const allEvents = await GeopoliticalEvent.find({ status: 'active' });
+    
     // Calculate relevance scores for all events
-    const relevantEvents = geopoliticalEvents
+    const relevantEvents = allEvents
       .map(event => ({
-        ...event,
+        ...event.toObject(),
         relevanceScore: calculateRelevanceScore(profile, event)
       }))
       .filter(event => event.relevanceScore >= parseFloat(threshold))
@@ -137,7 +137,7 @@ router.get('/user-profile/:id/relevant-events', (req, res) => {
  * POST /api/events
  * Add a geopolitical event (for testing/manual input)
  */
-router.post('/events', (req, res) => {
+router.post('/events', async (req, res) => {
   try {
     const event = req.body;
     
@@ -149,15 +149,12 @@ router.post('/events', (req, res) => {
       });
     }
     
-    const newEvent = {
-      ...event,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      categories: event.categories || [],
-      regions: event.regions || []
-    };
+    // Set default event date if not provided
+    if (!event.eventDate) {
+      event.eventDate = new Date();
+    }
     
-    geopoliticalEvents.push(newEvent);
+    const newEvent = await GeopoliticalEvent.create(event);
     
     res.status(201).json({
       success: true,
@@ -178,12 +175,14 @@ router.post('/events', (req, res) => {
  * GET /api/events
  * Get all geopolitical events
  */
-router.get('/events', (req, res) => {
+router.get('/events', async (req, res) => {
   try {
+    const events = await GeopoliticalEvent.find().sort({ eventDate: -1 });
+    
     res.status(200).json({
       success: true,
-      events: geopoliticalEvents,
-      total: geopoliticalEvents.length
+      events,
+      total: events.length
     });
     
   } catch (error) {

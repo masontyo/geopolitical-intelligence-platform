@@ -5,11 +5,15 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
+const connectDB = require('./config/database');
 const onboardingRoutes = require('./routes/onboarding');
 const userProfileRoutes = require('./routes/userProfile');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Connect to MongoDB
+connectDB();
 
 // Security middleware
 app.use(helmet());
