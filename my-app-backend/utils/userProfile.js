@@ -12,7 +12,7 @@ const validateUserProfile = (profile) => {
   const errors = [];
   
   // Required fields
-  const requiredFields = ['name', 'role', 'businessUnits', 'areasOfConcern'];
+  const requiredFields = ['name', 'title', 'company', 'industry', 'businessUnits', 'areasOfConcern'];
   
   requiredFields.forEach(field => {
     if (!profile[field]) {
