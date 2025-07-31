@@ -53,7 +53,7 @@ const calculateRelevanceScore = (userProfile, event) => {
   // Business units matching (weight: 0.3)
   const businessUnitMatches = userProfile.businessUnits.filter(unit => 
     event.categories && event.categories.some(category => 
-      category.toLowerCase().includes(unit.toLowerCase())
+      category.toLowerCase().includes(unit.name.toLowerCase())
     )
   ).length;
   
@@ -65,7 +65,7 @@ const calculateRelevanceScore = (userProfile, event) => {
   // Areas of concern matching (weight: 0.3)
   const concernMatches = userProfile.areasOfConcern.filter(concern => 
     event.categories && event.categories.some(category => 
-      category.toLowerCase().includes(concern.toLowerCase())
+      category.toLowerCase().includes(concern.category.toLowerCase())
     )
   ).length;
   
