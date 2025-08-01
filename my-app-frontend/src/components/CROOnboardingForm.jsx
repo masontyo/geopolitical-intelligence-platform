@@ -1,72 +1,133 @@
-import React, { useState } from 'react';
-import {
-  Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup,
-  Paper, Stepper, Step, StepLabel, TextField, Typography, Divider, MenuItem, Tooltip as MUITooltip,
-  Alert, CircularProgress
-} from '@mui/material';
-import { userProfileAPI } from '../services/api';
+import React, { useState } from "react";
+import { 
+  Paper, 
+  TextField, 
+  Button, 
+  Typography, 
+  Box, 
+  Divider, 
+  Stepper, 
+  Step, 
+  StepLabel,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  OutlinedInput,
+  Checkbox,
+  ListItemText,
+  FormHelperText
+} from "@mui/material";
+import { userProfileAPI } from "../services/api";
+import { useToast } from "./ToastNotifications";
+import { LoadingSpinner, ProgressBar } from "./LoadingSpinner";
 
-const eventOptions = [
-  'Shipping Disruption', 'Sanctions', 'Trade Wars',
-  'Regulatory Change', 'Cyber Threats', 'Resource Nationalism'
+const EVENT_TYPES = [
+  "Trade Disputes",
+  "Sanctions",
+  "Political Instability", 
+  "Natural Disasters",
+  "Supply Chain Disruptions",
+  "Currency Fluctuations",
+  "Regulatory Changes",
+  "Cybersecurity Threats"
 ];
 
-const initialState = {
-  companyName: '',
-  hqLocation: '',
-  businessUnits: '',
-  supplyChainNodes: '',
-  criticalRegions: '',
-  eventTypesConcerned: [],
-  pastDisruptions: '',
-  stakeholders: '',
-  deliveryPreference: 'dashboard',
-};
-
 export default function CROOnboardingForm({ onSubmit }) {
-  const [formData, setFormData] = useState(initialState);
+  const [formData, setFormData] = useState({
+    companyName: '',
+    hqLocation: '',
+    businessUnits: '',
+    supplyChainNodes: '',
+    criticalRegions: '',
+    eventTypesConcerned: [],
+    pastDisruptions: '',
+    stakeholders: '',
+    deliveryPreference: 'dashboard'
+  });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
+  const { success, error: showError } = useToast();
 
   function handleChange(e) {
-    const { name, value, type, checked } = e.target;
-    setFormData((data) =>
-      type === 'checkbox'
-        ? {
-            ...data,
-            eventTypesConcerned: checked
-              ? [...data.eventTypesConcerned, value]
-              : data.eventTypesConcerned.filter((et) => et !== value),
-          }
-        : { ...data, [name]: value }
-    );
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: null }));
+    }
+  }
+
+  function handleEventTypeChange(event) {
+    const value = event.target.value;
+    setFormData(prev => ({ ...prev, eventTypesConcerned: value }));
+    
+    if (validationErrors.eventTypesConcerned) {
+      setValidationErrors(prev => ({ ...prev, eventTypesConcerned: null }));
+    }
+  }
+
+  function validateForm() {
+    const errors = {};
+    
+    if (!formData.companyName.trim()) {
+      errors.companyName = 'Company name is required';
+    }
+    
+    if (!formData.hqLocation.trim()) {
+      errors.hqLocation = 'HQ location is required';
+    }
+    
+    if (!formData.businessUnits.trim()) {
+      errors.businessUnits = 'At least one business unit is required';
+    }
+    
+    if (formData.eventTypesConcerned.length === 0) {
+      errors.eventTypesConcerned = 'Please select at least one area of concern';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     
+    if (!validateForm()) {
+      showError('Please fix the validation errors before submitting');
+      return;
+    }
+
+    setLoading(true);
+    
     try {
-      // Transform form data to match backend API structure
+      console.log('Submitting form data:', formData);
+      
+      // Transform form data to match backend schema
       const profileData = {
         name: formData.companyName,
-        title: 'CRO', // Changed from 'role' to 'title'
+        title: 'CRO',
         company: formData.companyName,
-        industry: 'Technology', // Added required industry field
+        industry: 'Technology',
         businessUnits: (formData.businessUnits || '').split(',').map(unit => unit.trim()).filter(unit => unit).map(unit => ({
           name: unit,
           description: `${unit} business unit`,
           regions: [],
           products: []
         })),
-        areasOfConcern: (formData.eventTypesConcerned || []).map(concern => ({
+        areasOfConcern: formData.eventTypesConcerned.map(concern => ({
           category: concern,
           description: `${concern} related concerns`,
           priority: 'medium'
         })),
         regions: (formData.criticalRegions || '').split(',').map(region => region.trim()).filter(region => region),
-        riskTolerance: 'medium', // Default value
+        riskTolerance: 'medium',
         additionalInfo: {
           hqLocation: formData.hqLocation || '',
           supplyChainNodes: formData.supplyChainNodes || '',
@@ -76,18 +137,8 @@ export default function CROOnboardingForm({ onSubmit }) {
         }
       };
 
-      // Validate required fields
-      if (!profileData.businessUnits || profileData.businessUnits.length === 0) {
-        throw new Error('At least one business unit is required');
-      }
+      console.log('Transformed profile data:', profileData);
       
-      if (!profileData.areasOfConcern || profileData.areasOfConcern.length === 0) {
-        throw new Error('At least one area of concern is required');
-      }
-
-      console.log('Submitting profile data:', profileData);
-      console.log('API URL:', process.env.REACT_APP_API_URL || 'Using default URL');
-
       // Save to backend
       const savedProfile = await userProfileAPI.createProfile(profileData);
       
@@ -103,7 +154,14 @@ export default function CROOnboardingForm({ onSubmit }) {
       // MongoDB uses _id, not id
       const profileId = savedProfile.profile._id || savedProfile.profile.id;
       console.log('Extracted profile ID:', profileId);
-      onSubmit({ ...formData, id: profileId });
+      
+      success('Profile created successfully! Redirecting to review...');
+      
+      // Small delay to show success message
+      setTimeout(() => {
+        onSubmit({ ...formData, id: profileId });
+      }, 1000);
+      
     } catch (err) {
       console.error('Error saving profile:', err);
       
@@ -132,9 +190,25 @@ export default function CROOnboardingForm({ onSubmit }) {
       }
       
       setError(errorMessage);
+      showError(errorMessage, 'Profile Creation Failed');
     } finally {
       setLoading(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <Paper elevation={3} sx={{ maxWidth: 620, mx: "auto", my: 6, p: 4 }}>
+        <LoadingSpinner 
+          message="Creating your profile..." 
+          size="large" 
+        />
+        <ProgressBar 
+          value={75} 
+          message="Saving to database..." 
+        />
+      </Paper>
+    );
   }
 
   return (
@@ -150,6 +224,7 @@ export default function CROOnboardingForm({ onSubmit }) {
           <StepLabel>Enrich</StepLabel>
         </Step>
       </Stepper>
+      
       <Typography variant="h5" gutterBottom>Your Company Risk Profile</Typography>
 
       <Typography variant="body2" sx={{ mb: 2, background: "#eef5fc", p: 1.5, borderRadius: 1 }}>
@@ -164,128 +239,142 @@ export default function CROOnboardingForm({ onSubmit }) {
 
       <Box component="form" onSubmit={handleSubmit}>
         <Divider sx={{ my: 2 }}>Company Details</Divider>
+        
         <TextField
           label="Company Name"
           name="companyName"
-          fullWidth required sx={{ mb: 2 }}
-          value={formData.companyName} onChange={handleChange}
-          helperText="Identifies your organization for tailored reporting."
+          fullWidth 
+          required 
+          sx={{ mb: 2 }}
+          value={formData.companyName} 
+          onChange={handleChange}
+          error={!!validationErrors.companyName}
+          helperText={validationErrors.companyName || "Identifies your organization for tailored reporting."}
         />
+        
         <TextField
           label="HQ Location"
           name="hqLocation"
-          fullWidth required sx={{ mb: 2 }}
-          value={formData.hqLocation} onChange={handleChange}
-          helperText="Some events (like sanctions) are jurisdiction-dependent."
+          fullWidth 
+          required 
+          sx={{ mb: 2 }}
+          value={formData.hqLocation} 
+          onChange={handleChange}
+          error={!!validationErrors.hqLocation}
+          helperText={validationErrors.hqLocation || "Some events (like sanctions) are jurisdiction-dependent."}
         />
+        
         <TextField
           label="Business Units"
           name="businessUnits"
-          fullWidth sx={{ mb: 2 }}
-          value={formData.businessUnits} onChange={handleChange}
-          helperText="Allows for unit-specific risk monitoring and recommendations."
+          fullWidth 
+          sx={{ mb: 2 }}
+          value={formData.businessUnits} 
+          onChange={handleChange}
+          error={!!validationErrors.businessUnits}
+          helperText={validationErrors.businessUnits || "Allows for unit-specific risk monitoring and recommendations."}
+          placeholder="e.g., Manufacturing, Sales, R&D"
         />
 
         <Divider sx={{ my: 2 }}>Operational Footprint</Divider>
+        
         <TextField
           label="Supply Chain Nodes"
           name="supplyChainNodes"
-          multiline rows={2}
-          fullWidth sx={{ mb: 1 }}
+          multiline 
+          rows={2}
+          fullWidth 
+          sx={{ mb: 1 }}
           value={formData.supplyChainNodes}
           onChange={handleChange}
           helperText="List main nodes (factories, suppliers, ports). Gives you route-specific alerts."
         />
-        {formData.supplyChainNodes && (
-          <Box sx={{ bgcolor: "#f5f5f5", p: 1, borderRadius: 1, mb: 2, fontSize: 13 }}>
-            <b>Example:</b> 'Singapore port, Shenzhen factory' triggers custom alerts.
-          </Box>
-        )}
+        
         <TextField
-          label="Critical Regions or Routes"
+          label="Critical Regions"
           name="criticalRegions"
-          fullWidth sx={{ mb: 1 }}
-          value={formData.criticalRegions}
+          fullWidth 
+          sx={{ mb: 2 }}
+          value={formData.criticalRegions} 
           onChange={handleChange}
-          helperText="Defining key regions enables geographic filtering for updates."
+          helperText="Regions where you have operations, suppliers, or customers."
+          placeholder="e.g., China, Germany, Brazil"
         />
-        {formData.criticalRegions && (
-          <Box sx={{ bgcolor: "#f5f5f5", p: 1, borderRadius: 1, mb: 2, fontSize: 13 }}>
-            <b>Example:</b> 'Strait of Hormuz' = Get real-time incident alerts.
-          </Box>
-        )}
 
-        <Divider sx={{ my: 2 }}>Business Priorities & Risks</Divider>
-        <FormControl component="fieldset" sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1 }} variant="subtitle1">
-            Event types of highest concern&nbsp;
-            <MUITooltip title="Prioritizes actionable risk alerts (pick all that apply)">
-              <span style={{ color: "#1976d2", fontWeight: 700, cursor: "pointer" }}>i</span>
-            </MUITooltip>
-          </Typography>
-          <FormGroup row>
-            {eventOptions.map((evt) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formData.eventTypesConcerned.includes(evt)}
-                    onChange={handleChange}
-                    name="eventTypesConcerned"
-                    value={evt}
-                  />
-                }
-                label={evt}
-                key={evt}
-              />
+        <Divider sx={{ my: 2 }}>Risk Monitoring</Divider>
+        
+        <FormControl fullWidth sx={{ mb: 2 }} error={!!validationErrors.eventTypesConcerned}>
+          <InputLabel>Areas of Concern</InputLabel>
+          <Select
+            multiple
+            value={formData.eventTypesConcerned}
+            onChange={handleEventTypeChange}
+            input={<OutlinedInput label="Areas of Concern" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip key={value} label={value} size="small" />
+                ))}
+              </Box>
+            )}
+          >
+            {EVENT_TYPES.map((type) => (
+              <MenuItem key={type} value={type}>
+                <Checkbox checked={formData.eventTypesConcerned.indexOf(type) > -1} />
+                <ListItemText primary={type} />
+              </MenuItem>
             ))}
-          </FormGroup>
+          </Select>
+          <FormHelperText>
+            {validationErrors.eventTypesConcerned || "Select the types of events you want to monitor."}
+          </FormHelperText>
         </FormControl>
-        {(!!formData.eventTypesConcerned.length) &&
-          <Box sx={{ bgcolor: "#f5f5f5", p: 1, borderRadius: 1, mb: 2, fontSize: 13 }}>
-            <b>Example:</b> Tick 'Cyber Threats' to get exec-level notices about regional cyber risks.
-          </Box>
-        }
 
         <TextField
-          label="Describe a recent supply chain crisis or near miss"
+          label="Past Disruptions"
           name="pastDisruptions"
-          multiline rows={3}
-          fullWidth sx={{ mb: 2 }}
-          value={formData.pastDisruptions} onChange={handleChange}
-          helperText="Your pain points make recommendations actionable."
+          multiline 
+          rows={2}
+          fullWidth 
+          sx={{ mb: 2 }}
+          value={formData.pastDisruptions} 
+          onChange={handleChange}
+          helperText="Describe any past geopolitical disruptions that affected your business."
         />
 
-        <Divider sx={{ my: 2 }}>Stakeholders & Preferences</Divider>
         <TextField
-          label="Who else should be alerted?"
+          label="Stakeholders to Alert"
           name="stakeholders"
-          multiline rows={2}
-          fullWidth sx={{ mb: 1 }}
-          value={formData.stakeholders} onChange={handleChange}
-          helperText="Target risk communications (Ops, Compliance, Finance, etc.)."
+          fullWidth 
+          sx={{ mb: 2 }}
+          value={formData.stakeholders} 
+          onChange={handleChange}
+          helperText="Who should be notified of relevant events? (e.g., CRO, Legal, Operations)"
         />
 
-        <TextField
-          label="Preferred Report Delivery"
-          name="deliveryPreference"
-          select
-          sx={{ width: 250, mb: 4 }}
-          value={formData.deliveryPreference} onChange={handleChange}
-        >
-          <MenuItem value="dashboard">Dashboard</MenuItem>
-          <MenuItem value="email">Email</MenuItem>
-        </TextField>
+        <FormControl fullWidth sx={{ mb: 3 }}>
+          <InputLabel>Preferred Delivery Method</InputLabel>
+          <Select
+            name="deliveryPreference"
+            value={formData.deliveryPreference}
+            onChange={handleChange}
+            label="Preferred Delivery Method"
+          >
+            <MenuItem value="dashboard">Dashboard Only</MenuItem>
+            <MenuItem value="email">Email Alerts</MenuItem>
+            <MenuItem value="both">Dashboard + Email</MenuItem>
+          </Select>
+        </FormControl>
 
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <Button 
             type="submit" 
             variant="contained" 
             color="primary" 
             size="large"
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
           >
-            {loading ? 'Saving Profile...' : 'Submit & Preview Profile'}
+            {loading ? 'Creating Profile...' : 'Create Profile'}
           </Button>
         </Box>
       </Box>
