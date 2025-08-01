@@ -14,7 +14,10 @@ const PORT = process.env.PORT || 3001;
 
 // Connect to MongoDB (skip in test environment)
 if (process.env.NODE_ENV !== 'test') {
-  connectDB();
+  connectDB().catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
+  });
 }
 
 // Security middleware

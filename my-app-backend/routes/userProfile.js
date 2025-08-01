@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { validateUserProfile, calculateRelevanceScore } = require('../utils/userProfile');
 const UserProfile = require('../models/UserProfile');
 const GeopoliticalEvent = require('../models/GeopoliticalEvent');
@@ -11,6 +12,15 @@ const router = express.Router();
  */
 router.post('/user-profile', async (req, res) => {
   try {
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.error('MongoDB not connected. ReadyState:', mongoose.connection.readyState);
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection not available. Please try again.'
+      });
+    }
+
     const profile = req.body;
     
     // Validate the profile
@@ -51,9 +61,19 @@ router.post('/user-profile', async (req, res) => {
     
   } catch (error) {
     console.error('Error creating user profile:', error);
+    
+    // Provide more specific error messages
+    if (error.name === 'MongoNotConnectedError') {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection lost. Please try again.'
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
