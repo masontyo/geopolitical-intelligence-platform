@@ -23,6 +23,7 @@ import {
 import { userProfileAPI } from "../services/api";
 import { useToast } from "./ToastNotifications";
 import { LoadingSpinner, ProgressBar } from "./LoadingSpinner";
+import { healthAPI } from "../services/api";
 
 const EVENT_TYPES = [
   "Trade Disputes",
@@ -109,6 +110,14 @@ export default function CROOnboardingForm({ onSubmit }) {
     try {
       console.log('Submitting form data:', formData);
       
+      // Check server health first (optional - can be removed if too slow)
+      try {
+        const healthResponse = await healthAPI.checkHealth();
+        console.log('Server health check:', healthResponse);
+      } catch (healthError) {
+        console.log('Health check failed, proceeding anyway:', healthError.message);
+      }
+      
       // Transform form data to match backend schema
       const profileData = {
         name: formData.companyName,
@@ -183,6 +192,8 @@ export default function CROOnboardingForm({ onSubmit }) {
         } else {
           errorMessage = 'Invalid data provided. Please check your form inputs.';
         }
+      } else if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+        errorMessage = 'Request timed out. The server may be starting up. Please try again in a few moments.';
       } else if (err.response?.data?.message) {
         errorMessage = err.response.data.message;
       } else if (err.message) {
