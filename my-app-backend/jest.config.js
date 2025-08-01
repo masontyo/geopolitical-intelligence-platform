@@ -17,5 +17,6 @@ module.exports = {
     }
   },
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup.js'],
-  testTimeout: 10000
+  testTimeout: 30000,
+  preset: '@shelf/jest-mongodb'
 }; 

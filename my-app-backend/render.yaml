@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: contextual-info-backend
+    name: geopolitical-intelligence-backend
     env: node
     plan: free
     buildCommand: npm install

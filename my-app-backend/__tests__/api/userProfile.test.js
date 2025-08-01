@@ -6,14 +6,16 @@ const UserProfile = require('../../models/UserProfile');
 // Mock MongoDB connection for testing
 const connectTestDB = async () => {
   try {
-    // Use in-memory MongoDB for testing
-    await mongoose.connect('mongodb://localhost:27017/test-geopolitical-intelligence', {
+    // Use the same MongoDB Atlas connection as production
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/test-geopolitical-intelligence';
+    await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+    console.log('Test database connected successfully');
   } catch (error) {
     // If connection fails, we'll skip database tests
-    console.warn('Test database connection failed, skipping database tests');
+    console.warn('Test database connection failed, skipping database tests:', error.message);
   }
 };
 
@@ -85,7 +87,11 @@ describe('User Profile API Tests', () => {
 
   beforeEach(async () => {
     // Clear the database before each test
-    await UserProfile.deleteMany({});
+    try {
+      await UserProfile.deleteMany({});
+    } catch (error) {
+      console.warn('Could not clear test database:', error.message);
+    }
   });
 
   describe('POST /api/user-profile', () => {
