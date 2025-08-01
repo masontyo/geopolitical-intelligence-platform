@@ -51,11 +51,19 @@ const calculateRelevanceScore = (userProfile, event) => {
   let totalWeight = 0;
   
   // Business units matching (weight: 0.3)
-  const businessUnitMatches = userProfile.businessUnits.filter(unit => 
-    event.categories && event.categories.some(category => 
-      category.toLowerCase().includes(unit.name.toLowerCase())
-    )
-  ).length;
+  const businessUnitMatches = userProfile.businessUnits.filter(unit => {
+    const unitName = unit.name.toLowerCase();
+    return event.categories && event.categories.some(category => {
+      const categoryName = category.toLowerCase();
+      // Check if category contains unit name OR unit name contains category
+      return categoryName.includes(unitName) || unitName.includes(categoryName) ||
+             // Special mappings for common terms
+             (unitName.includes('semiconductor') && categoryName.includes('technology')) ||
+             (unitName.includes('supply chain') && categoryName.includes('supply chain')) ||
+             (unitName.includes('cloud') && categoryName.includes('technology')) ||
+             (unitName.includes('ai') && categoryName.includes('technology'));
+    });
+  }).length;
   
   if (userProfile.businessUnits.length > 0) {
     score += (businessUnitMatches / userProfile.businessUnits.length) * 0.3;
@@ -63,11 +71,20 @@ const calculateRelevanceScore = (userProfile, event) => {
   }
   
   // Areas of concern matching (weight: 0.3)
-  const concernMatches = userProfile.areasOfConcern.filter(concern => 
-    event.categories && event.categories.some(category => 
-      category.toLowerCase().includes(concern.category.toLowerCase())
-    )
-  ).length;
+  const concernMatches = userProfile.areasOfConcern.filter(concern => {
+    const concernCategory = concern.category.toLowerCase();
+    return event.categories && event.categories.some(category => {
+      const categoryName = category.toLowerCase();
+      // Check if category contains concern OR concern contains category
+      return categoryName.includes(concernCategory) || concernCategory.includes(categoryName) ||
+             // Special mappings for common terms
+             (concernCategory.includes('trade disputes') && categoryName.includes('trade')) ||
+             (concernCategory.includes('sanctions') && categoryName.includes('sanctions')) ||
+             (concernCategory.includes('supply chain disruptions') && categoryName.includes('supply chain')) ||
+             (concernCategory.includes('regulatory changes') && categoryName.includes('regulation')) ||
+             (concernCategory.includes('cybersecurity threats') && categoryName.includes('cybersecurity'));
+    });
+  }).length;
   
   if (userProfile.areasOfConcern.length > 0) {
     score += (concernMatches / userProfile.areasOfConcern.length) * 0.3;

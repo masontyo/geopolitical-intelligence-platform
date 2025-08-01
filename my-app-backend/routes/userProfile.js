@@ -115,7 +115,7 @@ router.get('/user-profile/:id', async (req, res) => {
 router.get('/user-profile/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
-    const { threshold = 0.5 } = req.query; // Minimum relevance score
+    const { threshold = 0.1 } = req.query; // Lower default threshold for better matching
     
     const profile = await UserProfile.findById(id);
     
