@@ -197,7 +197,20 @@ router.post('/events', async (req, res) => {
  */
 router.get('/events', async (req, res) => {
   try {
+    console.log('📊 Fetching geopolitical events...');
+    
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.error('MongoDB not connected. ReadyState:', mongoose.connection.readyState);
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection not available. Please try again.'
+      });
+    }
+    
     const events = await GeopoliticalEvent.find().sort({ eventDate: -1 });
+    
+    console.log(`✅ Found ${events.length} events`);
     
     res.status(200).json({
       success: true,
@@ -206,10 +219,20 @@ router.get('/events', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error fetching events:', error);
+    console.error('❌ Error fetching events:', error);
+    
+    // Provide more specific error messages
+    if (error.name === 'MongoNotConnectedError') {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection lost. Please try again.'
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
