@@ -118,8 +118,33 @@ export const userProfileAPI = {
   },
 
   // Get relevant events for a user profile
-  getRelevantEvents: async (profileId) => {
-    const requestFn = () => api.get(`/api/user-profile/${profileId}/relevant-events`);
+  getRelevantEvents: async (profileId, options = {}) => {
+    const params = new URLSearchParams();
+    if (options.threshold) params.append('threshold', options.threshold);
+    if (options.includeAnalytics) params.append('includeAnalytics', options.includeAnalytics);
+    
+    const requestFn = () => api.get(`/api/user-profile/${profileId}/relevant-events?${params.toString()}`);
+    const response = await retryRequest(requestFn);
+    return response.data;
+  },
+
+  // Get scoring analytics for a user profile
+  getScoringAnalytics: async (profileId, options = {}) => {
+    const params = new URLSearchParams();
+    if (options.threshold) params.append('threshold', options.threshold);
+    
+    const requestFn = () => api.get(`/api/scoring-analytics/${profileId}?${params.toString()}`);
+    const response = await retryRequest(requestFn);
+    return response.data;
+  },
+
+  // Test scoring algorithm with custom data
+  testScoring: async (profile, events, options = {}) => {
+    const requestFn = () => api.post('/api/test-scoring', {
+      profile,
+      events,
+      threshold: options.threshold || 0.05
+    });
     const response = await retryRequest(requestFn);
     return response.data;
   },

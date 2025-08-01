@@ -11,18 +11,25 @@ import {
   ListItemText, 
   ListItemIcon,
   Alert,
-  Button
+  Button,
+  AppBar,
+  Toolbar,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { 
   Business, 
   Warning, 
   Timeline, 
   Refresh,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  Analytics,
+  Dashboard as DashboardIcon
 } from '@mui/icons-material';
 import { userProfileAPI } from '../services/api';
 import { useToast } from './ToastNotifications';
 import { LoadingSpinner, SkeletonLoader } from './LoadingSpinner';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 export default function Dashboard({ profileId }) {
   const [profile, setProfile] = useState(null);
@@ -30,6 +37,7 @@ export default function Dashboard({ profileId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
   const { error: showError, info } = useToast();
 
   const loadDashboardData = async () => {
@@ -73,6 +81,10 @@ export default function Dashboard({ profileId }) {
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
     loadDashboardData();
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
   };
 
   useEffect(() => {
@@ -144,11 +156,42 @@ export default function Dashboard({ profileId }) {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Business sx={{ mr: 2 }} />
-        Welcome, {profile.name}
-      </Typography>
+    <Box>
+      {/* Navigation Header */}
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+            <Business sx={{ mr: 2 }} />
+            Welcome, {profile.name}
+          </Typography>
+          <Tabs value={activeTab} onChange={handleTabChange} sx={{ minHeight: 'auto' }}>
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <DashboardIcon />
+                  Dashboard
+                </Box>
+              }
+            />
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Analytics />
+                  Advanced Analytics
+                </Box>
+              }
+            />
+          </Tabs>
+        </Toolbar>
+      </AppBar>
+
+      {/* Content Area */}
+      {activeTab === 0 && (
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <DashboardIcon sx={{ mr: 2 }} />
+            Risk Intelligence Dashboard
+          </Typography>
 
       <Grid container spacing={3}>
         {/* Profile Summary */}
@@ -271,6 +314,13 @@ export default function Dashboard({ profileId }) {
           </Paper>
         </Grid>
       </Grid>
-    </Container>
+        </Container>
+      )}
+
+      {/* Analytics Dashboard Tab */}
+      {activeTab === 1 && (
+        <AnalyticsDashboard profileId={profileId} />
+      )}
+    </Box>
   );
 } 
