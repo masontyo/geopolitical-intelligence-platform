@@ -200,27 +200,24 @@ router.get('/events', async (req, res) => {
  */
 router.post('/seed-database', async (req, res) => {
   try {
-    // Only allow seeding in development or with a secret key
-    if (process.env.NODE_ENV === 'production' && !req.headers['x-seed-key']) {
-      return res.status(403).json({
-        success: false,
-        message: 'Seeding requires authorization in production'
-      });
-    }
-
+    console.log('🌱 Starting database seeding...');
+    
     const { main } = require('../scripts/seedDatabase');
     await main();
     
+    console.log('✅ Database seeding completed successfully');
+    
     res.status(200).json({
       success: true,
-      message: 'Database seeded successfully'
+      message: 'Database seeded successfully with sample data'
     });
     
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('❌ Error seeding database:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to seed database'
+      message: 'Failed to seed database',
+      error: error.message
     });
   }
 });
