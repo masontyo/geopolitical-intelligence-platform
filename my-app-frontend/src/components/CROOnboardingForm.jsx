@@ -6,9 +6,6 @@ import {
   Typography, 
   Box, 
   Divider, 
-  Stepper, 
-  Step, 
-  StepLabel,
   Alert,
   FormControl,
   InputLabel,
@@ -137,12 +134,9 @@ export default function CROOnboardingForm({ onSubmit }) {
         })),
         regions: (formData.criticalRegions || '').split(',').map(region => region.trim()).filter(region => region),
         riskTolerance: 'medium',
-        additionalInfo: {
-          hqLocation: formData.hqLocation || '',
-          supplyChainNodes: formData.supplyChainNodes || '',
-          pastDisruptions: formData.pastDisruptions || '',
-          stakeholders: formData.stakeholders || '',
-          deliveryPreference: formData.deliveryPreference || 'dashboard'
+        notificationPreferences: {
+          email: true,
+          frequency: 'daily'
         }
       };
 
@@ -224,18 +218,6 @@ export default function CROOnboardingForm({ onSubmit }) {
 
   return (
     <Paper elevation={3} sx={{ maxWidth: 620, mx: "auto", my: 6, p: 4 }}>
-      <Stepper activeStep={0} alternativeLabel sx={{ mb: 3 }}>
-        <Step key="Profile">
-          <StepLabel>Profile Details</StepLabel>
-        </Step>
-        <Step key="Review">
-          <StepLabel>Review</StepLabel>
-        </Step>
-        <Step key="Enrich">
-          <StepLabel>Enrich</StepLabel>
-        </Step>
-      </Stepper>
-      
       <Typography variant="h5" gutterBottom>Your Company Risk Profile</Typography>
 
       <Typography variant="body2" sx={{ mb: 2, background: "#eef5fc", p: 1.5, borderRadius: 1 }}>
