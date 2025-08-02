@@ -681,4 +681,24 @@ router.get('/crisis-rooms/:id/timeline', async (req, res) => {
   }
 });
 
+// Get crisis rooms by profile ID
+router.get('/crisis-rooms/profile/:profileId', async (req, res) => {
+  try {
+    const crisisRooms = await CrisisCommunication.find({
+      'stakeholders.email': { $exists: true }
+    }).populate('eventId').sort({ 'crisisRoom.createdAt': -1 });
+    
+    res.json({ 
+      success: true,
+      crisisRooms 
+    });
+  } catch (error) {
+    console.error('Error getting crisis rooms by profile:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router; 
