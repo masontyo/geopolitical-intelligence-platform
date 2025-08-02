@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import OnboardingFlow from './components/OnboardingFlow';
-import CrisisRoomTest from './components/CrisisRoomTest';
+import IntegratedDashboard from './components/IntegratedDashboard';
 import { ToastProvider } from './components/ToastNotifications';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -44,7 +44,7 @@ function App() {
       <CssBaseline />
       <ToastProvider>
         <div className="App">
-          <CrisisRoomTest />
+          <IntegratedDashboard profileId="688e58db83612282c8e13b48" />
         </div>
       </ToastProvider>
     </ThemeProvider>
