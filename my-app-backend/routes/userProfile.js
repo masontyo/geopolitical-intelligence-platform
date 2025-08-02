@@ -127,7 +127,7 @@ router.get('/user-profile/:id', async (req, res) => {
 router.get('/user-profile/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
-    const { threshold = 0.05, includeAnalytics = false } = req.query;
+    const { threshold = 0.01, includeAnalytics = false } = req.query;
     
     // Check if the ID is a valid ObjectId format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -189,16 +189,77 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
     
     for (const article of newsResponse.data.articles) {
       try {
+        // Analyze article content to extract categories, regions, and severity
+        const content = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
+        
+        // Determine categories based on content
+        const categories = [];
+        if (content.includes('trade') || content.includes('tariff') || content.includes('sanction')) {
+          categories.push('Trade & Economic');
+        }
+        if (content.includes('military') || content.includes('conflict') || content.includes('war')) {
+          categories.push('Military & Security');
+        }
+        if (content.includes('election') || content.includes('political') || content.includes('regime')) {
+          categories.push('Political');
+        }
+        if (content.includes('cyber') || content.includes('hack') || content.includes('digital')) {
+          categories.push('Cybersecurity');
+        }
+        if (content.includes('supply chain') || content.includes('logistics') || content.includes('supply')) {
+          categories.push('Supply Chain');
+        }
+        if (content.includes('regulation') || content.includes('regulatory') || content.includes('policy') || content.includes('law')) {
+          categories.push('Regulatory Changes');
+        }
+        if (content.includes('tension') || content.includes('geopolitical') || content.includes('international') || content.includes('diplomatic')) {
+          categories.push('Geopolitical Tensions');
+        }
+        if (categories.length === 0) {
+          categories.push('General');
+        }
+        
+        // Determine severity based on keywords
+        let severity = 'low';
+        if (content.includes('crisis') || content.includes('war') || content.includes('attack') || content.includes('conflict')) {
+          severity = 'critical';
+        } else if (content.includes('tension') || content.includes('dispute') || content.includes('sanction')) {
+          severity = 'high';
+        } else if (content.includes('policy') || content.includes('regulation') || content.includes('agreement')) {
+          severity = 'medium';
+        }
+        
+        // Extract regions based on content
+        const regions = [];
+        if (content.includes('china') || content.includes('asia') || content.includes('japan') || content.includes('korea')) {
+          regions.push('Asia-Pacific');
+        }
+        if (content.includes('europe') || content.includes('eu') || content.includes('ukraine') || content.includes('russia')) {
+          regions.push('Europe');
+        }
+        if (content.includes('united states') || content.includes('us') || content.includes('usa') || content.includes('canada')) {
+          regions.push('North America');
+        }
+        if (content.includes('middle east') || content.includes('iran') || content.includes('israel')) {
+          regions.push('Middle East');
+        }
+        if (content.includes('africa') || content.includes('nigeria') || content.includes('south africa')) {
+          regions.push('Africa');
+        }
+        if (regions.length === 0) {
+          regions.push('Global');
+        }
+        
         // Convert article to event format
         const event = {
           title: article.title,
           description: article.description || article.content?.substring(0, 500) || '',
           summary: article.description?.substring(0, 200) || article.title,
           eventDate: new Date(article.publishedAt),
-          categories: [], // Will be determined by scoring
-          regions: [], // Will be determined by scoring
+          categories: categories,
+          regions: regions,
           countries: [],
-          severity: 'medium', // Will be determined by scoring
+          severity: severity,
           impact: { economic: 'neutral', political: 'neutral', social: 'neutral' },
           source: {
             name: article.source?.name || 'Unknown Source',
