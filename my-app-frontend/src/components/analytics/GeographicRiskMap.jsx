@@ -254,7 +254,7 @@ export default function GeographicRiskMap({ events, profile }) {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'success.main', border: '2px solid white' }} />
-              <Typography variant="caption">Low Risk (<40%)</Typography>
+              <Typography variant="caption">Low Risk (&lt;40%)</Typography>
             </Box>
           </Box>
           <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'text.secondary' }}>
