@@ -11,7 +11,11 @@
     "test:integration": "jest --testPathPattern=integration --coverage --watchAll=false",
     "test:unit": "jest --testPathPattern=unit --coverage --watchAll=false",
     "seed": "node scripts/seedDatabase.js",
-    "seed:reset": "node scripts/seedDatabase.js --reset"
+    "seed:reset": "node scripts/seedDatabase.js --reset",
+    "test:notifications": "node test-notification-system.js",
+    "test:crisis": "node test-crisis-communications.js",
+    "news:update": "curl -X GET http://localhost:3001/api/news/update",
+    "news:test": "curl -X GET http://localhost:3001/api/news/test"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +28,13 @@
     "express": "^4.18.2",
     "helmet": "^7.0.0",
     "mongoose": "^8.17.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "nodemailer": "^7.0.5",
+    "twilio": "^4.19.0",
+    "jsonwebtoken": "^9.0.2",
+    "express-validator": "^7.0.1",
+    "winston": "^3.11.0",
+    "prom-client": "^15.0.0"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "^5.2.2",

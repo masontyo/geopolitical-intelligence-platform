@@ -8,9 +8,15 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const onboardingRoutes = require('./routes/onboarding');
 const userProfileRoutes = require('./routes/userProfile');
+const newsRoutes = require('./routes/news');
+const crisisCommunicationRoutes = require('./routes/crisisCommunication');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Debug port configuration
+console.log('Environment PORT:', process.env.PORT);
+console.log('Final PORT:', PORT);
 
 // Connect to MongoDB (skip in test environment)
 if (process.env.NODE_ENV !== 'test') {
@@ -28,13 +34,20 @@ app.use(morgan('combined'));
 
 // CORS configuration
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    'https://geop-frontend-yes.vercel.app',
-    'https://geop-frontend-yes.vercel.app/'
-  ],
-  credentials: true
+  origin: true, // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Manual CORS headers for testing
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -52,6 +65,8 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api', onboardingRoutes);
 app.use('/api', userProfileRoutes);
+app.use('/api', newsRoutes);
+app.use('/api', crisisCommunicationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -71,9 +86,12 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Only start the server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on http://localhost:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
 module.exports = app; // Export for testing

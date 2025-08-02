@@ -191,7 +191,10 @@ async function main() {
     
   } catch (error) {
     console.error('❌ Seeding failed:', error);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
+    throw error; // Re-throw for test environment
   } finally {
     await mongoose.disconnect();
     console.log('🔌 Disconnected from MongoDB');

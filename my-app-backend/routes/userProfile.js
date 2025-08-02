@@ -13,24 +13,24 @@ const router = express.Router();
  */
 router.post('/user-profile', async (req, res) => {
   try {
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      console.error('MongoDB not connected. ReadyState:', mongoose.connection.readyState);
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection not available. Please try again.'
-      });
-    }
-
     const profile = req.body;
     
-    // Validate the profile
+    // Validate the profile first (this should work regardless of database connection)
     const validation = validateUserProfile(profile);
     
     if (!validation.isValid) {
       return res.status(400).json({
         success: false,
         errors: validation.errors
+      });
+    }
+
+    // Check if MongoDB is connected (only for database operations)
+    if (mongoose.connection.readyState !== 1) {
+      console.error('MongoDB not connected. ReadyState:', mongoose.connection.readyState);
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection not available. Please try again.'
       });
     }
     
@@ -86,6 +86,15 @@ router.post('/user-profile', async (req, res) => {
 router.get('/user-profile/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Check if the ID is a valid ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Profile not found'
+      });
+    }
+    
     const profile = await UserProfile.findById(id);
     
     if (!profile) {
@@ -117,6 +126,14 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
     const { threshold = 0.05, includeAnalytics = false } = req.query; // Use advanced scoring threshold
+    
+    // Check if the ID is a valid ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Profile not found'
+      });
+    }
     
     const profile = await UserProfile.findById(id);
     

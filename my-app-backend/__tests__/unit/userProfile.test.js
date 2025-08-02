@@ -5,8 +5,9 @@ describe('User Profile Utils', () => {
     test('should validate a complete user profile', () => {
       const validProfile = {
         name: 'John Doe',
-        role: 'CRO',
+        title: 'CRO',
         company: 'Multinational Corp',
+        industry: 'Technology',
         businessUnits: ['Manufacturing', 'Supply Chain'],
         areasOfConcern: ['Trade Relations', 'Supply Chain Disruption'],
         regions: ['Asia', 'Europe'],
@@ -21,7 +22,7 @@ describe('User Profile Utils', () => {
     test('should reject profile with missing required fields', () => {
       const invalidProfile = {
         name: 'John Doe',
-        role: 'CRO'
+        title: 'CRO'
         // Missing required fields
       };
 
@@ -34,8 +35,9 @@ describe('User Profile Utils', () => {
     test('should reject profile with empty arrays', () => {
       const invalidProfile = {
         name: 'John Doe',
-        role: 'CRO',
+        title: 'CRO',
         company: 'Multinational Corp',
+        industry: 'Technology',
         businessUnits: [],
         areasOfConcern: ['Trade Relations'],
         regions: ['Asia'],
@@ -50,8 +52,9 @@ describe('User Profile Utils', () => {
     test('should reject profile with invalid risk tolerance', () => {
       const invalidProfile = {
         name: 'John Doe',
-        role: 'CRO',
+        title: 'CRO',
         company: 'Multinational Corp',
+        industry: 'Technology',
         businessUnits: ['Manufacturing'],
         areasOfConcern: ['Trade Relations'],
         riskTolerance: 'invalid'
@@ -64,9 +67,9 @@ describe('User Profile Utils', () => {
 
     test('should accept profile with valid risk tolerance values', () => {
       const validProfiles = [
-        { name: 'John', role: 'CRO', businessUnits: ['Manufacturing'], areasOfConcern: ['Trade'], riskTolerance: 'low' },
-        { name: 'Jane', role: 'CRO', businessUnits: ['Manufacturing'], areasOfConcern: ['Trade'], riskTolerance: 'medium' },
-        { name: 'Bob', role: 'CRO', businessUnits: ['Manufacturing'], areasOfConcern: ['Trade'], riskTolerance: 'high' }
+        { name: 'John', title: 'CRO', company: 'Test Corp', industry: 'Technology', businessUnits: ['Manufacturing'], areasOfConcern: ['Trade'], riskTolerance: 'low' },
+        { name: 'Jane', title: 'CRO', company: 'Test Corp', industry: 'Technology', businessUnits: ['Manufacturing'], areasOfConcern: ['Trade'], riskTolerance: 'medium' },
+        { name: 'Bob', title: 'CRO', company: 'Test Corp', industry: 'Technology', businessUnits: ['Manufacturing'], areasOfConcern: ['Trade'], riskTolerance: 'high' }
       ];
 
       validProfiles.forEach(profile => {
@@ -79,8 +82,14 @@ describe('User Profile Utils', () => {
   describe('calculateRelevanceScore', () => {
     test('should calculate high relevance for matching business units', () => {
       const userProfile = {
-        businessUnits: ['Manufacturing', 'Supply Chain'],
-        areasOfConcern: ['Trade Relations', 'Supply Chain Disruption'],
+        businessUnits: [
+          { name: 'Manufacturing' },
+          { name: 'Supply Chain' }
+        ],
+        areasOfConcern: [
+          { category: 'Trade Relations' },
+          { category: 'Supply Chain Disruption' }
+        ],
         regions: ['Asia', 'Europe']
       };
 
@@ -97,16 +106,16 @@ describe('User Profile Utils', () => {
 
     test('should calculate low relevance for non-matching content', () => {
       const userProfile = {
-        businessUnits: ['Manufacturing'],
-        areasOfConcern: ['Supply Chain'],
-        regions: ['Asia']
+        businessUnits: [{ name: 'Manufacturing' }],
+        areasOfConcern: [{ category: 'Trade Relations' }],
+        regions: ['Europe']
       };
 
       const event = {
-        title: 'Tech Startup Funding in Silicon Valley',
-        description: 'New AI startup receives major funding',
-        regions: ['North America'],
-        categories: ['Technology', 'Finance']
+        title: 'Unrelated Event',
+        description: 'This event has nothing to do with the user profile',
+        regions: ['South America'],
+        categories: ['Entertainment']
       };
 
       const score = calculateRelevanceScore(userProfile, event);
