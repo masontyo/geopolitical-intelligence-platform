@@ -540,69 +540,97 @@ export default function CROOnboardingForm({ onSubmit }) {
           helperText={validationErrors.hqLocation || "Some events (like sanctions) are jurisdiction-dependent."}
         />
         
-        <Autocomplete
-          multiple
-          freeSolo
-          options={BUSINESS_UNITS}
-          value={formData.businessUnits}
-          onChange={(event, newValue) => {
-            setFormData(prev => ({ ...prev, businessUnits: newValue }));
-            if (validationErrors.businessUnits) {
-              setValidationErrors(prev => ({ ...prev, businessUnits: null }));
-            }
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Business Units"
-              placeholder="Type to search or select business units"
-              error={!!validationErrors.businessUnits}
-              helperText={validationErrors.businessUnits || "Allows for unit-specific risk monitoring and recommendations."}
-            />
-          )}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Chip
-                variant="outlined"
-                label={option}
-                {...getTagProps({ index })}
-                sx={{ m: 0.5 }}
-              />
-            ))
-          }
-          sx={{ mb: 2 }}
-        />
+                 <Autocomplete
+           multiple
+           freeSolo
+           options={BUSINESS_UNITS}
+           value={formData.businessUnits}
+           onChange={(event, newValue) => {
+             setFormData(prev => ({ ...prev, businessUnits: newValue }));
+             if (validationErrors.businessUnits) {
+               setValidationErrors(prev => ({ ...prev, businessUnits: null }));
+             }
+           }}
+           filterOptions={(options, { inputValue }) => {
+             const filtered = options.filter(option =>
+               option.toLowerCase().includes(inputValue.toLowerCase())
+             );
+             // Remove duplicates and sort by relevance
+             const unique = [...new Set(filtered)];
+             return unique.sort((a, b) => {
+               const aStartsWith = a.toLowerCase().startsWith(inputValue.toLowerCase());
+               const bStartsWith = b.toLowerCase().startsWith(inputValue.toLowerCase());
+               if (aStartsWith && !bStartsWith) return -1;
+               if (!aStartsWith && bStartsWith) return 1;
+               return a.localeCompare(b);
+             });
+           }}
+           renderInput={(params) => (
+             <TextField
+               {...params}
+               label="Business Units"
+               placeholder="Type to search or select business units"
+               error={!!validationErrors.businessUnits}
+               helperText={validationErrors.businessUnits || "Allows for unit-specific risk monitoring and recommendations."}
+             />
+           )}
+           renderTags={(value, getTagProps) =>
+             value.map((option, index) => (
+               <Chip
+                 variant="outlined"
+                 label={option}
+                 {...getTagProps({ index })}
+                 sx={{ m: 0.5 }}
+               />
+             ))
+           }
+           sx={{ mb: 2 }}
+         />
 
         <Divider sx={{ my: 2 }}>Operational Footprint</Divider>
         
-        <Autocomplete
-          multiple
-          freeSolo
-          options={SUPPLY_CHAIN_NODES}
-          value={formData.supplyChainNodes}
-          onChange={(event, newValue) => {
-            setFormData(prev => ({ ...prev, supplyChainNodes: newValue }));
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Supply Chain Nodes"
-              placeholder="Type to search or select supply chain nodes"
-              helperText="List main nodes (factories, suppliers, ports). Gives you route-specific alerts."
-            />
-          )}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Chip
-                variant="outlined"
-                label={option}
-                {...getTagProps({ index })}
-                sx={{ m: 0.5 }}
-              />
-            ))
-          }
-          sx={{ mb: 2 }}
-        />
+                 <Autocomplete
+           multiple
+           freeSolo
+           options={SUPPLY_CHAIN_NODES}
+           value={formData.supplyChainNodes}
+           onChange={(event, newValue) => {
+             setFormData(prev => ({ ...prev, supplyChainNodes: newValue }));
+           }}
+           filterOptions={(options, { inputValue }) => {
+             const filtered = options.filter(option =>
+               option.toLowerCase().includes(inputValue.toLowerCase())
+             );
+             // Remove duplicates and sort by relevance
+             const unique = [...new Set(filtered)];
+             return unique.sort((a, b) => {
+               const aStartsWith = a.toLowerCase().startsWith(inputValue.toLowerCase());
+               const bStartsWith = b.toLowerCase().startsWith(inputValue.toLowerCase());
+               if (aStartsWith && !bStartsWith) return -1;
+               if (!aStartsWith && bStartsWith) return 1;
+               return a.localeCompare(b);
+             });
+           }}
+           renderInput={(params) => (
+             <TextField
+               {...params}
+               label="Supply Chain Nodes"
+               placeholder="Type to search or select supply chain nodes"
+               helperText="List main nodes (factories, suppliers, ports). Gives you route-specific alerts."
+             />
+           )}
+           renderTags={(value, getTagProps) =>
+             value.map((option, index) => (
+               <Chip
+                 variant="outlined"
+                 label={option}
+                 {...getTagProps({ index })}
+                 sx={{ m: 0.5 }}
+               />
+             ))
+           }
+           sx={{ mb: 2 }}
+         />
         
                  <Autocomplete
            multiple
@@ -614,6 +642,20 @@ export default function CROOnboardingForm({ onSubmit }) {
              if (validationErrors.criticalRegions) {
                setValidationErrors(prev => ({ ...prev, criticalRegions: null }));
              }
+           }}
+           filterOptions={(options, { inputValue }) => {
+             const filtered = options.filter(option =>
+               option.toLowerCase().includes(inputValue.toLowerCase())
+             );
+             // Remove duplicates and sort by relevance
+             const unique = [...new Set(filtered)];
+             return unique.sort((a, b) => {
+               const aStartsWith = a.toLowerCase().startsWith(inputValue.toLowerCase());
+               const bStartsWith = b.toLowerCase().startsWith(inputValue.toLowerCase());
+               if (aStartsWith && !bStartsWith) return -1;
+               if (!aStartsWith && bStartsWith) return 1;
+               return a.localeCompare(b);
+             });
            }}
            renderInput={(params) => (
              <TextField
