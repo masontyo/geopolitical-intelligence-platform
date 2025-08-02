@@ -111,6 +111,11 @@ function analyzeArticle(article) {
   ).length;
   relevanceScore += Math.min(geopoliticalMatches * 0.1, 0.3);
   
+  // Ensure relevanceScore is a valid number
+  if (isNaN(relevanceScore)) {
+    relevanceScore = 0.3; // Default fallback
+  }
+  
   return {
     category,
     severity,
