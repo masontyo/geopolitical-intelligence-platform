@@ -130,13 +130,29 @@ export default function CrisisRoom({ crisisRoomId, onClose }) {
   const fetchCrisisRoom = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/crisis-rooms/${crisisRoomId}`);
-      setCrisisRoom(response.data.data);
-      setError(null);
+      
+      // First try the summary endpoint for faster loading
+      let response;
+      try {
+        response = await api.get(`/crisis-rooms/${crisisRoomId}/summary`);
+        setCrisisRoom(response.data.data);
+        setError(null);
+      } catch (summaryErr) {
+        // If summary fails, try the full endpoint
+        console.log('Summary endpoint failed, trying full endpoint...');
+        response = await api.get(`/crisis-rooms/${crisisRoomId}`);
+        setCrisisRoom(response.data.data);
+        setError(null);
+      }
     } catch (err) {
       console.error('Error fetching crisis room:', err);
-      setError('Failed to load crisis room data');
-      showError('Failed to load crisis room data');
+      if (err.response?.status === 408) {
+        setError('Crisis room data is too large. Please try again later or contact support.');
+        showError('Crisis room data is too large. Please try again later.');
+      } else {
+        setError('Failed to load crisis room data');
+        showError('Failed to load crisis room data');
+      }
     } finally {
       setLoading(false);
     }
