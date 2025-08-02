@@ -21,14 +21,13 @@ import {
 import CROOnboardingForm from "./CROOnboardingForm";
 import CROProfileReview from "./CROProfileReview";
 import ProfileSuggestions from "./ProfileSuggestions";
-import Dashboard from "./Dashboard";
+import IntegratedDashboard from "./IntegratedDashboard";
 import { useToast } from "./ToastNotifications";
 
 const steps = [
   { label: 'Profile Setup', icon: <Person />, description: 'Enter your basic information' },
   { label: 'Business Details', icon: <Business />, description: 'Define your organization and concerns' },
   { label: 'Review & Confirm', icon: <Assessment />, description: 'Review your profile information' },
-  { label: 'Smart Suggestions', icon: <CheckCircle />, description: 'Get personalized recommendations' },
   { label: 'Dashboard', icon: <DashboardIcon />, description: 'Access your intelligence dashboard' }
 ];
 
@@ -94,7 +93,10 @@ export default function OnboardingFlow() {
   const handleContinue = () => {
     setIsReviewing(false);
     setActiveStep(2);
-    setIsSuggesting(true);
+    // Skip suggestions and go directly to dashboard
+    setFinalProfile(profile);
+    success('Profile setup completed! Welcome to your dashboard.');
+    localStorage.removeItem('onboarding_profile'); // Clean up
   };
 
   const handleSuggestionsComplete = (suggestions) => {
@@ -120,9 +122,9 @@ export default function OnboardingFlow() {
   };
 
   if (finalProfile) {
-    console.log('Rendering Dashboard with profileId:', finalProfile.id);
+    console.log('Rendering IntegratedDashboard with profileId:', finalProfile.id);
     console.log('Final profile data:', finalProfile);
-    return <Dashboard profileId={finalProfile.id} />;
+    return <IntegratedDashboard profileId={finalProfile.id} />;
   }
 
   return (
@@ -199,14 +201,7 @@ export default function OnboardingFlow() {
           />
         )}
 
-        {isSuggesting && profile && (
-          <ProfileSuggestions 
-            profileId={profile.id}
-            onComplete={handleSuggestionsComplete}
-            onSkip={handleSkipSuggestions}
-            onError={handleError}
-          />
-        )}
+
       </Paper>
 
       {/* Help Section */}

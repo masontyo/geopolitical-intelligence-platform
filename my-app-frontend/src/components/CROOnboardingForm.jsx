@@ -412,12 +412,19 @@ export default function CROOnboardingForm({ onSubmit }) {
         company: formData.companyName,
         email: formData.email,
         industry: 'Technology',
-        businessUnits: (formData.businessUnits || []).map(unit => ({
-          name: unit,
-          description: `${unit} business unit`,
-          regions: [],
-          products: []
-        })),
+        businessUnits: (formData.businessUnits && formData.businessUnits.length > 0) 
+          ? formData.businessUnits.map(unit => ({
+              name: unit,
+              description: `${unit} business unit`,
+              regions: [],
+              products: []
+            }))
+          : [{
+              name: 'General Operations',
+              description: 'General business operations',
+              regions: [],
+              products: []
+            }],
         areasOfConcern: formData.eventTypesConcerned.map(concern => ({
           category: concern,
           description: `${concern} related concerns`,
