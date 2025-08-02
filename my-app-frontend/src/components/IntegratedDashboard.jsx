@@ -22,7 +22,8 @@ import {
   Badge,
   IconButton,
   Menu,
-  MenuItem
+  MenuItem,
+  Link
 } from '@mui/material';
 import { 
   Business, 
@@ -58,7 +59,6 @@ export default function IntegratedDashboard({ profileId }) {
 
   const tabs = [
     { label: 'Overview', icon: <DashboardIcon /> },
-    { label: 'Risk Events', icon: <Warning /> },
     { label: 'Crisis Communications', icon: <Warning /> },
     { label: 'Analytics', icon: <Analytics /> }
   ];
@@ -112,26 +112,38 @@ export default function IntegratedDashboard({ profileId }) {
 
   const handleCreateCrisisRoom = async (eventId) => {
     try {
+      console.log('Creating crisis room for event:', eventId);
+      const event = relevantEvents.find(e => e._id === eventId);
+      console.log('Found event:', event);
+      
       const response = await fetch('https://geop-backend.onrender.com/api/crisis-rooms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           eventId,
           crisisData: {
-            title: `Crisis: ${relevantEvents.find(e => e._id === eventId)?.title || 'Event'}`,
+            title: `Crisis: ${event?.title || 'Event'}`,
             description: 'Crisis communication room created from dashboard',
             createdBy: profile?.name || 'Dashboard User'
           }
         })
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const crisisRoom = await response.json();
+        console.log('Created crisis room:', crisisRoom);
         setCrisisRooms(prev => [...prev, crisisRoom]);
         success('Crisis room created successfully!');
         return crisisRoom._id;
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to create crisis room:', errorData);
+        showError(`Failed to create crisis room: ${errorData.message || 'Unknown error'}`);
       }
     } catch (err) {
+      console.error('Error creating crisis room:', err);
       showError('Failed to create crisis room');
     }
   };
@@ -319,7 +331,7 @@ export default function IntegratedDashboard({ profileId }) {
                         </ListItemIcon>
                         <ListItemText
                           primary={event.title}
-                          secondary={`${event.severity} • ${event.location} • ${new Date(event.date).toLocaleDateString()}`}
+                          secondary={`${event.severity} • ${event.regions?.join(', ') || 'Global'} • ${new Date(event.eventDate).toLocaleDateString()}`}
                         />
                         <Button
                           size="small"
@@ -339,49 +351,6 @@ export default function IntegratedDashboard({ profileId }) {
 
         {activeTab === 1 && (
           <Grid container spacing={3}>
-            {relevantEvents.map((event, index) => (
-              <Grid item xs={12} md={6} key={index}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {event.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      {event.description}
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                      <Chip label={event.severity} color="warning" size="small" />
-                      <Chip label={event.location} variant="outlined" size="small" />
-                      <Chip label={event.category} variant="outlined" size="small" />
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {new Date(event.date).toLocaleDateString()}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button 
-                      size="small" 
-                      startIcon={<Visibility />}
-                      onClick={() => setActiveTab(2)}
-                    >
-                      View Details
-                    </Button>
-                    <Button 
-                      size="small" 
-                      startIcon={<Warning />}
-                      onClick={() => handleCreateCrisisRoom(event._id)}
-                    >
-                      Create Crisis Room
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-
-        {activeTab === 2 && (
-          <Grid container spacing={3}>
             {crisisRooms.length === 0 ? (
               <Grid item xs={12}>
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
@@ -395,9 +364,9 @@ export default function IntegratedDashboard({ profileId }) {
                   <Button 
                     variant="contained" 
                     startIcon={<Add />}
-                    onClick={() => setActiveTab(1)}
+                    onClick={() => setActiveTab(0)}
                   >
-                    View Risk Events
+                    View Overview
                   </Button>
                 </Paper>
               </Grid>
@@ -449,7 +418,7 @@ export default function IntegratedDashboard({ profileId }) {
           </Grid>
         )}
 
-        {activeTab === 3 && (
+        {activeTab === 2 && (
           <AnalyticsDashboard profileId={profileId} />
         )}
       </Container>
