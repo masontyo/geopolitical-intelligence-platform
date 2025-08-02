@@ -149,32 +149,32 @@ export default function GeographicRiskMap({ events, profile }) {
           opacity: 0.6
         }} />
         
-        {/* Simple continent outlines */}
-        <svg
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            opacity: 0.3
-          }}
-          viewBox="0 0 1000 500"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          {/* North America */}
-          <path d="M 150 150 Q 200 120 250 140 L 280 180 Q 250 200 200 190 L 150 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
-          {/* Europe */}
-          <path d="M 450 150 Q 480 140 500 150 L 520 170 Q 500 180 480 175 L 450 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
-          {/* Asia */}
-          <path d="M 550 150 Q 650 140 750 160 L 780 200 Q 750 220 650 210 L 550 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
-          {/* Africa */}
-          <path d="M 480 200 Q 520 180 550 200 L 560 280 Q 520 300 480 290 L 480 200 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
-          {/* South America */}
-          <path d="M 300 250 Q 320 240 340 250 L 350 350 Q 320 370 300 360 L 300 250 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
-          {/* Australia */}
-          <path d="M 750 350 Q 780 340 800 350 L 810 380 Q 780 390 750 385 L 750 350 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
-        </svg>
+                 {/* Simple continent outlines */}
+         <svg
+           style={{
+             position: 'absolute',
+             top: 0,
+             left: 0,
+             width: '100%',
+             height: '100%',
+             opacity: 0.3
+           }}
+           viewBox="0 0 1000 500"
+           preserveAspectRatio="xMidYMid meet"
+         >
+           {/* North America */}
+           <path d="M 150 150 Q 200 120 250 140 L 280 180 Q 250 200 200 190 L 150 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1" />
+           {/* Europe */}
+           <path d="M 450 150 Q 480 140 500 150 L 520 170 Q 500 180 480 175 L 450 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1" />
+           {/* Asia */}
+           <path d="M 550 150 Q 650 140 750 160 L 780 200 Q 750 220 650 210 L 550 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1" />
+           {/* Africa */}
+           <path d="M 480 200 Q 520 180 550 200 L 560 280 Q 520 300 480 290 L 480 200 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1" />
+           {/* South America */}
+           <path d="M 300 250 Q 320 240 340 250 L 350 350 Q 320 370 300 360 L 300 250 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1" />
+           {/* Australia */}
+           <path d="M 750 350 Q 780 340 800 350 L 810 380 Q 780 390 750 385 L 750 350 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1" />
+         </svg>
         
         {/* Risk dots overlay */}
         {geographicData.map((region, index) => {
