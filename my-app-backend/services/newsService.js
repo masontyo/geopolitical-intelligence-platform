@@ -97,7 +97,11 @@ class NewsService {
         description: article.description,
         content: article.content,
         url: article.url,
-        source: 'NewsAPI',
+        source: {
+          name: article.source?.name || 'Unknown Source',
+          url: article.url,
+          reliability: 'medium'
+        },
         publishedAt: article.publishedAt,
         author: article.author
       }));
@@ -128,7 +132,11 @@ class NewsService {
         description: article.description,
         content: article.content,
         url: article.url,
-        source: 'GNews',
+        source: {
+          name: article.source?.name || 'GNews',
+          url: article.url,
+          reliability: 'medium'
+        },
         publishedAt: article.publishedAt,
         author: article.author
       }));
@@ -160,7 +168,11 @@ class NewsService {
           description: article.summary,
           content: article.summary,
           url: article.url,
-          source: 'Alpha Vantage',
+          source: {
+            name: article.source || 'Alpha Vantage',
+            url: article.url,
+            reliability: 'medium'
+          },
           publishedAt: article.time_published,
           author: article.authors?.[0] || 'Unknown'
         }));
@@ -212,8 +224,11 @@ class NewsService {
       category: analysis.category,
       severity: analysis.severity,
       date: new Date(article.publishedAt),
-      source: article.source,
-      sourceUrl: article.url,
+      source: article.source || {
+        name: 'Unknown Source',
+        url: article.url,
+        reliability: 'medium'
+      },
       relevanceScore: analysis.relevanceScore,
       tags: analysis.tags,
       impact: analysis.impact
