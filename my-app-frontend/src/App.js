@@ -44,7 +44,7 @@ function App() {
       <CssBaseline />
       <ToastProvider>
         <div className="App">
-          <IntegratedDashboard profileId="688e58db83612282c8e13b48" />
+          <IntegratedDashboard profileId="688cc58d2bf6fd05d88af31f" />
         </div>
       </ToastProvider>
     </ThemeProvider>
