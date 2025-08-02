@@ -7,6 +7,15 @@ const GeopoliticalEvent = require('../models/GeopoliticalEvent');
 
 const router = express.Router();
 
+// Test endpoint to debug routing
+router.get('/user-profile-test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'User profile routes are working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 /**
  * POST /api/user-profile
  * Create or update a user profile
