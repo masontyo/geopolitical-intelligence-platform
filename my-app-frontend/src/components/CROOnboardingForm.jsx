@@ -15,7 +15,8 @@ import {
   OutlinedInput,
   Checkbox,
   ListItemText,
-  FormHelperText
+  FormHelperText,
+  Autocomplete
 } from "@mui/material";
 import { userProfileAPI } from "../services/api";
 import { useToast } from "./ToastNotifications";
@@ -33,13 +34,232 @@ const EVENT_TYPES = [
   "Cybersecurity Threats"
 ];
 
+// Comprehensive list of world regions and countries for autocomplete
+const WORLD_REGIONS = [
+  // Major Regions
+  "Asia Pacific",
+  "Europe",
+  "North America", 
+  "South America",
+  "Africa",
+  "Middle East",
+  "Central Asia",
+  "Southeast Asia",
+  "East Asia",
+  "Western Europe",
+  "Eastern Europe",
+  "Northern Europe",
+  "Southern Europe",
+  "Central America",
+  "Caribbean",
+  "Sub-Saharan Africa",
+  "North Africa",
+  "West Africa",
+  "East Africa",
+  "Southern Africa",
+  "Central Africa",
+  
+  // Major Countries
+  "United States",
+  "China",
+  "Japan",
+  "Germany",
+  "United Kingdom",
+  "France",
+  "India",
+  "Italy",
+  "Brazil",
+  "Canada",
+  "South Korea",
+  "Russia",
+  "Australia",
+  "Spain",
+  "Mexico",
+  "Indonesia",
+  "Netherlands",
+  "Saudi Arabia",
+  "Turkey",
+  "Switzerland",
+  "Poland",
+  "Sweden",
+  "Belgium",
+  "Thailand",
+  "Austria",
+  "Norway",
+  "Israel",
+  "Singapore",
+  "Denmark",
+  "Finland",
+  "Chile",
+  "Czech Republic",
+  "Portugal",
+  "New Zealand",
+  "Greece",
+  "Hungary",
+  "Ireland",
+  "Slovakia",
+  "Luxembourg",
+  "Slovenia",
+  "Estonia",
+  "Latvia",
+  "Lithuania",
+  "Malta",
+  "Cyprus",
+  "Croatia",
+  "Bulgaria",
+  "Romania",
+  "Serbia",
+  "Ukraine",
+  "Belarus",
+  "Moldova",
+  "Georgia",
+  "Armenia",
+  "Azerbaijan",
+  "Kazakhstan",
+  "Uzbekistan",
+  "Kyrgyzstan",
+  "Tajikistan",
+  "Turkmenistan",
+  "Mongolia",
+  "Vietnam",
+  "Philippines",
+  "Malaysia",
+  "Myanmar",
+  "Cambodia",
+  "Laos",
+  "Brunei",
+  "Timor-Leste",
+  "Taiwan",
+  "Hong Kong",
+  "Macau",
+  "North Korea",
+  "South Korea",
+  "Bangladesh",
+  "Pakistan",
+  "Sri Lanka",
+  "Nepal",
+  "Bhutan",
+  "Maldives",
+  "Afghanistan",
+  "Iran",
+  "Iraq",
+  "Syria",
+  "Lebanon",
+  "Jordan",
+  "Palestine",
+  "Yemen",
+  "Oman",
+  "United Arab Emirates",
+  "Qatar",
+  "Bahrain",
+  "Kuwait",
+  "Egypt",
+  "Libya",
+  "Tunisia",
+  "Algeria",
+  "Morocco",
+  "Sudan",
+  "South Sudan",
+  "Ethiopia",
+  "Eritrea",
+  "Djibouti",
+  "Somalia",
+  "Kenya",
+  "Uganda",
+  "Tanzania",
+  "Rwanda",
+  "Burundi",
+  "Democratic Republic of the Congo",
+  "Republic of the Congo",
+  "Gabon",
+  "Equatorial Guinea",
+  "Cameroon",
+  "Central African Republic",
+  "Chad",
+  "Niger",
+  "Nigeria",
+  "Benin",
+  "Togo",
+  "Ghana",
+  "Ivory Coast",
+  "Liberia",
+  "Sierra Leone",
+  "Guinea",
+  "Guinea-Bissau",
+  "Senegal",
+  "Gambia",
+  "Mauritania",
+  "Mali",
+  "Burkina Faso",
+  "Niger",
+  "Chad",
+  "South Africa",
+  "Namibia",
+  "Botswana",
+  "Zimbabwe",
+  "Zambia",
+  "Malawi",
+  "Mozambique",
+  "Madagascar",
+  "Comoros",
+  "Mauritius",
+  "Seychelles",
+  "Argentina",
+  "Brazil",
+  "Chile",
+  "Colombia",
+  "Ecuador",
+  "Guyana",
+  "Paraguay",
+  "Peru",
+  "Suriname",
+  "Uruguay",
+  "Venezuela",
+  "Bolivia",
+  "Panama",
+  "Costa Rica",
+  "Nicaragua",
+  "Honduras",
+  "El Salvador",
+  "Guatemala",
+  "Belize",
+  "Cuba",
+  "Jamaica",
+  "Haiti",
+  "Dominican Republic",
+  "Puerto Rico",
+  "Trinidad and Tobago",
+  "Barbados",
+  "Grenada",
+  "Saint Vincent and the Grenadines",
+  "Saint Lucia",
+  "Dominica",
+  "Antigua and Barbuda",
+  "Saint Kitts and Nevis",
+  "Bahamas",
+  "Fiji",
+  "Papua New Guinea",
+  "Solomon Islands",
+  "Vanuatu",
+  "New Caledonia",
+  "French Polynesia",
+  "Samoa",
+  "Tonga",
+  "Tuvalu",
+  "Kiribati",
+  "Marshall Islands",
+  "Micronesia",
+  "Palau",
+  "Nauru"
+].sort();
+
 export default function CROOnboardingForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     companyName: '',
     hqLocation: '',
     businessUnits: '',
     supplyChainNodes: '',
-    criticalRegions: '',
+    criticalRegions: [],
     eventTypesConcerned: [],
     pastDisruptions: '',
     stakeholders: '',
@@ -132,7 +352,7 @@ export default function CROOnboardingForm({ onSubmit }) {
           description: `${concern} related concerns`,
           priority: 'medium'
         })),
-        regions: (formData.criticalRegions || '').split(',').map(region => region.trim()).filter(region => region),
+        regions: formData.criticalRegions || [],
         riskTolerance: 'medium',
         notificationPreferences: {
           email: true,
@@ -283,16 +503,38 @@ export default function CROOnboardingForm({ onSubmit }) {
           helperText="List main nodes (factories, suppliers, ports). Gives you route-specific alerts."
         />
         
-        <TextField
-          label="Critical Regions"
-          name="criticalRegions"
-          fullWidth 
-          sx={{ mb: 2 }}
-          value={formData.criticalRegions} 
-          onChange={handleChange}
-          helperText="Regions where you have operations, suppliers, or customers."
-          placeholder="e.g., China, Germany, Brazil"
-        />
+                 <Autocomplete
+           multiple
+           freeSolo
+           options={WORLD_REGIONS}
+           value={formData.criticalRegions}
+           onChange={(event, newValue) => {
+             setFormData(prev => ({ ...prev, criticalRegions: newValue }));
+             if (validationErrors.criticalRegions) {
+               setValidationErrors(prev => ({ ...prev, criticalRegions: null }));
+             }
+           }}
+           renderInput={(params) => (
+             <TextField
+               {...params}
+               label="Critical Regions"
+               placeholder="Type to search or select regions"
+               error={!!validationErrors.criticalRegions}
+               helperText={validationErrors.criticalRegions || "Regions where you have operations, suppliers, or customers. Type to search or select from the list."}
+             />
+           )}
+           renderTags={(value, getTagProps) =>
+             value.map((option, index) => (
+               <Chip
+                 variant="outlined"
+                 label={option}
+                 {...getTagProps({ index })}
+                 sx={{ m: 0.5 }}
+               />
+             ))
+           }
+           sx={{ mb: 2 }}
+         />
 
         <Divider sx={{ my: 2 }}>Risk Monitoring</Divider>
         
