@@ -130,11 +130,11 @@ export default function IntegratedDashboard({ profileId }) {
       console.log('Response status:', response.status);
       
       if (response.ok) {
-        const crisisRoom = await response.json();
-        console.log('Created crisis room:', crisisRoom);
-        setCrisisRooms(prev => [...prev, crisisRoom]);
+        const responseData = await response.json();
+        console.log('Created crisis room:', responseData);
+        setCrisisRooms(prev => [...prev, responseData.data]);
         success('Crisis room created successfully!');
-        return crisisRoom._id;
+        return responseData.data._id;
       } else {
         const errorData = await response.json();
         console.error('Failed to create crisis room:', errorData);
