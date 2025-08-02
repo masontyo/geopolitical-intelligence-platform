@@ -108,17 +108,35 @@ router.get('/crisis-rooms', async (req, res) => {
 // Get specific crisis room
 router.get('/crisis-rooms/:id', async (req, res) => {
   try {
-    const crisisRoom = await CrisisCommunication.findById(req.params.id)
+    // Set a timeout for this operation
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database query timeout')), 25000);
+    });
+
+    const queryPromise = CrisisCommunication.findById(req.params.id)
       .populate('eventId', 'title description eventDate severity categories regions')
-      .populate('stakeholders')
+      .populate('stakeholders', 'name email role organization phone notificationChannels escalationLevel')
       .populate('communications.sentBy', 'name email')
-      .populate('responses.stakeholderId', 'name email role');
+      .populate('responses.stakeholderId', 'name email role')
+      .lean(); // Use lean() for better performance
+
+    const crisisRoom = await Promise.race([queryPromise, timeoutPromise]);
     
     if (!crisisRoom) {
       return res.status(404).json({
         success: false,
         message: 'Crisis room not found'
       });
+    }
+
+    // Limit communications to last 50 to prevent overwhelming response
+    if (crisisRoom.communications && crisisRoom.communications.length > 50) {
+      crisisRoom.communications = crisisRoom.communications.slice(-50);
+    }
+
+    // Limit responses to last 100
+    if (crisisRoom.responses && crisisRoom.responses.length > 100) {
+      crisisRoom.responses = crisisRoom.responses.slice(-100);
     }
     
     res.json({
@@ -127,11 +145,19 @@ router.get('/crisis-rooms/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching crisis room:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch crisis room',
-      error: error.message
-    });
+    if (error.message === 'Database query timeout') {
+      res.status(408).json({
+        success: false,
+        message: 'Request timeout - crisis room data is too large',
+        error: 'TIMEOUT'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch crisis room',
+        error: error.message
+      });
+    }
   }
 });
 
@@ -686,7 +712,12 @@ router.get('/crisis-rooms/profile/:profileId', async (req, res) => {
   try {
     const crisisRooms = await CrisisCommunication.find({
       'stakeholders.email': { $exists: true }
-    }).populate('eventId').sort({ 'crisisRoom.createdAt': -1 });
+    })
+    .populate('eventId', 'title description eventDate severity')
+    .select('crisisRoom stakeholders metrics')
+    .sort({ 'crisisRoom.createdAt': -1 })
+    .limit(20)
+    .lean();
     
     res.json({ 
       success: true,
@@ -697,6 +728,36 @@ router.get('/crisis-rooms/profile/:profileId', async (req, res) => {
     res.status(500).json({ 
       success: false,
       error: error.message 
+    });
+  }
+});
+
+// Get lightweight crisis room info (for dashboard)
+router.get('/crisis-rooms/:id/summary', async (req, res) => {
+  try {
+    const crisisRoom = await CrisisCommunication.findById(req.params.id)
+      .populate('eventId', 'title description eventDate severity categories regions')
+      .populate('stakeholders', 'name email role organization')
+      .select('crisisRoom stakeholders metrics timeline')
+      .lean();
+    
+    if (!crisisRoom) {
+      return res.status(404).json({
+        success: false,
+        message: 'Crisis room not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: crisisRoom
+    });
+  } catch (error) {
+    console.error('Error fetching crisis room summary:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch crisis room summary',
+      error: error.message
     });
   }
 });
