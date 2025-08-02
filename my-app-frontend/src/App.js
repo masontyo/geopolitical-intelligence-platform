@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import OnboardingFlow from './components/OnboardingFlow';
+import CrisisRoomTest from './components/CrisisRoomTest';
 import { ToastProvider } from './components/ToastNotifications';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -43,7 +44,7 @@ function App() {
       <CssBaseline />
       <ToastProvider>
         <div className="App">
-          <OnboardingFlow />
+          <CrisisRoomTest />
         </div>
       </ToastProvider>
     </ThemeProvider>

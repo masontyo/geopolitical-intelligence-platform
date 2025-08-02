@@ -319,6 +319,7 @@ const WORLD_REGIONS = [
 export default function CROOnboardingForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     companyName: '',
+    email: '',
     hqLocation: '',
     businessUnits: [],
     supplyChainNodes: [],
@@ -358,6 +359,12 @@ export default function CROOnboardingForm({ onSubmit }) {
     
     if (!formData.companyName.trim()) {
       errors.companyName = 'Company name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
     }
     
     if (!formData.hqLocation.trim()) {
@@ -403,6 +410,7 @@ export default function CROOnboardingForm({ onSubmit }) {
         name: formData.companyName,
         title: 'CRO',
         company: formData.companyName,
+        email: formData.email,
         industry: 'Technology',
         businessUnits: (formData.businessUnits || []).map(unit => ({
           name: unit,
@@ -526,6 +534,19 @@ export default function CROOnboardingForm({ onSubmit }) {
           onChange={handleChange}
           error={!!validationErrors.companyName}
           helperText={validationErrors.companyName || "Identifies your organization for tailored reporting."}
+        />
+        
+        <TextField
+          label="Email Address"
+          name="email"
+          type="email"
+          fullWidth 
+          required 
+          sx={{ mb: 2 }}
+          value={formData.email} 
+          onChange={handleChange}
+          error={!!validationErrors.email}
+          helperText={validationErrors.email || "Used for notifications and alerts about relevant events."}
         />
         
         <TextField
