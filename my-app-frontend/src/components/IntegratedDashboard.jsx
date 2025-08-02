@@ -32,7 +32,7 @@ import {
   Error as ErrorIcon,
   Analytics,
   Dashboard as DashboardIcon,
-  CrisisAlert,
+  Warning,
   Email,
   People,
   Notifications,
@@ -60,7 +60,7 @@ export default function IntegratedDashboard({ profileId }) {
   const tabs = [
     { label: 'Overview', icon: <DashboardIcon /> },
     { label: 'Risk Events', icon: <Warning /> },
-    { label: 'Crisis Communications', icon: <CrisisAlert /> },
+    { label: 'Crisis Communications', icon: <Warning /> },
     { label: 'Analytics', icon: <Analytics /> }
   ];
 
@@ -324,7 +324,7 @@ export default function IntegratedDashboard({ profileId }) {
                         />
                         <Button
                           size="small"
-                          startIcon={<CrisisAlert />}
+                          startIcon={<Warning />}
                           onClick={() => handleCreateCrisisRoom(event._id)}
                         >
                           Create Crisis Room
@@ -369,7 +369,7 @@ export default function IntegratedDashboard({ profileId }) {
                     </Button>
                     <Button 
                       size="small" 
-                      startIcon={<CrisisAlert />}
+                      startIcon={<Warning />}
                       onClick={() => handleCreateCrisisRoom(event._id)}
                     >
                       Create Crisis Room
@@ -386,7 +386,7 @@ export default function IntegratedDashboard({ profileId }) {
             {crisisRooms.length === 0 ? (
               <Grid item xs={12}>
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
-                  <CrisisAlert sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Warning sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                   <Typography variant="h6" gutterBottom>
                     No Active Crisis Rooms
                   </Typography>

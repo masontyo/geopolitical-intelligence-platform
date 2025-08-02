@@ -65,8 +65,8 @@ import {
   ExpandMore,
   AttachFile,
   Reply,
-  Escalation,
-  Resolve
+  TrendingUp,
+  CheckCircle
 } from '@mui/icons-material';
 import { useToast } from './ToastNotifications';
 import api from '../services/api';
@@ -334,7 +334,7 @@ export default function CrisisRoom({ crisisRoomId, onClose }) {
             <Button
               variant="contained"
               color="error"
-              startIcon={<Escalation />}
+              startIcon={<TrendingUp />}
               onClick={() => setEscalationDialog(true)}
               sx={{ mr: 1 }}
             >
