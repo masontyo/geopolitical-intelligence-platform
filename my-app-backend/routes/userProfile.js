@@ -122,12 +122,12 @@ router.get('/user-profile/:id', async (req, res) => {
 
 /**
  * GET /api/user-profile/:id/relevant-events
- * Get relevant geopolitical events for a user profile using advanced scoring
+ * Get relevant geopolitical events for a user profile by fetching real-time news and scoring
  */
 router.get('/user-profile/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
-    const { threshold = 0.05, includeAnalytics = false } = req.query; // Use advanced scoring threshold
+    const { threshold = 0.05, includeAnalytics = false } = req.query;
     
     // Check if the ID is a valid ObjectId format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -146,31 +146,106 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
       });
     }
     
-    // Get all events from database
-    const allEvents = await GeopoliticalEvent.find({ status: 'active' });
+    // Fetch real-time news from News API
+    const axios = require('axios');
+    const NEWSAPI_KEY = process.env.NEWSAPI_KEY || '00a28673b0414caabfadd792f7d0b7f8';
     
-    // Use advanced scoring algorithm
-    const scoredEvents = scoreEvents(profile, allEvents);
+    console.log(`📰 Fetching real-time news for user ${profile.name}...`);
     
-    // Filter by threshold and convert to response format
+    // Build search query based on user's areas of concern and regions
+    const userKeywords = profile.areasOfConcern.map(concern => concern.category.toLowerCase());
+    const userRegions = profile.regions.map(region => region.toLowerCase());
+    
+    // Create a focused search query based on user's profile
+    let searchQuery = 'geopolitical OR international relations';
+    
+    // Add user-specific keywords
+    if (userKeywords.length > 0) {
+      const keywordQuery = userKeywords.slice(0, 3).join(' OR '); // Limit to avoid query length issues
+      searchQuery += ` OR ${keywordQuery}`;
+    }
+    
+    // Add user-specific regions
+    if (userRegions.length > 0) {
+      const regionQuery = userRegions.slice(0, 3).join(' OR '); // Limit to avoid query length issues
+      searchQuery += ` OR ${regionQuery}`;
+    }
+    
+    // Fetch news articles
+    const newsResponse = await axios.get('https://newsapi.org/v2/everything', {
+      params: {
+        q: searchQuery,
+        language: 'en',
+        sortBy: 'publishedAt',
+        pageSize: 100, // Get more articles to have better selection
+        apiKey: NEWSAPI_KEY
+      }
+    });
+    
+    console.log(`📊 Fetched ${newsResponse.data.articles.length} articles for scoring`);
+    
+    // Convert news articles to event format and score them
+    const scoredEvents = [];
+    
+    for (const article of newsResponse.data.articles) {
+      try {
+        // Convert article to event format
+        const event = {
+          title: article.title,
+          description: article.description || article.content?.substring(0, 500) || '',
+          summary: article.description?.substring(0, 200) || article.title,
+          eventDate: new Date(article.publishedAt),
+          categories: [], // Will be determined by scoring
+          regions: [], // Will be determined by scoring
+          countries: [],
+          severity: 'medium', // Will be determined by scoring
+          impact: { economic: 'neutral', political: 'neutral', social: 'neutral' },
+          source: {
+            name: article.source?.name || 'Unknown Source',
+            url: article.url,
+            reliability: 'medium'
+          },
+          tags: [],
+          status: 'active'
+        };
+        
+        // Score this event against the user's profile
+        const scoredEvent = scoreEvents(profile, [event])[0];
+        
+        if (scoredEvent && scoredEvent.relevanceScore >= parseFloat(threshold)) {
+          scoredEvents.push({
+            ...event,
+            relevanceScore: scoredEvent.relevanceScore,
+            rationale: scoredEvent.rationale,
+            contributingFactors: scoredEvent.contributingFactors,
+            confidenceLevel: scoredEvent.confidenceLevel,
+            categories: scoredEvent.event.categories || [],
+            regions: scoredEvent.event.regions || [],
+            severity: scoredEvent.event.severity || 'medium'
+          });
+        }
+      } catch (error) {
+        console.error(`Error processing article "${article.title}":`, error.message);
+      }
+    }
+    
+    // Sort by relevance score (highest first) and limit results
     const relevantEvents = scoredEvents
-      .filter(scoredEvent => scoredEvent.relevanceScore >= parseFloat(threshold))
-      .map(scoredEvent => ({
-        ...scoredEvent.event.toObject(),
-        relevanceScore: scoredEvent.relevanceScore,
-        rationale: scoredEvent.rationale,
-        contributingFactors: scoredEvent.contributingFactors,
-        confidenceLevel: scoredEvent.confidenceLevel
-      }));
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, 20); // Limit to top 20 most relevant events
+    
+    console.log(`✅ Found ${relevantEvents.length} relevant events for user ${profile.name}`);
     
     const response = {
       success: true,
       events: relevantEvents,
       total: relevantEvents.length,
       scoringMetadata: {
-        totalEventsProcessed: allEvents.length,
+        totalArticlesFetched: newsResponse.data.articles.length,
+        totalEventsProcessed: scoredEvents.length,
         eventsAboveThreshold: relevantEvents.length,
-        threshold: parseFloat(threshold)
+        threshold: parseFloat(threshold),
+        searchQuery: searchQuery
       }
     };
     
@@ -185,7 +260,8 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
     console.error('Error fetching relevant events:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
