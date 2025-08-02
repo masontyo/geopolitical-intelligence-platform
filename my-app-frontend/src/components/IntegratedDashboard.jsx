@@ -121,11 +121,9 @@ export default function IntegratedDashboard({ profileId }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           eventId,
-          crisisData: {
-            title: `Crisis: ${event?.title || 'Event'}`,
-            description: 'Crisis communication room created from dashboard',
-            createdBy: profile?.name || 'Dashboard User'
-          }
+          title: `Crisis: ${event?.title || 'Event'}`,
+          description: 'Crisis communication room created from dashboard',
+          createdBy: profile?.name || 'Dashboard User'
         })
       });
 
