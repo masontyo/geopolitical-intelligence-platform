@@ -16,6 +16,24 @@ router.get('/user-profile-test', (req, res) => {
   });
 });
 
+// List all profiles for debugging
+router.get('/user-profile-list', async (req, res) => {
+  try {
+    const profiles = await UserProfile.find().select('_id name company email industry');
+    res.json({
+      success: true,
+      profiles,
+      count: profiles.length
+    });
+  } catch (error) {
+    console.error('Error listing profiles:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 /**
  * POST /api/user-profile
  * Create or update a user profile
