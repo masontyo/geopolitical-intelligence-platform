@@ -24,6 +24,58 @@ import {
   Download
 } from '@mui/icons-material';
 
+// Geographic coordinates for major regions
+const REGION_COORDINATES = {
+  'North America': { x: 25, y: 35 },
+  'United States': { x: 22, y: 38 },
+  'Canada': { x: 25, y: 25 },
+  'Mexico': { x: 20, y: 45 },
+  'Europe': { x: 48, y: 30 },
+  'United Kingdom': { x: 45, y: 28 },
+  'Germany': { x: 50, y: 30 },
+  'France': { x: 47, y: 32 },
+  'Italy': { x: 50, y: 35 },
+  'Spain': { x: 45, y: 38 },
+  'Poland': { x: 52, y: 28 },
+  'Ukraine': { x: 55, y: 28 },
+  'Russia': { x: 65, y: 25 },
+  'Asia': { x: 75, y: 35 },
+  'China': { x: 78, y: 38 },
+  'Japan': { x: 85, y: 35 },
+  'South Korea': { x: 82, y: 35 },
+  'India': { x: 70, y: 45 },
+  'Southeast Asia': { x: 75, y: 50 },
+  'Vietnam': { x: 78, y: 50 },
+  'Thailand': { x: 75, y: 48 },
+  'Malaysia': { x: 75, y: 52 },
+  'Indonesia': { x: 78, y: 55 },
+  'Philippines': { x: 82, y: 50 },
+  'Middle East': { x: 58, y: 42 },
+  'Saudi Arabia': { x: 60, y: 45 },
+  'Iran': { x: 62, y: 40 },
+  'Iraq': { x: 60, y: 40 },
+  'Syria': { x: 58, y: 38 },
+  'Turkey': { x: 55, y: 35 },
+  'Israel': { x: 55, y: 40 },
+  'Africa': { x: 52, y: 55 },
+  'Egypt': { x: 55, y: 45 },
+  'Libya': { x: 52, y: 42 },
+  'Tunisia': { x: 48, y: 42 },
+  'Algeria': { x: 45, y: 45 },
+  'Morocco': { x: 42, y: 42 },
+  'Nigeria': { x: 50, y: 55 },
+  'South Africa': { x: 52, y: 70 },
+  'South America': { x: 32, y: 70 },
+  'Brazil': { x: 35, y: 65 },
+  'Argentina': { x: 30, y: 75 },
+  'Chile': { x: 25, y: 75 },
+  'Colombia': { x: 28, y: 58 },
+  'Venezuela': { x: 30, y: 55 },
+  'Peru': { x: 25, y: 65 },
+  'Australia': { x: 82, y: 70 },
+  'New Zealand': { x: 85, y: 75 }
+};
+
 export default function GeographicRiskMap({ events, profile }) {
   // Generate geographic risk data
   const geographicData = useMemo(() => {
@@ -74,48 +126,64 @@ export default function GeographicRiskMap({ events, profile }) {
     return 'Low';
   };
 
-  // Mock world map visualization (in a real app, you'd use a mapping library)
+  // Render world map with actual image and overlay dots
   const renderWorldMap = () => {
-    const regions = [
-      { name: 'North America', x: 20, y: 30, size: 15 },
-      { name: 'Europe', x: 45, y: 25, size: 12 },
-      { name: 'Asia-Pacific', x: 75, y: 35, size: 18 },
-      { name: 'Southeast Asia', x: 70, y: 50, size: 10 },
-      { name: 'Middle East', x: 55, y: 45, size: 8 },
-      { name: 'Africa', x: 50, y: 60, size: 14 },
-      { name: 'South America', x: 30, y: 70, size: 12 }
-    ];
-
     return (
       <Box sx={{ 
         position: 'relative',
-        height: 400,
+        height: 500,
         border: '2px solid',
         borderColor: 'divider',
         borderRadius: 2,
         bgcolor: 'background.paper',
         overflow: 'hidden'
       }}>
-        {/* Mock world map background */}
+        {/* World map background */}
         <Box sx={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'linear-gradient(45deg, #e3f2fd 0%, #f3e5f5 50%, #e8f5e8 100%)',
-          opacity: 0.3
+          background: 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 25%, #e8f5e8 50%, #fff3e0 75%, #fce4ec 100%)',
+          opacity: 0.6
         }} />
         
-        {/* Region markers */}
-        {regions.map((region, index) => {
-          const regionData = geographicData.find(d => 
-            d.name.toLowerCase().includes(region.name.toLowerCase()) ||
-            region.name.toLowerCase().includes(d.name.toLowerCase())
-          );
+        {/* Simple continent outlines */}
+        <svg
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0.3
+          }}
+          viewBox="0 0 1000 500"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* North America */}
+          <path d="M 150 150 Q 200 120 250 140 L 280 180 Q 250 200 200 190 L 150 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
+          {/* Europe */}
+          <path d="M 450 150 Q 480 140 500 150 L 520 170 Q 500 180 480 175 L 450 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
+          {/* Asia */}
+          <path d="M 550 150 Q 650 140 750 160 L 780 200 Q 750 220 650 210 L 550 150 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
+          {/* Africa */}
+          <path d="M 480 200 Q 520 180 550 200 L 560 280 Q 520 300 480 290 L 480 200 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
+          {/* South America */}
+          <path d="M 300 250 Q 320 240 340 250 L 350 350 Q 320 370 300 360 L 300 250 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
+          {/* Australia */}
+          <path d="M 750 350 Q 780 340 800 350 L 810 380 Q 780 390 750 385 L 750 350 Z" fill="#e8f4f8" stroke="#b3d9e6" strokeWidth="1"/>
+        </svg>
+        
+        {/* Risk dots overlay */}
+        {geographicData.map((region, index) => {
+          const coordinates = REGION_COORDINATES[region.name];
+          if (!coordinates) return null;
           
-          const riskScore = regionData?.avgRiskScore || 0;
+          const riskScore = region.avgRiskScore;
           const color = getRiskColor(riskScore);
+          const size = Math.max(8, Math.min(20, region.eventCount * 2)); // Size based on event count
           
           return (
             <Tooltip 
@@ -127,7 +195,10 @@ export default function GeographicRiskMap({ events, profile }) {
                     Risk Score: {(riskScore * 100).toFixed(1)}%
                   </Typography>
                   <Typography variant="body2">
-                    Events: {regionData?.eventCount || 0}
+                    Events: {region.eventCount}
+                  </Typography>
+                  <Typography variant="body2">
+                    High-Risk: {region.highRiskEvents}
                   </Typography>
                 </Box>
               }
@@ -135,19 +206,21 @@ export default function GeographicRiskMap({ events, profile }) {
               <Box
                 sx={{
                   position: 'absolute',
-                  left: `${region.x}%`,
-                  top: `${region.y}%`,
-                  width: region.size,
-                  height: region.size,
+                  left: `${coordinates.x}%`,
+                  top: `${coordinates.y}%`,
+                  width: size,
+                  height: size,
                   borderRadius: '50%',
                   bgcolor: `${color}.main`,
                   border: '2px solid white',
-                  boxShadow: 2,
+                  boxShadow: `0 0 0 2px ${color === 'error' ? '#d32f2f' : color === 'warning' ? '#ed6c02' : '#2e7d32'}`,
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
+                  transform: 'translate(-50%, -50%)',
                   '&:hover': {
-                    transform: 'scale(1.2)',
-                    boxShadow: 4
+                    transform: 'translate(-50%, -50%) scale(1.3)',
+                    boxShadow: `0 0 0 4px ${color === 'error' ? '#d32f2f' : color === 'warning' ? '#ed6c02' : '#2e7d32'}`,
+                    zIndex: 10
                   }
                 }}
               />
@@ -163,25 +236,30 @@ export default function GeographicRiskMap({ events, profile }) {
           bgcolor: 'background.paper',
           p: 2,
           borderRadius: 1,
-          boxShadow: 2
+          boxShadow: 3,
+          border: '1px solid',
+          borderColor: 'divider'
         }}>
           <Typography variant="caption" sx={{ fontWeight: 'bold', mb: 1, display: 'block' }}>
             Risk Levels
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'error.main' }} />
-              <Typography variant="caption">High Risk</Typography>
+              <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'error.main', border: '2px solid white' }} />
+              <Typography variant="caption">High Risk (≥70%)</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
-              <Typography variant="caption">Medium Risk</Typography>
+              <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'warning.main', border: '2px solid white' }} />
+              <Typography variant="caption">Medium Risk (40-69%)</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'success.main' }} />
-              <Typography variant="caption">Low Risk</Typography>
+              <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'success.main', border: '2px solid white' }} />
+              <Typography variant="caption">Low Risk (<40%)</Typography>
             </Box>
           </Box>
+          <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'text.secondary' }}>
+            Dot size = Event count
+          </Typography>
         </Box>
       </Box>
     );
