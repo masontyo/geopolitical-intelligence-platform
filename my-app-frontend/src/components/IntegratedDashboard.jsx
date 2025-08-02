@@ -32,7 +32,6 @@ import {
   Error as ErrorIcon,
   Analytics,
   Dashboard as DashboardIcon,
-  Warning,
   Email,
   People,
   Notifications,

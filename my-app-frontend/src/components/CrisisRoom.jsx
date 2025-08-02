@@ -65,8 +65,7 @@ import {
   ExpandMore,
   AttachFile,
   Reply,
-  TrendingUp,
-  CheckCircle
+  TrendingUp
 } from '@mui/icons-material';
 import { useToast } from './ToastNotifications';
 import api from '../services/api';
