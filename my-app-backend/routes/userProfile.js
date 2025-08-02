@@ -127,7 +127,7 @@ router.get('/user-profile/:id', async (req, res) => {
 router.get('/user-profile/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
-    const { threshold = 0.01, includeAnalytics = false } = req.query;
+    const { threshold = 0.005, includeAnalytics = false } = req.query;
     
     // Check if the ID is a valid ObjectId format
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -156,20 +156,35 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
     const userKeywords = profile.areasOfConcern.map(concern => concern.category.toLowerCase());
     const userRegions = profile.regions.map(region => region.toLowerCase());
     
-    // Create a focused search query based on user's profile
-    let searchQuery = 'geopolitical OR international relations';
-    
-    // Add user-specific keywords
-    if (userKeywords.length > 0) {
-      const keywordQuery = userKeywords.slice(0, 3).join(' OR '); // Limit to avoid query length issues
-      searchQuery += ` OR ${keywordQuery}`;
-    }
-    
-    // Add user-specific regions
-    if (userRegions.length > 0) {
-      const regionQuery = userRegions.slice(0, 3).join(' OR '); // Limit to avoid query length issues
-      searchQuery += ` OR ${regionQuery}`;
-    }
+         // Create a broader, more inclusive search query
+     let searchQuery = 'geopolitical OR international OR business OR economy OR trade OR security OR technology OR government OR policy';
+     
+     // Add user-specific keywords with broader terms
+     if (userKeywords.length > 0) {
+       const expandedKeywords = userKeywords.map(keyword => {
+         // Map specific concerns to broader search terms
+         switch (keyword.toLowerCase()) {
+           case 'supply chain disruption':
+             return 'supply chain OR logistics OR manufacturing OR shipping OR trade';
+           case 'cybersecurity threats':
+             return 'cybersecurity OR cyber OR security OR technology OR digital';
+           case 'regulatory changes':
+             return 'regulation OR policy OR law OR government OR compliance';
+           case 'geopolitical tensions':
+             return 'geopolitical OR international OR diplomacy OR conflict OR tension';
+           default:
+             return keyword;
+         }
+       });
+       const keywordQuery = expandedKeywords.slice(0, 2).join(' OR '); // Limit to avoid query length issues
+       searchQuery += ` OR ${keywordQuery}`;
+     }
+     
+     // Add user-specific regions with broader coverage
+     if (userRegions.length > 0) {
+       const regionQuery = userRegions.slice(0, 2).join(' OR '); // Limit to avoid query length issues
+       searchQuery += ` OR ${regionQuery}`;
+     }
     
     // Fetch news articles
     const newsResponse = await axios.get('https://newsapi.org/v2/everything', {
@@ -192,62 +207,216 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
         // Analyze article content to extract categories, regions, and severity
         const content = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
         
-        // Determine categories based on content
+        // Intelligent category detection using semantic understanding
         const categories = [];
-        if (content.includes('trade') || content.includes('tariff') || content.includes('sanction')) {
-          categories.push('Trade & Economic');
-        }
-        if (content.includes('military') || content.includes('conflict') || content.includes('war')) {
-          categories.push('Military & Security');
-        }
-        if (content.includes('election') || content.includes('political') || content.includes('regime')) {
-          categories.push('Political');
-        }
-        if (content.includes('cyber') || content.includes('hack') || content.includes('digital')) {
-          categories.push('Cybersecurity');
-        }
-        if (content.includes('supply chain') || content.includes('logistics') || content.includes('supply')) {
-          categories.push('Supply Chain');
-        }
-        if (content.includes('regulation') || content.includes('regulatory') || content.includes('policy') || content.includes('law')) {
-          categories.push('Regulatory Changes');
-        }
-        if (content.includes('tension') || content.includes('geopolitical') || content.includes('international') || content.includes('diplomatic')) {
-          categories.push('Geopolitical Tensions');
-        }
-        if (categories.length === 0) {
-          categories.push('General');
+        
+        // Supply Chain Disruption - broad semantic matching
+        const supplyChainTerms = [
+          'supply chain', 'logistics', 'shipping', 'transport', 'freight', 'cargo', 'import', 'export',
+          'manufacturing', 'factory', 'production', 'assembly', 'component', 'material', 'raw material',
+          'inventory', 'warehouse', 'distribution', 'delivery', 'port', 'container', 'truck', 'rail',
+          'shortage', 'disruption', 'delay', 'backlog', 'bottleneck', 'shortage', 'out of stock',
+          'semiconductor', 'chip', 'electronics', 'automotive', 'steel', 'aluminum', 'plastic'
+        ];
+        if (supplyChainTerms.some(term => content.includes(term))) {
+          categories.push('Supply Chain Disruption');
         }
         
-        // Determine severity based on keywords
+        // Cybersecurity Threats - broad security matching
+        const cyberTerms = [
+          'cyber', 'hack', 'hacking', 'breach', 'data breach', 'security', 'vulnerability', 'malware',
+          'ransomware', 'phishing', 'attack', 'digital', 'online', 'internet', 'network', 'system',
+          'software', 'technology', 'computer', 'server', 'database', 'information', 'privacy',
+          'encryption', 'firewall', 'antivirus', 'spam', 'virus', 'trojan', 'spyware'
+        ];
+        if (cyberTerms.some(term => content.includes(term))) {
+          categories.push('Cybersecurity Threats');
+        }
+        
+        // Regulatory Changes - broad policy/legal matching
+        const regulatoryTerms = [
+          'regulation', 'regulatory', 'policy', 'law', 'legislation', 'bill', 'act', 'rule', 'standard',
+          'compliance', 'enforcement', 'government', 'federal', 'state', 'local', 'agency', 'department',
+          'oversight', 'audit', 'inspection', 'license', 'permit', 'certification', 'approval',
+          'ban', 'restriction', 'requirement', 'mandate', 'directive', 'guideline', 'framework'
+        ];
+        if (regulatoryTerms.some(term => content.includes(term))) {
+          categories.push('Regulatory Changes');
+        }
+        
+        // Geopolitical Tensions - broad international relations
+        const geopoliticalTerms = [
+          'geopolitical', 'international', 'diplomatic', 'tension', 'conflict', 'dispute', 'negotiation',
+          'alliance', 'partnership', 'agreement', 'treaty', 'sanction', 'embargo', 'trade war',
+          'tariff', 'protectionism', 'globalization', 'multilateral', 'bilateral', 'summit', 'meeting',
+          'foreign policy', 'diplomacy', 'ambassador', 'embassy', 'consulate', 'foreign minister',
+          'president', 'prime minister', 'leader', 'government', 'administration', 'regime'
+        ];
+        if (geopoliticalTerms.some(term => content.includes(term))) {
+          categories.push('Geopolitical Tensions');
+        }
+        
+        // Trade & Economic - broad economic indicators
+        const tradeTerms = [
+          'trade', 'economic', 'economy', 'market', 'financial', 'investment', 'currency', 'exchange rate',
+          'inflation', 'recession', 'growth', 'gdp', 'employment', 'unemployment', 'interest rate',
+          'monetary', 'fiscal', 'budget', 'deficit', 'surplus', 'debt', 'bond', 'stock', 'commodity',
+          'oil', 'gas', 'energy', 'mineral', 'agriculture', 'food', 'consumer', 'retail', 'wholesale'
+        ];
+        if (tradeTerms.some(term => content.includes(term))) {
+          categories.push('Trade & Economic');
+        }
+        
+        // Military & Security - broad security/military terms
+        const militaryTerms = [
+          'military', 'defense', 'security', 'war', 'conflict', 'battle', 'attack', 'threat', 'terrorism',
+          'weapon', 'missile', 'nuclear', 'army', 'navy', 'air force', 'soldier', 'troop', 'base',
+          'alliance', 'nato', 'united nations', 'peacekeeping', 'ceasefire', 'truce', 'armistice',
+          'invasion', 'occupation', 'liberation', 'resistance', 'rebellion', 'civil war', 'coup'
+        ];
+        if (militaryTerms.some(term => content.includes(term))) {
+          categories.push('Military & Security');
+        }
+        
+        // Political - broad political terms
+        const politicalTerms = [
+          'political', 'election', 'vote', 'campaign', 'candidate', 'party', 'democrat', 'republican',
+          'parliament', 'congress', 'senate', 'house', 'representative', 'senator', 'minister',
+          'president', 'prime minister', 'governor', 'mayor', 'official', 'bureaucrat', 'civil servant',
+          'protest', 'demonstration', 'rally', 'march', 'activism', 'lobby', 'interest group'
+        ];
+        if (politicalTerms.some(term => content.includes(term))) {
+          categories.push('Political');
+        }
+        
+        // If no specific categories found, check for general business/economic relevance
+        if (categories.length === 0) {
+          const generalBusinessTerms = [
+            'business', 'company', 'corporation', 'industry', 'sector', 'market', 'consumer', 'customer',
+            'product', 'service', 'revenue', 'profit', 'loss', 'earnings', 'quarterly', 'annual',
+            'merger', 'acquisition', 'partnership', 'joint venture', 'startup', 'venture', 'investment'
+          ];
+          if (generalBusinessTerms.some(term => content.includes(term))) {
+            categories.push('General Business');
+          } else {
+            categories.push('General');
+          }
+        }
+        
+        // Intelligent severity detection using semantic understanding
         let severity = 'low';
-        if (content.includes('crisis') || content.includes('war') || content.includes('attack') || content.includes('conflict')) {
+        
+        // Critical severity indicators
+        const criticalTerms = [
+          'crisis', 'emergency', 'disaster', 'catastrophe', 'war', 'attack', 'invasion', 'bombing',
+          'terrorism', 'terrorist', 'mass casualty', 'evacuation', 'lockdown', 'curfew', 'martial law',
+          'nuclear', 'missile', 'weapon', 'battle', 'combat', 'siege', 'blockade', 'embargo',
+          'bankruptcy', 'collapse', 'default', 'recession', 'depression', 'panic', 'chaos'
+        ];
+        if (criticalTerms.some(term => content.includes(term))) {
           severity = 'critical';
-        } else if (content.includes('tension') || content.includes('dispute') || content.includes('sanction')) {
+        }
+        // High severity indicators
+        else if (content.includes('tension') || content.includes('dispute') || content.includes('sanction') ||
+                 content.includes('protest') || content.includes('demonstration') || content.includes('strike') ||
+                 content.includes('shortage') || content.includes('delay') || content.includes('disruption') ||
+                 content.includes('breach') || content.includes('hack') || content.includes('vulnerability')) {
           severity = 'high';
-        } else if (content.includes('policy') || content.includes('regulation') || content.includes('agreement')) {
+        }
+        // Medium severity indicators
+        else if (content.includes('policy') || content.includes('regulation') || content.includes('agreement') ||
+                 content.includes('announcement') || content.includes('decision') || content.includes('plan') ||
+                 content.includes('proposal') || content.includes('discussion') || content.includes('meeting')) {
           severity = 'medium';
         }
         
-        // Extract regions based on content
+        // Intelligent region detection using comprehensive country/region mapping
         const regions = [];
-        if (content.includes('china') || content.includes('asia') || content.includes('japan') || content.includes('korea')) {
+        
+        // Asia-Pacific countries and regions
+        const asiaPacificTerms = [
+          'china', 'japan', 'korea', 'south korea', 'north korea', 'taiwan', 'hong kong', 'singapore',
+          'india', 'pakistan', 'bangladesh', 'sri lanka', 'nepal', 'bhutan', 'myanmar', 'thailand',
+          'vietnam', 'cambodia', 'laos', 'malaysia', 'indonesia', 'philippines', 'brunei', 'east timor',
+          'mongolia', 'kazakhstan', 'kyrgyzstan', 'tajikistan', 'uzbekistan', 'turkmenistan',
+          'australia', 'new zealand', 'fiji', 'papua new guinea', 'pacific', 'asia', 'asian'
+        ];
+        if (asiaPacificTerms.some(term => content.includes(term))) {
           regions.push('Asia-Pacific');
         }
-        if (content.includes('europe') || content.includes('eu') || content.includes('ukraine') || content.includes('russia')) {
+        
+        // Europe countries and regions
+        const europeTerms = [
+          'europe', 'european', 'eu', 'european union', 'ukraine', 'russia', 'belarus', 'moldova',
+          'poland', 'czech republic', 'slovakia', 'hungary', 'romania', 'bulgaria', 'serbia',
+          'croatia', 'slovenia', 'bosnia', 'montenegro', 'albania', 'macedonia', 'kosovo',
+          'germany', 'france', 'italy', 'spain', 'portugal', 'netherlands', 'belgium', 'luxembourg',
+          'austria', 'switzerland', 'liechtenstein', 'denmark', 'sweden', 'norway', 'finland',
+          'iceland', 'ireland', 'united kingdom', 'uk', 'britain', 'england', 'scotland', 'wales',
+          'greece', 'cyprus', 'malta', 'estonia', 'latvia', 'lithuania', 'baltic'
+        ];
+        if (europeTerms.some(term => content.includes(term))) {
           regions.push('Europe');
         }
-        if (content.includes('united states') || content.includes('us') || content.includes('usa') || content.includes('canada')) {
+        
+        // North America countries and regions
+        const northAmericaTerms = [
+          'united states', 'usa', 'us', 'america', 'american', 'canada', 'canadian', 'mexico', 'mexican',
+          'alaska', 'hawaii', 'puerto rico', 'guam', 'caribbean', 'jamaica', 'cuba', 'haiti',
+          'dominican republic', 'bahamas', 'barbados', 'trinidad', 'tobago', 'north america'
+        ];
+        if (northAmericaTerms.some(term => content.includes(term))) {
           regions.push('North America');
         }
-        if (content.includes('middle east') || content.includes('iran') || content.includes('israel')) {
+        
+        // Middle East countries and regions
+        const middleEastTerms = [
+          'middle east', 'israel', 'palestine', 'iran', 'iraq', 'syria', 'lebanon', 'jordan',
+          'saudi arabia', 'kuwait', 'qatar', 'bahrain', 'uae', 'united arab emirates', 'oman',
+          'yemen', 'egypt', 'turkey', 'cyprus', 'gaza', 'west bank', 'jerusalem', 'tel aviv',
+          'baghdad', 'damascus', 'beirut', 'amman', 'riyadh', 'dubai', 'abu dhabi', 'doha'
+        ];
+        if (middleEastTerms.some(term => content.includes(term))) {
           regions.push('Middle East');
         }
-        if (content.includes('africa') || content.includes('nigeria') || content.includes('south africa')) {
+        
+        // Africa countries and regions
+        const africaTerms = [
+          'africa', 'african', 'nigeria', 'south africa', 'kenya', 'ethiopia', 'ghana', 'morocco',
+          'algeria', 'tunisia', 'libya', 'sudan', 'south sudan', 'chad', 'niger', 'mali',
+          'senegal', 'guinea', 'sierra leone', 'liberia', 'ivory coast', 'burkina faso', 'togo',
+          'benin', 'cameroon', 'central african republic', 'congo', 'democratic republic of congo',
+          'gabon', 'equatorial guinea', 'angola', 'zambia', 'zimbabwe', 'botswana', 'namibia',
+          'mozambique', 'madagascar', 'mauritius', 'seychelles', 'comoros', 'djibouti', 'somalia',
+          'eritrea', 'uganda', 'tanzania', 'rwanda', 'burundi', 'malawi', 'zambia'
+        ];
+        if (africaTerms.some(term => content.includes(term))) {
           regions.push('Africa');
         }
+        
+        // Latin America countries and regions
+        const latinAmericaTerms = [
+          'latin america', 'south america', 'brazil', 'argentina', 'chile', 'peru', 'colombia',
+          'venezuela', 'ecuador', 'bolivia', 'paraguay', 'uruguay', 'guyana', 'suriname',
+          'french guiana', 'panama', 'costa rica', 'nicaragua', 'honduras', 'el salvador',
+          'guatemala', 'belize', 'caribbean', 'central america'
+        ];
+        if (latinAmericaTerms.some(term => content.includes(term))) {
+          regions.push('Latin America');
+        }
+        
+        // If no specific regions found, check for global/international indicators
         if (regions.length === 0) {
-          regions.push('Global');
+          const globalTerms = [
+            'global', 'worldwide', 'international', 'world', 'united nations', 'un', 'nato',
+            'g7', 'g20', 'wto', 'world trade organization', 'imf', 'world bank', 'multilateral',
+            'bilateral', 'transnational', 'cross-border', 'intercontinental'
+          ];
+          if (globalTerms.some(term => content.includes(term))) {
+            regions.push('Global');
+          } else {
+            regions.push('Global'); // Default to global if no specific region detected
+          }
         }
         
         // Convert article to event format
