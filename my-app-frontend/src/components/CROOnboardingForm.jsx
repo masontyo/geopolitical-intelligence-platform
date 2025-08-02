@@ -34,6 +34,69 @@ const EVENT_TYPES = [
   "Cybersecurity Threats"
 ];
 
+// Common business units for autocomplete
+const BUSINESS_UNITS = [
+  "Manufacturing",
+  "Research & Development",
+  "Sales",
+  "Marketing",
+  "Finance",
+  "Human Resources",
+  "Legal",
+  "Operations",
+  "Supply Chain",
+  "Logistics",
+  "Customer Service",
+  "Information Technology",
+  "Quality Assurance",
+  "Engineering",
+  "Product Development",
+  "Business Development",
+  "Strategy",
+  "Risk Management",
+  "Compliance",
+  "Procurement",
+  "Facilities",
+  "Security",
+  "Communications",
+  "Public Relations",
+  "Investor Relations",
+  "Corporate Affairs",
+  "Sustainability",
+  "Innovation",
+  "Digital Transformation",
+  "Data Analytics"
+].sort();
+
+// Common supply chain nodes for autocomplete
+const SUPPLY_CHAIN_NODES = [
+  "Raw Material Suppliers",
+  "Component Manufacturers",
+  "Assembly Plants",
+  "Distribution Centers",
+  "Warehouses",
+  "Ports",
+  "Airports",
+  "Railway Hubs",
+  "Trucking Companies",
+  "Freight Forwarders",
+  "Customs Brokers",
+  "Third-Party Logistics",
+  "Retail Stores",
+  "E-commerce Platforms",
+  "Wholesale Distributors",
+  "Service Centers",
+  "Recycling Facilities",
+  "Quality Control Labs",
+  "Testing Facilities",
+  "Packaging Suppliers",
+  "Transportation Hubs",
+  "Cold Storage Facilities",
+  "Bonded Warehouses",
+  "Cross-Dock Facilities",
+  "Fulfillment Centers"
+].sort();
+
 // Comprehensive list of world regions and countries for autocomplete
 const WORLD_REGIONS = [
   // Major Regions
@@ -257,8 +320,8 @@ export default function CROOnboardingForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     companyName: '',
     hqLocation: '',
-    businessUnits: '',
-    supplyChainNodes: '',
+    businessUnits: [],
+    supplyChainNodes: [],
     criticalRegions: [],
     eventTypesConcerned: [],
     pastDisruptions: '',
@@ -301,7 +364,7 @@ export default function CROOnboardingForm({ onSubmit }) {
       errors.hqLocation = 'HQ location is required';
     }
     
-    if (!formData.businessUnits.trim()) {
+    if (formData.businessUnits.length === 0) {
       errors.businessUnits = 'At least one business unit is required';
     }
     
@@ -341,7 +404,7 @@ export default function CROOnboardingForm({ onSubmit }) {
         title: 'CRO',
         company: formData.companyName,
         industry: 'Technology',
-        businessUnits: (formData.businessUnits || '').split(',').map(unit => unit.trim()).filter(unit => unit).map(unit => ({
+        businessUnits: (formData.businessUnits || []).map(unit => ({
           name: unit,
           description: `${unit} business unit`,
           regions: [],
@@ -477,30 +540,68 @@ export default function CROOnboardingForm({ onSubmit }) {
           helperText={validationErrors.hqLocation || "Some events (like sanctions) are jurisdiction-dependent."}
         />
         
-        <TextField
-          label="Business Units"
-          name="businessUnits"
-          fullWidth 
+        <Autocomplete
+          multiple
+          freeSolo
+          options={BUSINESS_UNITS}
+          value={formData.businessUnits}
+          onChange={(event, newValue) => {
+            setFormData(prev => ({ ...prev, businessUnits: newValue }));
+            if (validationErrors.businessUnits) {
+              setValidationErrors(prev => ({ ...prev, businessUnits: null }));
+            }
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Business Units"
+              placeholder="Type to search or select business units"
+              error={!!validationErrors.businessUnits}
+              helperText={validationErrors.businessUnits || "Allows for unit-specific risk monitoring and recommendations."}
+            />
+          )}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                {...getTagProps({ index })}
+                sx={{ m: 0.5 }}
+              />
+            ))
+          }
           sx={{ mb: 2 }}
-          value={formData.businessUnits} 
-          onChange={handleChange}
-          error={!!validationErrors.businessUnits}
-          helperText={validationErrors.businessUnits || "Allows for unit-specific risk monitoring and recommendations."}
-          placeholder="e.g., Manufacturing, Sales, R&D"
         />
 
         <Divider sx={{ my: 2 }}>Operational Footprint</Divider>
         
-        <TextField
-          label="Supply Chain Nodes"
-          name="supplyChainNodes"
-          multiline 
-          rows={2}
-          fullWidth 
-          sx={{ mb: 1 }}
+        <Autocomplete
+          multiple
+          freeSolo
+          options={SUPPLY_CHAIN_NODES}
           value={formData.supplyChainNodes}
-          onChange={handleChange}
-          helperText="List main nodes (factories, suppliers, ports). Gives you route-specific alerts."
+          onChange={(event, newValue) => {
+            setFormData(prev => ({ ...prev, supplyChainNodes: newValue }));
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Supply Chain Nodes"
+              placeholder="Type to search or select supply chain nodes"
+              helperText="List main nodes (factories, suppliers, ports). Gives you route-specific alerts."
+            />
+          )}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => (
+              <Chip
+                variant="outlined"
+                label={option}
+                {...getTagProps({ index })}
+                sx={{ m: 0.5 }}
+              />
+            ))
+          }
+          sx={{ mb: 2 }}
         />
         
                  <Autocomplete
