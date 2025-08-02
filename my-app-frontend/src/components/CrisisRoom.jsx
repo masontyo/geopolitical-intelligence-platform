@@ -29,13 +29,6 @@ import {
   Badge,
   Tabs,
   Tab,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -339,14 +332,14 @@ export default function CrisisRoom({ crisisRoomId, onClose }) {
             >
               Escalate
             </Button>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<Resolve />}
-              onClick={() => setResolveDialog(true)}
-            >
-              Resolve
-            </Button>
+                         <Button
+               variant="contained"
+               color="success"
+               startIcon={<CheckCircle />}
+               onClick={() => setResolveDialog(true)}
+             >
+               Resolve
+             </Button>
           </Grid>
         </Grid>
       </Paper>
@@ -581,37 +574,44 @@ export default function CrisisRoom({ crisisRoomId, onClose }) {
             </Grid>
           </TabPanel>
 
-          {/* Timeline Tab */}
-          <TabPanel value={activeTab} index={3}>
-            <Typography variant="h6" gutterBottom>
-              Timeline
-            </Typography>
-            
-            <Timeline>
-              {crisisRoom.timeline.map((item, index) => (
-                <TimelineItem key={index}>
-                  <TimelineOppositeContent sx={{ m: 'auto 0' }} variant="body2" color="text.secondary">
-                    {new Date(item.timestamp).toLocaleString()}
-                  </TimelineOppositeContent>
-                  <TimelineSeparator>
-                    <TimelineDot color="primary" />
-                    {index < crisisRoom.timeline.length - 1 && <TimelineConnector />}
-                  </TimelineSeparator>
-                  <TimelineContent sx={{ py: '12px', px: 2 }}>
-                    <Typography variant="h6" component="span">
-                      {item.event.replace(/_/g, ' ').toUpperCase()}
-                    </Typography>
-                    <Typography>{item.description}</Typography>
-                    {item.actorName && (
-                      <Typography variant="body2" color="text.secondary">
-                        By: {item.actorName}
-                      </Typography>
-                    )}
-                  </TimelineContent>
-                </TimelineItem>
-              ))}
-            </Timeline>
-          </TabPanel>
+                     {/* Timeline Tab */}
+           <TabPanel value={activeTab} index={3}>
+             <Typography variant="h6" gutterBottom>
+               Timeline
+             </Typography>
+             
+             <List>
+               {crisisRoom.timeline.map((item, index) => (
+                 <ListItem key={index} divider>
+                   <ListItemAvatar>
+                     <Avatar sx={{ bgcolor: 'primary.main' }}>
+                       <TimelineIcon />
+                     </Avatar>
+                   </ListItemAvatar>
+                   <ListItemText
+                     primary={
+                       <Typography variant="h6" component="span">
+                         {item.event.replace(/_/g, ' ').toUpperCase()}
+                       </Typography>
+                     }
+                     secondary={
+                       <Box>
+                         <Typography variant="body1">{item.description}</Typography>
+                         <Typography variant="body2" color="text.secondary">
+                           {new Date(item.timestamp).toLocaleString()}
+                         </Typography>
+                         {item.actorName && (
+                           <Typography variant="body2" color="text.secondary">
+                             By: {item.actorName}
+                           </Typography>
+                         )}
+                       </Box>
+                     }
+                   />
+                 </ListItem>
+               ))}
+             </List>
+           </TabPanel>
 
           {/* Analytics Tab */}
           <TabPanel value={activeTab} index={4}>
