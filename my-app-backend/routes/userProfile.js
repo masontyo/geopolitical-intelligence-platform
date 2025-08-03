@@ -288,20 +288,21 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
      for (const result of llmResults) {
        const { event, analysis } = result;
        
-       if (analysis.relevanceScore >= parseFloat(threshold) && analysis.isRelevant) {
-         scoredEvents.push({
-           ...event,
-           relevanceScore: analysis.relevanceScore,
-           rationale: analysis.reasoning,
-           contributingFactors: analysis.keyFactors.map(factor => ({
-             factor: factor,
-             weight: analysis.relevanceScore,
-             description: analysis.reasoning
-           })),
-           confidenceLevel: analysis.confidence,
-           llmAnalysis: analysis // Include full LLM analysis for debugging
-         });
-       }
+               if (analysis.relevanceScore >= parseFloat(threshold) && analysis.isRelevant && analysis.isDevelopingEvent) {
+          scoredEvents.push({
+            ...event,
+            relevanceScore: analysis.relevanceScore,
+            rationale: analysis.reasoning,
+            contributingFactors: analysis.keyFactors.map(factor => ({
+              factor: factor,
+              weight: analysis.relevanceScore,
+              description: analysis.reasoning
+            })),
+            confidenceLevel: analysis.confidence,
+            isDevelopingEvent: analysis.isDevelopingEvent,
+            llmAnalysis: analysis // Include full LLM analysis for debugging
+          });
+        }
      }
     
          // Sort by relevance score (highest first) and limit results

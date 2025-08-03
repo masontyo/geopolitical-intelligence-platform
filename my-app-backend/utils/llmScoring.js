@@ -60,7 +60,7 @@ class LLMScoringEngine {
    */
   buildAnalysisPrompt(userProfile, event) {
     return `
-ANALYZE THIS EVENT FOR BUSINESS RELEVANCE
+ANALYZE THIS EVENT FOR BUSINESS RELEVANCE AND CURRENT DEVELOPMENTS
 
 USER PROFILE:
 - Name: ${userProfile.name}
@@ -79,24 +79,61 @@ EVENT TO ANALYZE:
 - Source: ${event.source.name}
 
 ANALYSIS TASK:
-1. Determine if this event is TRULY relevant to the user's business interests
-2. Consider context - distinguish between:
-   - Real geopolitical/economic events vs entertainment/gaming
-   - Business-relevant policy changes vs general news
-   - Actual supply chain/cybersecurity issues vs unrelated tech news
-3. Score relevance from 0.0 (completely irrelevant) to 1.0 (highly relevant)
-4. Provide reasoning for your score
+1. Determine if this is a CURRENT DEVELOPING EVENT (not just informational content)
+2. Check if this event is TRULY relevant to the user's business interests
+3. Distinguish between:
+   - DEVELOPING EVENTS: New policies, breaking news, ongoing crises, recent developments, emerging threats, active negotiations, recent attacks/breaches, new regulations, unfolding situations
+   - INFORMATIONAL CONTENT: General articles about topics, historical analysis, educational content, background information, static reports, evergreen content
+   - ENTERTAINMENT: Gaming, sports, celebrity news, movies, TV shows
+4. Score relevance from 0.0 (completely irrelevant) to 1.0 (highly relevant)
+5. Provide reasoning for your score
+
+DEVELOPING EVENT INDICATORS (look for these):
+- "announces", "announced", "announcement"
+- "new", "recent", "latest", "breaking"
+- "develops", "developing", "emerging"
+- "launches", "launched", "introduces"
+- "changes", "changed", "updates", "updated"
+- "reveals", "revealed", "discovered"
+- "responds", "responded", "reacts"
+- "plans", "planning", "proposes", "proposed"
+- "investigates", "investigation", "probe"
+- "warns", "warning", "alerts", "alert"
+- "expands", "expanding", "grows", "growing"
+- "restricts", "restricted", "bans", "banned"
+- "approves", "approved", "rejects", "rejected"
+- "signs", "signed", "agrees", "agreed"
+- "declares", "declared", "states", "stated"
+- "reports", "reported", "finds", "found"
+- "reveals", "revealed", "exposes", "exposed"
+
+INFORMATIONAL CONTENT INDICATORS (avoid these):
+- "explains", "explanation", "guide", "tutorial"
+- "overview", "summary", "background"
+- "history", "historical", "tradition"
+- "analysis", "analyst", "expert says"
+- "study", "research", "survey"
+- "tips", "advice", "recommendations"
+- "how to", "what is", "why does"
+- "comparison", "versus", "differences"
+- "review", "evaluation", "assessment"
 
 RESPOND IN THIS EXACT JSON FORMAT:
 {
   "relevanceScore": 0.0-1.0,
   "isRelevant": true/false,
-  "reasoning": "Brief explanation of why this is or isn't relevant",
+  "isDevelopingEvent": true/false,
+  "reasoning": "Brief explanation of why this is or isn't relevant and whether it's a developing event",
   "keyFactors": ["factor1", "factor2"],
   "confidence": "high/medium/low"
 }
 
-IMPORTANT: Be strict about relevance. If this is entertainment, gaming, sports, or clearly unrelated business news, score it low (0.0-0.2). Only score high (0.7-1.0) for events that could actually impact the user's business operations, supply chain, cybersecurity, regulatory compliance, or geopolitical risk exposure.
+IMPORTANT RULES:
+1. ONLY score high (0.7-1.0) for CURRENT DEVELOPING EVENTS that could impact business
+2. Score low (0.0-0.3) for informational/educational content, even if topic-relevant
+3. Score very low (0.0-0.1) for entertainment/gaming/sports
+4. Must be BOTH relevant AND a developing event to score above 0.5
+5. Look for action words and recent developments, not just topic mentions
 `;
   }
 
@@ -117,6 +154,7 @@ IMPORTANT: Be strict about relevance. If this is entertainment, gaming, sports, 
       return {
         relevanceScore: Math.max(0, Math.min(1, parseFloat(analysis.relevanceScore) || 0)),
         isRelevant: analysis.isRelevant || false,
+        isDevelopingEvent: analysis.isDevelopingEvent || false,
         reasoning: analysis.reasoning || 'No reasoning provided',
         keyFactors: Array.isArray(analysis.keyFactors) ? analysis.keyFactors : [],
         confidence: analysis.confidence || 'medium'
@@ -144,20 +182,64 @@ IMPORTANT: Be strict about relevance. If this is entertainment, gaming, sports, 
       return {
         relevanceScore: 0.1,
         isRelevant: false,
+        isDevelopingEvent: false,
         reasoning: 'Event appears to be entertainment/gaming related',
         keyFactors: ['entertainment_content'],
         confidence: 'high'
       };
     }
 
+    // Check for developing event indicators
+    const developingEventTerms = [
+      'announces', 'announced', 'announcement', 'new', 'recent', 'latest', 'breaking',
+      'develops', 'developing', 'emerging', 'launches', 'launched', 'introduces',
+      'changes', 'changed', 'updates', 'updated', 'reveals', 'revealed', 'discovered',
+      'responds', 'responded', 'reacts', 'plans', 'planning', 'proposes', 'proposed',
+      'investigates', 'investigation', 'probe', 'warns', 'warning', 'alerts', 'alert',
+      'expands', 'expanding', 'grows', 'growing', 'restricts', 'restricted', 'bans', 'banned',
+      'approves', 'approved', 'rejects', 'rejected', 'signs', 'signed', 'agrees', 'agreed',
+      'declares', 'declared', 'states', 'stated', 'reports', 'reported', 'finds', 'found',
+      'exposes', 'exposed'
+    ];
+    const isDevelopingEvent = developingEventTerms.some(term => content.includes(term));
+
+    // Check for informational content indicators (avoid these)
+    const informationalTerms = [
+      'explains', 'explanation', 'guide', 'tutorial', 'overview', 'summary', 'background',
+      'history', 'historical', 'tradition', 'analysis', 'analyst', 'expert says',
+      'study', 'research', 'survey', 'tips', 'advice', 'recommendations',
+      'how to', 'what is', 'why does', 'comparison', 'versus', 'differences',
+      'review', 'evaluation', 'assessment'
+    ];
+    const isInformational = informationalTerms.some(term => content.includes(term));
+
     // Basic relevance check
     const businessTerms = ['business', 'economy', 'trade', 'policy', 'regulation', 'supply', 'cyber', 'security', 'government'];
     const hasBusinessTerms = businessTerms.some(term => content.includes(term));
     
+    // Determine score based on multiple factors
+    let relevanceScore = 0.1;
+    let reasoning = 'No clear business relevance';
+    
+    if (hasBusinessTerms && isDevelopingEvent && !isInformational) {
+      relevanceScore = 0.6;
+      reasoning = 'Contains business keywords and developing event indicators';
+    } else if (hasBusinessTerms && isDevelopingEvent) {
+      relevanceScore = 0.4;
+      reasoning = 'Contains business keywords and developing event indicators, but may be informational';
+    } else if (hasBusinessTerms && !isInformational) {
+      relevanceScore = 0.3;
+      reasoning = 'Contains business-related keywords but no clear developing event';
+    } else if (hasBusinessTerms) {
+      relevanceScore = 0.2;
+      reasoning = 'Contains business-related keywords but appears to be informational content';
+    }
+    
     return {
-      relevanceScore: hasBusinessTerms ? 0.3 : 0.1,
+      relevanceScore: relevanceScore,
       isRelevant: hasBusinessTerms,
-      reasoning: hasBusinessTerms ? 'Contains business-related keywords' : 'No clear business relevance',
+      isDevelopingEvent: isDevelopingEvent && !isInformational,
+      reasoning: reasoning,
       keyFactors: hasBusinessTerms ? ['business_keywords'] : ['no_business_relevance'],
       confidence: 'medium'
     };
