@@ -60,7 +60,7 @@ class LLMScoringEngine {
    */
   buildAnalysisPrompt(userProfile, event) {
     return `
-ANALYZE THIS EVENT FOR BUSINESS RELEVANCE AND CURRENT DEVELOPMENTS
+ANALYZE THIS EVENT FOR BUSINESS RELEVANCE, SEVERITY, AND CURRENT DEVELOPMENTS
 
 USER PROFILE:
 - Name: ${userProfile.name}
@@ -75,18 +75,20 @@ EVENT TO ANALYZE:
 - Description: ${event.description}
 - Categories: ${event.categories.join(', ')}
 - Regions: ${event.regions.join(', ')}
-- Severity: ${event.severity}
 - Source: ${event.source.name}
 
 ANALYSIS TASK:
 1. Determine if this is a CURRENT DEVELOPING EVENT (not just informational content)
-2. Check if this event is TRULY relevant to the user's business interests
-3. Distinguish between:
-   - DEVELOPING EVENTS: New policies, breaking news, ongoing crises, recent developments, emerging threats, active negotiations, recent attacks/breaches, new regulations, unfolding situations
-   - INFORMATIONAL CONTENT: General articles about topics, historical analysis, educational content, background information, static reports, evergreen content
-   - ENTERTAINMENT: Gaming, sports, celebrity news, movies, TV shows
+2. Assess the SEVERITY level based on potential business impact
+3. Check if this event is TRULY relevant to the user's business interests
 4. Score relevance from 0.0 (completely irrelevant) to 1.0 (highly relevant)
 5. Provide reasoning for your score
+
+SEVERITY ASSESSMENT (determine based on content and potential impact):
+- CRITICAL: Major crises, wars, severe attacks, major policy changes, significant supply chain disruptions, large-scale cyber attacks, major regulatory changes
+- HIGH: Significant tensions, disputes, breaches, policy announcements, trade restrictions, moderate supply chain issues, regulatory proposals
+- MEDIUM: Policy discussions, minor disputes, routine announcements, small-scale issues, ongoing negotiations
+- LOW: Minor updates, routine news, background information, small policy changes
 
 DEVELOPING EVENT INDICATORS (look for these):
 - "announces", "announced", "announcement"
@@ -121,9 +123,10 @@ INFORMATIONAL CONTENT INDICATORS (avoid these):
 RESPOND IN THIS EXACT JSON FORMAT:
 {
   "relevanceScore": 0.0-1.0,
+  "severity": "critical/high/medium/low",
   "isRelevant": true/false,
   "isDevelopingEvent": true/false,
-  "reasoning": "Brief explanation of why this is or isn't relevant and whether it's a developing event",
+  "reasoning": "Brief explanation of why this is or isn't relevant, the severity level, and whether it's a developing event",
   "keyFactors": ["factor1", "factor2"],
   "confidence": "high/medium/low"
 }
@@ -134,6 +137,8 @@ IMPORTANT RULES:
 3. Score very low (0.0-0.1) for entertainment/gaming/sports
 4. Must be BOTH relevant AND a developing event to score above 0.5
 5. Look for action words and recent developments, not just topic mentions
+6. SEVERITY should influence relevance score - more severe events should generally score higher if relevant
+7. Assess severity based on actual impact potential, not just dramatic language
 `;
   }
 
@@ -153,6 +158,7 @@ IMPORTANT RULES:
       // Validate and normalize the response
       return {
         relevanceScore: Math.max(0, Math.min(1, parseFloat(analysis.relevanceScore) || 0)),
+        severity: analysis.severity || 'low',
         isRelevant: analysis.isRelevant || false,
         isDevelopingEvent: analysis.isDevelopingEvent || false,
         reasoning: analysis.reasoning || 'No reasoning provided',
@@ -181,6 +187,7 @@ IMPORTANT RULES:
     if (isEntertainment) {
       return {
         relevanceScore: 0.1,
+        severity: 'low',
         isRelevant: false,
         isDevelopingEvent: false,
         reasoning: 'Event appears to be entertainment/gaming related',
@@ -217,6 +224,16 @@ IMPORTANT RULES:
     const businessTerms = ['business', 'economy', 'trade', 'policy', 'regulation', 'supply', 'cyber', 'security', 'government'];
     const hasBusinessTerms = businessTerms.some(term => content.includes(term));
     
+    // Determine severity based on content
+    let severity = 'low';
+    if (content.includes('crisis') || content.includes('war') || content.includes('attack') || content.includes('major') || content.includes('significant')) {
+      severity = 'critical';
+    } else if (content.includes('tension') || content.includes('dispute') || content.includes('breach') || content.includes('restriction') || content.includes('sanction')) {
+      severity = 'high';
+    } else if (content.includes('policy') || content.includes('announcement') || content.includes('discussion') || content.includes('proposal')) {
+      severity = 'medium';
+    }
+    
     // Determine score based on multiple factors
     let relevanceScore = 0.1;
     let reasoning = 'No clear business relevance';
@@ -237,6 +254,7 @@ IMPORTANT RULES:
     
     return {
       relevanceScore: relevanceScore,
+      severity: severity,
       isRelevant: hasBusinessTerms,
       isDevelopingEvent: isDevelopingEvent && !isInformational,
       reasoning: reasoning,

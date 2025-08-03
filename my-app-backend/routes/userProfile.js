@@ -244,15 +244,8 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
            regions.push('Global');
          }
          
-         // Basic severity detection
+         // Basic severity detection (will be overridden by LLM analysis)
          let severity = 'low';
-         if (content.includes('crisis') || content.includes('war') || content.includes('attack')) {
-           severity = 'critical';
-         } else if (content.includes('tension') || content.includes('dispute') || content.includes('breach')) {
-           severity = 'high';
-         } else if (content.includes('policy') || content.includes('announcement')) {
-           severity = 'medium';
-         }
          
          const event = {
            title: article.title,
@@ -288,21 +281,37 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
      for (const result of llmResults) {
        const { event, analysis } = result;
        
-               if (analysis.relevanceScore >= parseFloat(threshold) && analysis.isRelevant && analysis.isDevelopingEvent) {
-          scoredEvents.push({
-            ...event,
-            relevanceScore: analysis.relevanceScore,
-            rationale: analysis.reasoning,
-            contributingFactors: analysis.keyFactors.map(factor => ({
-              factor: factor,
-              weight: analysis.relevanceScore,
-              description: analysis.reasoning
-            })),
-            confidenceLevel: analysis.confidence,
-            isDevelopingEvent: analysis.isDevelopingEvent,
-            llmAnalysis: analysis // Include full LLM analysis for debugging
-          });
-        }
+       if (analysis.relevanceScore >= parseFloat(threshold) && analysis.isRelevant && analysis.isDevelopingEvent) {
+         // Apply severity-based scoring boost
+         let finalScore = analysis.relevanceScore;
+         const severityMultipliers = {
+           'critical': 1.5,  // 50% boost for critical events
+           'high': 1.3,      // 30% boost for high severity
+           'medium': 1.0,    // No boost for medium
+           'low': 0.7        // 30% penalty for low severity
+         };
+         
+         if (severityMultipliers[analysis.severity]) {
+           finalScore *= severityMultipliers[analysis.severity];
+           // Cap the score at 1.0
+           finalScore = Math.min(finalScore, 1.0);
+         }
+         
+         scoredEvents.push({
+           ...event,
+           severity: analysis.severity, // Use LLM-determined severity
+           relevanceScore: finalScore,
+           rationale: analysis.reasoning,
+           contributingFactors: analysis.keyFactors.map(factor => ({
+             factor: factor,
+             weight: analysis.relevanceScore,
+             description: analysis.reasoning
+           })),
+           confidenceLevel: analysis.confidence,
+           isDevelopingEvent: analysis.isDevelopingEvent,
+           llmAnalysis: analysis // Include full LLM analysis for debugging
+         });
+       }
      }
     
          // Sort by relevance score (highest first) and limit results
