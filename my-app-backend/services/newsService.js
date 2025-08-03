@@ -11,17 +11,29 @@ class NewsService {
         apiKey: process.env.NEWSAPI_KEY,
         enabled: !!process.env.NEWSAPI_KEY
       },
-      // Alternative: GNews API
+      // Alternative: GNews API (often provides longer content)
       gnews: {
         baseUrl: 'https://gnews.io/api/v4',
         apiKey: process.env.GNEWS_API_KEY,
         enabled: !!process.env.GNEWS_API_KEY
       },
-      // Alternative: Alpha Vantage News API
+      // Alternative: Alpha Vantage News API (financial focus)
       alphavantage: {
         baseUrl: 'https://www.alphavantage.co/query',
         apiKey: process.env.ALPHA_VANTAGE_API_KEY,
         enabled: !!process.env.ALPHA_VANTAGE_API_KEY
+      },
+      // Alternative: NewsData.io (comprehensive)
+      newsdata: {
+        baseUrl: 'https://newsdata.io/api/1/news',
+        apiKey: process.env.NEWSDATA_API_KEY,
+        enabled: !!process.env.NEWSDATA_API_KEY
+      },
+      // Alternative: Bing News Search (Microsoft)
+      bing: {
+        baseUrl: 'https://api.bing.microsoft.com/v7.0/news/search',
+        apiKey: process.env.BING_API_KEY,
+        enabled: !!process.env.BING_API_KEY
       }
     };
     
@@ -66,6 +78,18 @@ class NewsService {
       if (this.newsSources.alphavantage.enabled) {
         const alphaNews = await this.fetchFromAlphaVantage();
         allNews.push(...alphaNews);
+      }
+      
+      // Fetch from NewsData.io
+      if (this.newsSources.newsdata.enabled) {
+        const newsdataNews = await this.fetchFromNewsData();
+        allNews.push(...newsdataNews);
+      }
+      
+      // Fetch from Bing News
+      if (this.newsSources.bing.enabled) {
+        const bingNews = await this.fetchFromBing();
+        allNews.push(...bingNews);
       }
       
       console.log(`Fetched ${allNews.length} news articles total`);
@@ -187,6 +211,95 @@ class NewsService {
   }
 
   /**
+   * Fetch from NewsData.io (often provides longer content)
+   */
+  async fetchFromNewsData() {
+    try {
+      const response = await axios.get(this.newsSources.newsdata.baseUrl, {
+        params: {
+          apikey: this.newsSources.newsdata.apiKey,
+          q: this.geopoliticalKeywords.join(' OR '),
+          language: 'en',
+          category: 'business,politics,technology',
+          country: 'us,gb,ca,au',
+          page: 1
+        }
+      });
+      
+      if (response.data.results) {
+        return response.data.results.map(article => ({
+          title: article.title,
+          description: article.description,
+          content: article.content || article.description,
+          url: article.link,
+          source: {
+            name: article.source_id || 'NewsData',
+            url: article.link,
+            reliability: 'medium'
+          },
+          publishedAt: article.pubDate,
+          author: article.creator?.[0] || 'Unknown',
+          // Additional metadata from NewsData
+          category: article.category?.[0],
+          country: article.country?.[0],
+          language: article.language
+        }));
+      }
+      
+      return [];
+      
+    } catch (error) {
+      console.error('Error fetching from NewsData:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Fetch from Bing News Search
+   */
+  async fetchFromBing() {
+    try {
+      const response = await axios.get(this.newsSources.bing.baseUrl, {
+        params: {
+          q: this.geopoliticalKeywords.join(' OR '),
+          count: 50,
+          freshness: 'Day',
+          textFormat: 'Raw',
+          safeSearch: 'Off'
+        },
+        headers: {
+          'Ocp-Apim-Subscription-Key': this.newsSources.bing.apiKey
+        }
+      });
+      
+      if (response.data.value) {
+        return response.data.value.map(article => ({
+          title: article.name,
+          description: article.description,
+          content: article.description, // Bing doesn't provide full content
+          url: article.url,
+          source: {
+            name: article.provider?.[0]?.name || 'Bing News',
+            url: article.url,
+            reliability: 'medium'
+          },
+          publishedAt: article.datePublished,
+          author: article.provider?.[0]?.name || 'Unknown',
+          // Additional metadata from Bing
+          category: article.category,
+          isBreakingNews: article.isBreakingNews || false
+        }));
+      }
+      
+      return [];
+      
+    } catch (error) {
+      console.error('Error fetching from Bing News:', error.message);
+      return [];
+    }
+  }
+
+  /**
    * Process news articles into geopolitical events
    */
   async processNewsIntoEvents(newsArticles) {
@@ -217,9 +330,14 @@ class NewsService {
       return null; // Skip non-geopolitical articles
     }
     
+    // Enhanced content processing
+    const enhancedContent = this.enhanceContent(article);
+    
     const event = {
       title: article.title,
-      description: article.description || article.content?.substring(0, 500) || '',
+      description: enhancedContent.description,
+      summary: enhancedContent.summary,
+      content: enhancedContent.fullContent,
       location: analysis.location || 'Global',
       category: analysis.category,
       severity: analysis.severity,
@@ -231,10 +349,212 @@ class NewsService {
       },
       relevanceScore: analysis.relevanceScore,
       tags: analysis.tags,
-      impact: analysis.impact
+      impact: analysis.impact,
+      // Enhanced metadata
+      entities: enhancedContent.entities,
+      sentiment: enhancedContent.sentiment,
+      keywords: enhancedContent.keywords,
+      metadata: {
+        wordCount: enhancedContent.wordCount,
+        readingTime: enhancedContent.readingTime,
+        hasFullContent: enhancedContent.hasFullContent,
+        sourceQuality: enhancedContent.sourceQuality
+      }
     };
     
     return event;
+  }
+
+  /**
+   * Enhance content with additional processing
+   */
+  enhanceContent(article) {
+    const fullText = `${article.title} ${article.description || ''} ${article.content || ''}`;
+    const wordCount = fullText.split(/\s+/).length;
+    
+    // Create better description (prioritize longer content)
+    let description = article.description || '';
+    if (article.content && article.content.length > description.length) {
+      description = article.content.substring(0, 300) + (article.content.length > 300 ? '...' : '');
+    }
+    
+    // Create summary from title and key points
+    const summary = this.createSummary(article.title, description);
+    
+    // Extract entities (companies, countries, people)
+    const entities = this.extractEntities(fullText);
+    
+    // Basic sentiment analysis
+    const sentiment = this.analyzeSentiment(fullText);
+    
+    // Extract key phrases
+    const keywords = this.extractKeyPhrases(fullText);
+    
+    // Assess source quality
+    const sourceQuality = this.assessSourceQuality(article.source?.name);
+    
+    return {
+      description,
+      summary,
+      fullContent: fullText,
+      entities,
+      sentiment,
+      keywords,
+      wordCount,
+      readingTime: Math.ceil(wordCount / 200), // Average reading speed
+      hasFullContent: !!(article.content && article.content.length > 500),
+      sourceQuality
+    };
+  }
+
+  /**
+   * Create a concise summary
+   */
+  createSummary(title, description) {
+    const keyPoints = [];
+    
+    // Extract key information from title
+    if (title.includes('announces') || title.includes('announced')) {
+      keyPoints.push('Policy announcement');
+    }
+    if (title.includes('sanctions') || title.includes('sanctioned')) {
+      keyPoints.push('Sanctions imposed');
+    }
+    if (title.includes('trade') || title.includes('tariff')) {
+      keyPoints.push('Trade policy change');
+    }
+    
+    // Add key points from description
+    if (description.includes('impact') || description.includes('affect')) {
+      keyPoints.push('Business impact expected');
+    }
+    if (description.includes('response') || description.includes('react')) {
+      keyPoints.push('Response/reaction involved');
+    }
+    
+    return keyPoints.length > 0 ? keyPoints.join('; ') : 'Geopolitical development';
+  }
+
+  /**
+   * Extract entities from text
+   */
+  extractEntities(text) {
+    const entities = {
+      countries: [],
+      companies: [],
+      people: [],
+      organizations: []
+    };
+    
+    // Extract countries
+    const countryPatterns = [
+      /\b(China|Russia|USA|United States|UK|United Kingdom|Germany|France|Japan|India|Brazil|Canada|Australia|South Korea|Iran|North Korea|Taiwan|Hong Kong)\b/gi
+    ];
+    
+    countryPatterns.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        entities.countries.push(...matches.map(m => m.toLowerCase()));
+      }
+    });
+    
+    // Extract companies (basic pattern)
+    const companyPatterns = [
+      /\b(Apple|Google|Microsoft|Amazon|Tesla|Samsung|Intel|AMD|NVIDIA|TSMC|ASML|Qualcomm|Huawei|ZTE|Alibaba|Tencent)\b/gi
+    ];
+    
+    companyPatterns.forEach(pattern => {
+      const matches = text.match(pattern);
+      if (matches) {
+        entities.companies.push(...matches.map(m => m.toLowerCase()));
+      }
+    });
+    
+    // Remove duplicates
+    Object.keys(entities).forEach(key => {
+      entities[key] = [...new Set(entities[key])];
+    });
+    
+    return entities;
+  }
+
+  /**
+   * Basic sentiment analysis
+   */
+  analyzeSentiment(text) {
+    const positiveWords = ['positive', 'growth', 'improve', 'benefit', 'opportunity', 'success', 'gain'];
+    const negativeWords = ['negative', 'decline', 'worse', 'threat', 'risk', 'loss', 'crisis', 'conflict', 'sanction'];
+    const neutralWords = ['announce', 'change', 'policy', 'regulation', 'update'];
+    
+    const lowerText = text.toLowerCase();
+    let score = 0;
+    
+    positiveWords.forEach(word => {
+      if (lowerText.includes(word)) score += 1;
+    });
+    
+    negativeWords.forEach(word => {
+      if (lowerText.includes(word)) score -= 1;
+    });
+    
+    neutralWords.forEach(word => {
+      if (lowerText.includes(word)) score += 0.1;
+    });
+    
+    if (score > 0) return 'positive';
+    if (score < 0) return 'negative';
+    return 'neutral';
+  }
+
+  /**
+   * Extract key phrases
+   */
+  extractKeyPhrases(text) {
+    const phrases = [];
+    const lowerText = text.toLowerCase();
+    
+    // Look for key geopolitical phrases
+    const keyPhrases = [
+      'supply chain disruption',
+      'trade restrictions',
+      'economic sanctions',
+      'regulatory changes',
+      'cybersecurity threat',
+      'political instability',
+      'military conflict',
+      'diplomatic relations',
+      'market volatility',
+      'currency fluctuations'
+    ];
+    
+    keyPhrases.forEach(phrase => {
+      if (lowerText.includes(phrase)) {
+        phrases.push(phrase);
+      }
+    });
+    
+    return phrases;
+  }
+
+  /**
+   * Assess source quality
+   */
+  assessSourceQuality(sourceName) {
+    const highQualitySources = ['reuters', 'bloomberg', 'financial times', 'wall street journal', 'cnn', 'bbc'];
+    const mediumQualitySources = ['ap', 'associated press', 'usa today', 'nbc', 'abc', 'cbs'];
+    
+    if (!sourceName) return 'unknown';
+    
+    const lowerSource = sourceName.toLowerCase();
+    
+    if (highQualitySources.some(source => lowerSource.includes(source))) {
+      return 'high';
+    }
+    if (mediumQualitySources.some(source => lowerSource.includes(source))) {
+      return 'medium';
+    }
+    
+    return 'low';
   }
 
   /**
