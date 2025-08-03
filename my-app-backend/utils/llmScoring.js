@@ -79,16 +79,18 @@ EVENT TO ANALYZE:
 
 ANALYSIS TASK:
 1. Determine if this is a CURRENT DEVELOPING EVENT (not just informational content)
-2. Assess the SEVERITY level based on potential business impact
-3. Check if this event is TRULY relevant to the user's business interests
-4. Score relevance from 0.0 (completely irrelevant) to 1.0 (highly relevant)
+2. Check if this event is TRULY relevant to the user's business interests
+3. Score relevance from 0.0 (completely irrelevant) to 1.0 (highly relevant)
+4. Assess the SEVERITY level based on BOTH content impact AND relevance to the user
 5. Provide reasoning for your score
 
-SEVERITY ASSESSMENT (determine based on content and potential impact):
-- CRITICAL: Major crises, wars, severe attacks, major policy changes, significant supply chain disruptions, large-scale cyber attacks, major regulatory changes
-- HIGH: Significant tensions, disputes, breaches, policy announcements, trade restrictions, moderate supply chain issues, regulatory proposals
-- MEDIUM: Policy discussions, minor disputes, routine announcements, small-scale issues, ongoing negotiations
-- LOW: Minor updates, routine news, background information, small policy changes
+SEVERITY ASSESSMENT (determine based on content impact AND relevance to user):
+- CRITICAL: Major crises, wars, severe attacks, major policy changes, significant supply chain disruptions, large-scale cyber attacks, major regulatory changes - AND highly relevant to user's business
+- HIGH: Significant tensions, disputes, breaches, policy announcements, trade restrictions, moderate supply chain issues, regulatory proposals - AND moderately to highly relevant to user's business
+- MEDIUM: Policy discussions, minor disputes, routine announcements, small-scale issues, ongoing negotiations - AND somewhat relevant to user's business
+- LOW: Minor updates, routine news, background information, small policy changes - OR not very relevant to user's business
+
+IMPORTANT: The same event can have different severity levels depending on how relevant it is to the specific user. A major policy change that doesn't affect the user's industry should be rated lower severity than a minor policy change that directly impacts their business.
 
 DEVELOPING EVENT INDICATORS (look for these):
 - "announces", "announced", "announcement"
@@ -137,8 +139,9 @@ IMPORTANT RULES:
 3. Score very low (0.0-0.1) for entertainment/gaming/sports
 4. Must be BOTH relevant AND a developing event to score above 0.5
 5. Look for action words and recent developments, not just topic mentions
-6. SEVERITY should influence relevance score - more severe events should generally score higher if relevant
-7. Assess severity based on actual impact potential, not just dramatic language
+6. SEVERITY should be influenced by relevance - more relevant events should be considered more severe
+7. Assess severity based on BOTH content impact AND relevance to the specific user
+8. The same event can have different severity levels for different users based on their business profile
 `;
   }
 
@@ -224,14 +227,44 @@ IMPORTANT RULES:
     const businessTerms = ['business', 'economy', 'trade', 'policy', 'regulation', 'supply', 'cyber', 'security', 'government'];
     const hasBusinessTerms = businessTerms.some(term => content.includes(term));
     
-    // Determine severity based on content
+    // Determine severity based on content AND relevance
     let severity = 'low';
+    let baseSeverity = 'low';
+    
+    // First, assess base severity from content
     if (content.includes('crisis') || content.includes('war') || content.includes('attack') || content.includes('major') || content.includes('significant')) {
-      severity = 'critical';
+      baseSeverity = 'critical';
     } else if (content.includes('tension') || content.includes('dispute') || content.includes('breach') || content.includes('restriction') || content.includes('sanction')) {
-      severity = 'high';
+      baseSeverity = 'high';
     } else if (content.includes('policy') || content.includes('announcement') || content.includes('discussion') || content.includes('proposal')) {
-      severity = 'medium';
+      baseSeverity = 'medium';
+    }
+    
+    // Then adjust severity based on relevance to user
+    if (hasBusinessTerms && isDevelopingEvent && !isInformational) {
+      // If highly relevant, maintain or increase severity
+      if (baseSeverity === 'critical') severity = 'critical';
+      else if (baseSeverity === 'high') severity = 'high';
+      else if (baseSeverity === 'medium') severity = 'high'; // Boost medium to high if relevant
+      else severity = 'medium'; // Boost low to medium if relevant
+    } else if (hasBusinessTerms && isDevelopingEvent) {
+      // If somewhat relevant, maintain or slightly reduce severity
+      if (baseSeverity === 'critical') severity = 'high';
+      else if (baseSeverity === 'high') severity = 'medium';
+      else if (baseSeverity === 'medium') severity = 'medium';
+      else severity = 'low';
+    } else if (hasBusinessTerms && !isInformational) {
+      // If minimally relevant, reduce severity
+      if (baseSeverity === 'critical') severity = 'medium';
+      else if (baseSeverity === 'high') severity = 'medium';
+      else if (baseSeverity === 'medium') severity = 'low';
+      else severity = 'low';
+    } else {
+      // If not relevant, reduce severity significantly
+      if (baseSeverity === 'critical') severity = 'medium';
+      else if (baseSeverity === 'high') severity = 'low';
+      else if (baseSeverity === 'medium') severity = 'low';
+      else severity = 'low';
     }
     
     // Determine score based on multiple factors
