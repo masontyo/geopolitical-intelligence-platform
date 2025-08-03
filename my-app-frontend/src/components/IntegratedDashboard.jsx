@@ -14,8 +14,6 @@ import {
   Button,
   AppBar,
   Toolbar,
-  Tabs,
-  Tab,
   Card,
   CardContent,
   CardActions,
@@ -23,7 +21,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Link
+  Link,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider
 } from '@mui/material';
 import { 
   Business, 
@@ -38,7 +40,10 @@ import {
   Notifications,
   MoreVert,
   Add,
-  Visibility
+  Visibility,
+  ExpandMore,
+  ExpandLess,
+  CrisisAlert
 } from '@mui/icons-material';
 import { userProfileAPI } from '../services/api';
 import { useToast } from './ToastNotifications';
@@ -52,16 +57,12 @@ export default function IntegratedDashboard({ profileId }) {
   const [crisisRooms, setCrisisRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState(0);
   const [selectedCrisisRoom, setSelectedCrisisRoom] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [expandedCrisis, setExpandedCrisis] = useState(false);
+  const [expandedAnalytics, setExpandedAnalytics] = useState(false);
+  const [expandedEventDetails, setExpandedEventDetails] = useState({});
   const { error: showError, success, info } = useToast();
-
-  const tabs = [
-    { label: 'Overview', icon: <DashboardIcon /> },
-    { label: 'Crisis Communications', icon: <Warning /> },
-    { label: 'Analytics', icon: <Analytics /> }
-  ];
 
   const loadDashboardData = async () => {
     if (!profileId) {
@@ -162,6 +163,33 @@ export default function IntegratedDashboard({ profileId }) {
     setAnchorEl(null);
   };
 
+  const handleToggleEventDetails = (eventId) => {
+    setExpandedEventDetails(prev => ({
+      ...prev,
+      [eventId]: !prev[eventId]
+    }));
+  };
+
+  const getSeverityColor = (severity) => {
+    switch (severity?.toLowerCase()) {
+      case 'critical': return 'error';
+      case 'high': return 'warning';
+      case 'medium': return 'info';
+      case 'low': return 'default';
+      default: return 'default';
+    }
+  };
+
+  const getSeverityIcon = (severity) => {
+    switch (severity?.toLowerCase()) {
+      case 'critical': return <ErrorIcon color="error" />;
+      case 'high': return <Warning color="warning" />;
+      case 'medium': return <Warning color="info" />;
+      case 'low': return <Warning color="action" />;
+      default: return <Warning color="action" />;
+    }
+  };
+
   useEffect(() => {
     loadDashboardData();
   }, [profileId]);
@@ -238,187 +266,267 @@ export default function IntegratedDashboard({ profileId }) {
           </Grid>
         </Paper>
 
-        {/* Main Tabs */}
+        {/* Quick Stats */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Risk Overview
+                </Typography>
+                <Typography variant="h4" color="warning.main">
+                  {relevantEvents.length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Active risk events
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Crisis Rooms
+                </Typography>
+                <Typography variant="h4" color="error.main">
+                  {crisisRooms.length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Active crisis communications
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Response Rate
+                </Typography>
+                <Typography variant="h4" color="success.main">
+                  87%
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Average stakeholder response
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Main Event Monitoring Section */}
         <Paper sx={{ mb: 3 }}>
-          <Tabs 
-            value={activeTab} 
-            onChange={(e, newValue) => setActiveTab(newValue)}
-            variant="fullWidth"
-          >
-            {tabs.map((tab, index) => (
-              <Tab 
-                key={index}
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {tab.icon}
-                    {tab.label}
-                    {tab.label === 'Crisis Communications' && crisisRooms.length > 0 && (
-                      <Badge badgeContent={crisisRooms.length} color="error" />
-                    )}
-                  </Box>
-                }
-              />
-            ))}
-          </Tabs>
-        </Paper>
-
-        {/* Tab Content */}
-        {activeTab === 0 && (
-          <Grid container spacing={3}>
-            {/* Quick Stats */}
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Risk Overview
-                  </Typography>
-                  <Typography variant="h4" color="warning.main">
-                    {relevantEvents.length}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Active risk events
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Crisis Rooms
-                  </Typography>
-                  <Typography variant="h4" color="error.main">
-                    {crisisRooms.length}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Active crisis communications
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Response Rate
-                  </Typography>
-                  <Typography variant="h4" color="success.main">
-                    87%
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Average stakeholder response
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Recent Events */}
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Recent Risk Events
-                  </Typography>
-                  <List>
-                    {relevantEvents.slice(0, 5).map((event, index) => (
-                      <ListItem key={index} divider>
-                        <ListItemIcon>
-                          <Warning color="warning" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={event.title}
-                          secondary={`${event.severity} • ${event.regions?.join(', ') || 'Global'} • ${new Date(event.eventDate).toLocaleDateString()}`}
-                        />
+          <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+            <Typography variant="h6" gutterBottom>
+              Risk Events Requiring Attention
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Monitor and analyze relevant geopolitical events
+            </Typography>
+          </Box>
+          
+          {relevantEvents.length === 0 ? (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Warning sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                No Active Risk Events
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                New relevant events will appear here as they are detected.
+              </Typography>
+            </Box>
+          ) : (
+            <List>
+              {relevantEvents.map((event, index) => (
+                <React.Fragment key={index}>
+                  <ListItem sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                    {/* Event Header */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mb: 1 }}>
+                      <ListItemIcon>
+                        {getSeverityIcon(event.severity)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" component="span">
+                              {event.title}
+                            </Typography>
+                            <Chip 
+                              label={event.severity} 
+                              color={getSeverityColor(event.severity)}
+                              size="small" 
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              {event.regions?.join(', ') || 'Global'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(event.eventDate).toLocaleDateString()}
+                            </Typography>
+                            {event.source?.name && (
+                              <Link href={event.source.url} target="_blank" variant="body2">
+                                {event.source.name}
+                              </Link>
+                            )}
+                          </Box>
+                        }
+                      />
+                      <Box sx={{ display: 'flex', gap: 1 }}>
                         <Button
                           size="small"
-                          startIcon={<Warning />}
+                          variant="outlined"
+                          onClick={() => handleToggleEventDetails(event._id)}
+                        >
+                          {expandedEventDetails[event._id] ? 'Hide Details' : 'View Details'}
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="warning"
+                          startIcon={<CrisisAlert />}
                           onClick={() => handleCreateCrisisRoom(event._id)}
                         >
                           Create Crisis Room
                         </Button>
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        )}
-
-        {activeTab === 1 && (
-          <Grid container spacing={3}>
-            {crisisRooms.length === 0 ? (
-              <Grid item xs={12}>
-                <Paper sx={{ p: 4, textAlign: 'center' }}>
-                  <Warning sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    No Active Crisis Rooms
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    Crisis rooms will appear here when created for high-priority events.
-                  </Typography>
-                  <Button 
-                    variant="contained" 
-                    startIcon={<Add />}
-                    onClick={() => setActiveTab(0)}
-                  >
-                    View Overview
-                  </Button>
-                </Paper>
-              </Grid>
-            ) : (
-              crisisRooms.map((crisisRoom, index) => (
-                <Grid item xs={12} md={6} key={index}>
-                  <Card>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        {crisisRoom.crisisRoom.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" paragraph>
-                        {crisisRoom.crisisRoom.description}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                        <Chip 
-                          label={crisisRoom.crisisRoom.severity} 
-                          color={crisisRoom.crisisRoom.severity === 'critical' ? 'error' : 'warning'} 
-                          size="small" 
-                        />
-                        <Chip 
-                          label={crisisRoom.crisisRoom.status} 
-                          variant="outlined" 
-                          size="small" 
-                        />
-                        <Chip 
-                          label={`${crisisRoom.stakeholders.length} stakeholders`} 
-                          variant="outlined" 
-                          size="small" 
-                        />
                       </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Created {new Date(crisisRoom.crisisRoom.createdAt).toLocaleDateString()}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button 
-                        size="small" 
-                        startIcon={<Visibility />}
-                        onClick={() => handleOpenCrisisRoom(crisisRoom._id)}
-                      >
-                        Open Crisis Room
-                      </Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))
-            )}
-          </Grid>
-        )}
+                    </Box>
 
-        {activeTab === 2 && (
-          <AnalyticsDashboard profileId={profileId} />
-        )}
+                    {/* Expanded Event Details */}
+                    {expandedEventDetails[event._id] && (
+                      <Box sx={{ pl: 7, pr: 2, pb: 2 }}>
+                        <Divider sx={{ mb: 2 }} />
+                        <Typography variant="body2" paragraph>
+                          {event.description}
+                        </Typography>
+                        {event.rationale && (
+                          <Typography variant="body2" color="text.secondary" paragraph>
+                            <strong>Analysis:</strong> {event.rationale}
+                          </Typography>
+                        )}
+                        {event.contributingFactors && event.contributingFactors.length > 0 && (
+                          <Box sx={{ mb: 2 }}>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                              <strong>Key Factors:</strong>
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                              {event.contributingFactors.slice(0, 3).map((factor, idx) => (
+                                <Chip 
+                                  key={idx} 
+                                  label={factor.factor} 
+                                  size="small" 
+                                  variant="outlined"
+                                />
+                              ))}
+                            </Box>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </ListItem>
+                  {index < relevantEvents.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+        </Paper>
+
+        {/* Collapsible Crisis Communications Section */}
+        <Accordion 
+          expanded={expandedCrisis} 
+          onChange={() => setExpandedCrisis(!expandedCrisis)}
+          sx={{ mb: 2 }}
+        >
+          <AccordionSummary expandIcon={<ExpandMore />}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <CrisisAlert color="error" />
+              <Typography variant="h6">
+                Crisis Communications
+              </Typography>
+              {crisisRooms.length > 0 && (
+                <Badge badgeContent={crisisRooms.length} color="error" />
+              )}
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            {crisisRooms.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  No active crisis rooms. Create one from a high-priority event above.
+                </Typography>
+              </Box>
+            ) : (
+              <Grid container spacing={2}>
+                {crisisRooms.map((crisisRoom, index) => (
+                  <Grid item xs={12} md={6} key={index}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          {crisisRoom.crisisRoom.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" paragraph>
+                          {crisisRoom.crisisRoom.description}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                          <Chip 
+                            label={crisisRoom.crisisRoom.severity} 
+                            color={crisisRoom.crisisRoom.severity === 'critical' ? 'error' : 'warning'} 
+                            size="small" 
+                          />
+                          <Chip 
+                            label={crisisRoom.crisisRoom.status} 
+                            variant="outlined" 
+                            size="small" 
+                          />
+                          <Chip 
+                            label={`${crisisRoom.stakeholders.length} stakeholders`} 
+                            variant="outlined" 
+                            size="small" 
+                          />
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Created {new Date(crisisRoom.crisisRoom.createdAt).toLocaleDateString()}
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button 
+                          size="small" 
+                          startIcon={<Visibility />}
+                          onClick={() => handleOpenCrisisRoom(crisisRoom._id)}
+                        >
+                          Open Crisis Room
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Collapsible Analytics Section */}
+        <Accordion 
+          expanded={expandedAnalytics} 
+          onChange={() => setExpandedAnalytics(!expandedAnalytics)}
+        >
+          <AccordionSummary expandIcon={<ExpandMore />}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Analytics color="primary" />
+              <Typography variant="h6">
+                Analytics & Insights
+              </Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <AnalyticsDashboard profileId={profileId} />
+          </AccordionDetails>
+        </Accordion>
       </Container>
     </Box>
   );
