@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Container, 
   Grid, 
@@ -51,7 +52,9 @@ import { LoadingSpinner } from './LoadingSpinner';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import CrisisRoom from './CrisisRoom';
 
-export default function IntegratedDashboard({ profileId }) {
+export default function IntegratedDashboard() {
+  const navigate = useNavigate();
+  const { profileId } = useParams();
   const [profile, setProfile] = useState(null);
   const [relevantEvents, setRelevantEvents] = useState([]);
   const [crisisRooms, setCrisisRooms] = useState([]);
@@ -168,6 +171,10 @@ export default function IntegratedDashboard({ profileId }) {
       ...prev,
       [eventId]: !prev[eventId]
     }));
+  };
+
+  const handleViewEventDetails = (eventId) => {
+    navigate(`/event/${eventId}`);
   };
 
   const getSeverityColor = (severity) => {
@@ -348,40 +355,57 @@ export default function IntegratedDashboard({ profileId }) {
                       <ListItemIcon>
                         {getSeverityIcon(event.severity)}
                       </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle1" component="span">
-                              {event.title}
-                            </Typography>
-                            <Chip 
-                              label={event.severity} 
-                              color={getSeverityColor(event.severity)}
-                              size="small" 
-                            />
-                          </Box>
-                        }
-                        secondary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {event.regions?.join(', ') || 'Global'}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(event.eventDate).toLocaleDateString()}
-                            </Typography>
-                            {event.source?.name && (
-                              <Link href={event.source.url} target="_blank" variant="body2">
-                                {event.source.name}
-                              </Link>
-                            )}
-                          </Box>
-                        }
-                      />
+                      <Box 
+                        sx={{ 
+                          flexGrow: 1, 
+                          cursor: 'pointer',
+                          '&:hover': {
+                            backgroundColor: 'action.hover',
+                            borderRadius: 1,
+                            px: 1,
+                            py: 0.5
+                          }
+                        }}
+                        onClick={() => handleViewEventDetails(event._id)}
+                      >
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="subtitle1" component="span">
+                                {event.title}
+                              </Typography>
+                              <Chip 
+                                label={event.severity} 
+                                color={getSeverityColor(event.severity)}
+                                size="small" 
+                              />
+                            </Box>
+                          }
+                          secondary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                              <Typography variant="body2" color="text.secondary">
+                                {event.regions?.join(', ') || 'Global'}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {new Date(event.eventDate).toLocaleDateString()}
+                              </Typography>
+                              {event.source?.name && (
+                                <Link href={event.source.url} target="_blank" variant="body2">
+                                  {event.source.name}
+                                </Link>
+                              )}
+                            </Box>
+                          }
+                        />
+                      </Box>
                       <Box sx={{ display: 'flex', gap: 1 }}>
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => handleToggleEventDetails(event._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleEventDetails(event._id);
+                          }}
                         >
                           {expandedEventDetails[event._id] ? 'Hide Details' : 'View Details'}
                         </Button>
@@ -390,7 +414,10 @@ export default function IntegratedDashboard({ profileId }) {
                           variant="contained"
                           color="warning"
                           startIcon={<CrisisAlert />}
-                          onClick={() => handleCreateCrisisRoom(event._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCreateCrisisRoom(event._id);
+                          }}
                         >
                           Create Crisis Room
                         </Button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Paper, 
   Typography, 
@@ -21,7 +22,6 @@ import {
 import CROOnboardingForm from "./CROOnboardingForm";
 import CROProfileReview from "./CROProfileReview";
 import ProfileSuggestions from "./ProfileSuggestions";
-import IntegratedDashboard from "./IntegratedDashboard";
 import { useToast } from "./ToastNotifications";
 
 const steps = [
@@ -32,6 +32,7 @@ const steps = [
 ];
 
 export default function OnboardingFlow() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
@@ -97,6 +98,8 @@ export default function OnboardingFlow() {
     setFinalProfile(profile);
     success('Profile setup completed! Welcome to your dashboard.');
     localStorage.removeItem('onboarding_profile'); // Clean up
+    // Navigate to dashboard
+    navigate(`/dashboard/${profile.id}`);
   };
 
   const handleSuggestionsComplete = (suggestions) => {
@@ -106,6 +109,8 @@ export default function OnboardingFlow() {
     setActiveStep(3);
     success('Profile setup completed! Welcome to your dashboard.');
     localStorage.removeItem('onboarding_profile'); // Clean up
+    // Navigate to dashboard
+    navigate(`/dashboard/${profile.id}`);
   };
 
   const handleSkipSuggestions = () => {
@@ -114,6 +119,8 @@ export default function OnboardingFlow() {
     setActiveStep(3);
     success('Profile setup completed! Welcome to your dashboard.');
     localStorage.removeItem('onboarding_profile'); // Clean up
+    // Navigate to dashboard
+    navigate(`/dashboard/${profile.id}`);
   };
 
   const handleError = (errorMessage) => {
@@ -121,10 +128,12 @@ export default function OnboardingFlow() {
     showError(errorMessage);
   };
 
+  // Note: We no longer render IntegratedDashboard directly here
+  // Instead, we navigate to the dashboard route
   if (finalProfile) {
-    console.log('Rendering IntegratedDashboard with profileId:', finalProfile.id);
     console.log('Final profile data:', finalProfile);
-    return <IntegratedDashboard profileId={finalProfile.id} />;
+    // The dashboard will be rendered by the router
+    return null;
   }
 
   return (
