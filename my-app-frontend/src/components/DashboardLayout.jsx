@@ -253,7 +253,11 @@ export default function DashboardLayout({ children }) {
         <MenuItem onClick={handleUserMenuClose}>Profile</MenuItem>
         <MenuItem onClick={handleUserMenuClose}>Account Settings</MenuItem>
         <Divider />
-        <MenuItem onClick={handleUserMenuClose}>Sign Out</MenuItem>
+        <MenuItem onClick={() => {
+          localStorage.removeItem('currentProfileId');
+          handleUserMenuClose();
+          navigate('/onboarding');
+        }}>Sign Out</MenuItem>
       </Menu>
 
       {/* Sidebar Drawer */}
