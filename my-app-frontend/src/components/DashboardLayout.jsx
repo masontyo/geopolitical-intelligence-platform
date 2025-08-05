@@ -306,7 +306,7 @@ export default function DashboardLayout({ children }) {
       >
         <Toolbar /> {/* Spacer for AppBar */}
         <Box sx={{ p: 3 }}>
-          {children}
+          {React.cloneElement(children, { profileId })}
         </Box>
       </Box>
     </Box>

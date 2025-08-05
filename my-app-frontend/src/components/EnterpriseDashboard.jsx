@@ -42,7 +42,7 @@ import {
   Business,
   Timeline
 } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { userProfileAPI } from '../services/api';
 import { useToast } from './ToastNotifications';
 import RiskStatusOverview from './dashboard/RiskStatusOverview';
@@ -50,8 +50,7 @@ import EventFeed from './dashboard/EventFeed';
 import GeographicHeatmap from './dashboard/GeographicHeatmap';
 import AnalyticsWidgets from './dashboard/AnalyticsWidgets';
 
-export default function EnterpriseDashboard() {
-  const { profileId } = useParams();
+export default function EnterpriseDashboard({ profileId }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
@@ -83,12 +82,14 @@ export default function EnterpriseDashboard() {
   };
 
   useEffect(() => {
-    loadDashboardData();
+    if (profileId) {
+      loadDashboardData();
+    }
   }, [profileId]);
 
   const loadDashboardData = async () => {
     if (!profileId) {
-      setError('No profile ID provided');
+      setError('No profile ID provided. Please complete onboarding first.');
       setLoading(false);
       return;
     }
@@ -159,9 +160,14 @@ export default function EnterpriseDashboard() {
         <Alert 
           severity="error" 
           action={
-            <Button color="inherit" size="small" onClick={loadDashboardData}>
-              Retry
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button color="inherit" size="small" onClick={loadDashboardData}>
+                Retry
+              </Button>
+              <Button color="inherit" size="small" onClick={() => navigate('/onboarding')}>
+                Go to Onboarding
+              </Button>
+            </Box>
           }
         >
           {error}
