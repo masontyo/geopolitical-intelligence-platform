@@ -62,6 +62,9 @@ export default function EnterpriseDashboard({ profileId }) {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
+  // Fallback to localStorage if profileId is not provided
+  const effectiveProfileId = profileId || localStorage.getItem('currentProfileId');
+
   // Mock data for demonstration
   const mockRiskData = {
     threatLevel: 'medium',
@@ -82,13 +85,13 @@ export default function EnterpriseDashboard({ profileId }) {
   };
 
   useEffect(() => {
-    if (profileId) {
+    if (effectiveProfileId) {
       loadDashboardData();
     }
-  }, [profileId]);
+  }, [effectiveProfileId]);
 
   const loadDashboardData = async () => {
-    if (!profileId) {
+    if (!effectiveProfileId) {
       setError('No profile ID provided. Please complete onboarding first.');
       setLoading(false);
       return;
@@ -100,8 +103,8 @@ export default function EnterpriseDashboard({ profileId }) {
     try {
       // Load profile and events
       const [profileResponse, eventsResponse] = await Promise.all([
-        userProfileAPI.getProfile(profileId),
-        userProfileAPI.getRelevantEvents(profileId, { includeAnalytics: true })
+        userProfileAPI.getProfile(effectiveProfileId),
+        userProfileAPI.getRelevantEvents(effectiveProfileId, { includeAnalytics: true })
       ]);
 
       setProfile(profileResponse.profile);

@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-  const { profileId } = useParams();
+  const { profileId: urlProfileId } = useParams();
   const { error: showError, success, info } = useToast();
   
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -52,8 +52,11 @@ export default function DashboardLayout({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
+  // Get profileId from URL params or localStorage
+  const profileId = urlProfileId || localStorage.getItem('currentProfileId');
+
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: `/dashboard/${profileId}` },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: `/dashboard/${profileId || ''}` },
     { text: 'Risk Alerts', icon: <WarningIcon />, path: '/alerts', badge: 3 },
     { text: 'Geographic View', icon: <MapIcon />, path: '/geographic' },
     { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
@@ -111,6 +114,9 @@ export default function DashboardLayout({ children }) {
             key={item.text}
             button
             onClick={() => {
+              if (item.text === 'Dashboard' && profileId) {
+                localStorage.setItem('currentProfileId', profileId);
+              }
               navigate(item.path);
               if (isMobile) setMobileOpen(false);
             }}

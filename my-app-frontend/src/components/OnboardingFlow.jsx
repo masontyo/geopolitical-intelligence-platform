@@ -98,6 +98,8 @@ export default function OnboardingFlow() {
     setFinalProfile(profile);
     success('Profile setup completed! Welcome to your dashboard.');
     localStorage.removeItem('onboarding_profile'); // Clean up
+    // Store profileId in localStorage for navigation
+    localStorage.setItem('currentProfileId', profile.id);
     // Navigate to dashboard
     navigate(`/dashboard/${profile.id}`);
   };
@@ -109,6 +111,8 @@ export default function OnboardingFlow() {
     setActiveStep(3);
     success('Profile setup completed! Welcome to your dashboard.');
     localStorage.removeItem('onboarding_profile'); // Clean up
+    // Store profileId in localStorage for navigation
+    localStorage.setItem('currentProfileId', profile.id);
     // Navigate to dashboard
     navigate(`/dashboard/${profile.id}`);
   };
@@ -119,6 +123,8 @@ export default function OnboardingFlow() {
     setActiveStep(3);
     success('Profile setup completed! Welcome to your dashboard.');
     localStorage.removeItem('onboarding_profile'); // Clean up
+    // Store profileId in localStorage for navigation
+    localStorage.setItem('currentProfileId', profile.id);
     // Navigate to dashboard
     navigate(`/dashboard/${profile.id}`);
   };
