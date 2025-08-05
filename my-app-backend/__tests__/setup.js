@@ -8,39 +8,57 @@ const mongoose = require('mongoose');
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 
+// Mock MongoDB connection for tests
+const mockMongoConnection = {
+  readyState: 1, // Connected
+  db: {
+    admin: () => ({
+      ping: jest.fn().mockResolvedValue({ ok: 1 })
+    })
+  },
+  collections: {},
+  close: jest.fn().mockResolvedValue(undefined)
+};
+
+// Mock mongoose connection
+mongoose.connection = mockMongoConnection;
+
 beforeAll(async () => {
   console.log = jest.fn();
   console.error = jest.fn();
   
-  // Try to connect to test database, but don't fail if it's not available
-  // The @shelf/jest-mongodb preset should handle this automatically
-  if (mongoose.connection.readyState === 0) {
-    try {
-      // Use the MongoDB URI from the preset if available
-      const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL || 'mongodb://localhost:27017/test';
-      await mongoose.connect(mongoUri, {
-        serverSelectionTimeoutMS: 5000, // 5 second timeout
-        socketTimeoutMS: 5000
-      });
-    } catch (error) {
-      // Don't fail the tests if MongoDB is not available
-      console.warn('MongoDB not available for tests, some tests may be skipped');
-    }
-  }
+  // Mock mongoose.connect to always succeed
+  mongoose.connect = jest.fn().mockResolvedValue(mockMongoConnection);
+  
+  // Mock mongoose.disconnect
+  mongoose.disconnect = jest.fn().mockResolvedValue(undefined);
+  
+  // Mock mongoose.connection.readyState
+  Object.defineProperty(mongoose.connection, 'readyState', {
+    get: () => 1, // Always return connected state
+    configurable: true
+  });
+  
+  console.log('Test environment setup complete');
+});
+
+beforeEach(async () => {
+  // Clear all mocks before each test
+  jest.clearAllMocks();
+  
+  // Reset mongoose connection state
+  Object.defineProperty(mongoose.connection, 'readyState', {
+    get: () => 1,
+    configurable: true
+  });
 });
 
 afterAll(async () => {
   console.log = originalConsoleLog;
   console.error = originalConsoleError;
   
-  // Close database connection if it exists
-  if (mongoose.connection.readyState !== 0) {
-    try {
-      await mongoose.connection.close();
-    } catch (error) {
-      // Ignore errors during cleanup
-    }
-  }
+  // Clean up mocks
+  jest.restoreAllMocks();
 });
 
 // Global test timeout
