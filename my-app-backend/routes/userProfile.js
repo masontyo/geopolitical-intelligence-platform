@@ -655,16 +655,20 @@ router.get('/events/:eventId', async (req, res) => {
     const baseEvent = eventTemplates[templateIndex];
     
     // Generate real analysis using LLM
+    console.log('🔍 Starting LLM analysis for event:', eventId);
     const llmEngine = new LLMScoringEngine();
     const analysis = await llmEngine.analyzeSingleEvent(baseEvent);
+    console.log('📊 LLM Analysis result:', analysis);
     
     // Generate enhanced title
+    console.log('🔍 Starting title enhancement');
     const titleEnhancer = new TitleEnhancementService();
     const enhancedTitle = await titleEnhancer.enhanceTitle(baseEvent.title, {
       description: baseEvent.description,
       categories: [baseEvent.category],
       regions: baseEvent.regions
     });
+    console.log('📝 Enhanced title:', enhancedTitle);
     
     // Generate detailed analysis
     const detailedAnalysis = {
