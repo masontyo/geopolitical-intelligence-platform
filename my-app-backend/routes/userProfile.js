@@ -201,15 +201,53 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
     
     console.log(`📊 Fetched ${newsResponse.data.articles.length} articles for scoring`);
     
-         // Convert news articles to event format and use LLM for intelligent scoring
-     console.log('🧠 Using LLM for intelligent event scoring...');
-     
-     const llmEngine = new LLMScoringEngine();
-     const titleEnhancer = new TitleEnhancementService();
-     const events = [];
-     
-     // Convert articles to event format with basic categorization
-     for (const article of newsResponse.data.articles) {
+    // Deduplicate articles based on title similarity and content
+    console.log('🔍 Deduplicating articles...');
+    const uniqueArticles = [];
+    const seenTitles = new Set();
+    const seenContent = new Set();
+    
+    for (const article of newsResponse.data.articles) {
+      const normalizedTitle = article.title.toLowerCase().trim();
+      const normalizedContent = (article.description || article.content || '').toLowerCase().trim();
+      
+      // Skip if we've seen this exact title or very similar content
+      if (seenTitles.has(normalizedTitle)) {
+        continue;
+      }
+      
+      // Check for content similarity (if content is very similar, skip)
+      const contentHash = normalizedContent.substring(0, 100); // First 100 chars as content fingerprint
+      if (seenContent.has(contentHash)) {
+        continue;
+      }
+      
+      // Check for title similarity (fuzzy matching)
+      const isDuplicate = Array.from(seenTitles).some(existingTitle => {
+        const similarity = calculateTitleSimilarity(normalizedTitle, existingTitle);
+        return similarity > 0.8; // 80% similarity threshold
+      });
+      
+      if (isDuplicate) {
+        continue;
+      }
+      
+      seenTitles.add(normalizedTitle);
+      seenContent.add(contentHash);
+      uniqueArticles.push(article);
+    }
+    
+    console.log(`✅ Deduplicated from ${newsResponse.data.articles.length} to ${uniqueArticles.length} unique articles`);
+    
+    // Convert news articles to event format and use LLM for intelligent scoring
+    console.log('🧠 Using LLM for intelligent event scoring...');
+    
+    const llmEngine = new LLMScoringEngine();
+    const titleEnhancer = new TitleEnhancementService();
+    const events = [];
+    
+    // Convert articles to event format with basic categorization
+    for (const article of uniqueArticles) {
        try {
          const content = `${article.title} ${article.description || ''} ${article.content || ''}`.toLowerCase();
          
@@ -603,5 +641,56 @@ router.post('/test-scoring', async (req, res) => {
     });
   }
 });
+
+/**
+ * Calculate similarity between two titles using Levenshtein distance
+ * @param {string} title1 - First title
+ * @param {string} title2 - Second title
+ * @returns {number} - Similarity score between 0 and 1
+ */
+function calculateTitleSimilarity(title1, title2) {
+  if (!title1 || !title2) return 0;
+  
+  // Normalize titles
+  const normalized1 = title1.toLowerCase().trim();
+  const normalized2 = title2.toLowerCase().trim();
+  
+  // If titles are identical, return 1
+  if (normalized1 === normalized2) return 1;
+  
+  // Calculate Levenshtein distance
+  const matrix = [];
+  const len1 = normalized1.length;
+  const len2 = normalized2.length;
+  
+  // Initialize matrix
+  for (let i = 0; i <= len1; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= len2; j++) {
+    matrix[0][j] = j;
+  }
+  
+  // Fill matrix
+  for (let i = 1; i <= len1; i++) {
+    for (let j = 1; j <= len2; j++) {
+      if (normalized1[i - 1] === normalized2[j - 1]) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,     // deletion
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j - 1] + 1  // substitution
+        );
+      }
+    }
+  }
+  
+  const distance = matrix[len1][len2];
+  const maxLength = Math.max(len1, len2);
+  
+  // Return similarity score (1 - normalized distance)
+  return maxLength > 0 ? 1 - (distance / maxLength) : 0;
+}
 
 module.exports = router; 
