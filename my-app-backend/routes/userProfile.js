@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { validateUserProfile, calculateRelevanceScore } = require('../utils/userProfile');
 const { scoreEvents, getScoringAnalytics } = require('../utils/advancedScoring');
 const LLMScoringEngine = require('../utils/llmScoring');
+const TitleEnhancementService = require('../utils/titleEnhancement');
 const UserProfile = require('../models/UserProfile');
 const GeopoliticalEvent = require('../models/GeopoliticalEvent');
 
@@ -204,6 +205,7 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
      console.log('🧠 Using LLM for intelligent event scoring...');
      
      const llmEngine = new LLMScoringEngine();
+     const titleEnhancer = new TitleEnhancementService();
      const events = [];
      
      // Convert articles to event format with basic categorization
@@ -249,6 +251,7 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
          
          const event = {
            title: article.title,
+           originalTitle: article.title, // Keep original for reference
            description: article.description || article.content?.substring(0, 500) || '',
            summary: article.description?.substring(0, 200) || article.title,
            eventDate: new Date(article.publishedAt),
@@ -276,6 +279,22 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
      console.log(`🤖 Analyzing ${events.length} events with LLM...`);
      const llmResults = await llmEngine.batchAnalyzeEvents(profile, events, 3); // Process 3 at a time
      
+     // Enhance titles for relevant events
+     console.log('✨ Enhancing titles for professional presentation...');
+     const relevantEventsForEnhancement = llmResults
+       .filter(result => result.analysis.relevanceScore >= parseFloat(threshold) && result.analysis.isRelevant && result.analysis.isDevelopingEvent)
+       .map(result => ({
+         title: result.event.title,
+         context: {
+           description: result.event.description,
+           categories: result.event.categories,
+           regions: result.event.regions
+         }
+       }));
+     
+     const enhancedTitles = await titleEnhancer.batchEnhanceTitles(relevantEventsForEnhancement, 3);
+     const enhancedTitleMap = new Map(enhancedTitles.map(item => [item.originalTitle, item.enhancedTitle]));
+     
      // Filter and format results
      const scoredEvents = [];
      for (const result of llmResults) {
@@ -297,8 +316,13 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
            finalScore = Math.min(finalScore, 1.0);
          }
          
+         // Get enhanced title if available
+         const enhancedTitle = enhancedTitleMap.get(event.title) || event.title;
+         
          scoredEvents.push({
            ...event,
+           title: enhancedTitle, // Use enhanced title
+           originalTitle: event.originalTitle, // Keep original for reference
            severity: analysis.severity, // Use LLM-determined severity
            relevanceScore: finalScore,
            rationale: analysis.reasoning,
