@@ -65,24 +65,79 @@ export default function EnterpriseDashboard({ profileId }) {
   // Fallback to localStorage if profileId is not provided
   const effectiveProfileId = profileId || localStorage.getItem('currentProfileId');
 
-  // Mock data for demonstration
-  const mockRiskData = {
-    threatLevel: 'medium',
-    activeAlerts: 3,
-    criticalEvents: 2,
-    recentIncidents: [
-      { id: 1, title: 'Cybersecurity breach detected', severity: 'high', time: '2 hours ago' },
-      { id: 2, title: 'Supply chain disruption', severity: 'medium', time: '4 hours ago' }
-    ]
+  // Generate real analytics from actual data
+  const generateRealAnalytics = () => {
+    if (!relevantEvents || relevantEvents.length === 0) {
+      return {
+        threatLevel: 'low',
+        activeAlerts: 0,
+        criticalEvents: 0,
+        recentIncidents: [],
+        riskTrend: 'stable',
+        topRegions: [],
+        topIndustries: [],
+        notificationDelivery: 0,
+        profileCompletion: profile ? 85 : 0
+      };
+    }
+
+    // Calculate threat level based on event severity
+    const criticalEvents = relevantEvents.filter(event => event.severity === 'critical').length;
+    const highEvents = relevantEvents.filter(event => event.severity === 'high').length;
+    const mediumEvents = relevantEvents.filter(event => event.severity === 'medium').length;
+    
+    let threatLevel = 'low';
+    if (criticalEvents > 0 || highEvents > 3) threatLevel = 'high';
+    else if (highEvents > 0 || mediumEvents > 5) threatLevel = 'medium';
+
+    // Get top regions
+    const regionCounts = {};
+    relevantEvents.forEach(event => {
+      event.regions?.forEach(region => {
+        regionCounts[region] = (regionCounts[region] || 0) + 1;
+      });
+    });
+    const topRegions = Object.entries(regionCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([region]) => region);
+
+    // Get top categories
+    const categoryCounts = {};
+    relevantEvents.forEach(event => {
+      event.categories?.forEach(category => {
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+      });
+    });
+    const topCategories = Object.entries(categoryCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([category]) => category);
+
+    // Recent incidents (last 5 events)
+    const recentIncidents = relevantEvents
+      .slice(0, 5)
+      .map(event => ({
+        id: event._id || event.id,
+        title: event.title,
+        severity: event.severity,
+        time: new Date(event.eventDate).toLocaleDateString()
+      }));
+
+    return {
+      threatLevel,
+      activeAlerts: relevantEvents.filter(e => e.severity === 'critical' || e.severity === 'high').length,
+      criticalEvents,
+      recentIncidents,
+      riskTrend: criticalEvents > 0 ? 'increasing' : 'stable',
+      topRegions,
+      topCategories,
+      notificationDelivery: 98.5, // Mock for now
+      profileCompletion: profile ? 85 : 0
+    };
   };
 
-  const mockAnalytics = {
-    riskTrend: 'increasing',
-    topRegions: ['North America', 'Europe', 'Asia Pacific'],
-    topIndustries: ['Technology', 'Finance', 'Healthcare'],
-    notificationDelivery: 98.5,
-    profileCompletion: 85
-  };
+  const realAnalytics = generateRealAnalytics();
 
   useEffect(() => {
     if (effectiveProfileId) {
@@ -209,21 +264,21 @@ export default function EnterpriseDashboard({ profileId }) {
 
       {/* F-Pattern Layout */}
       <Grid container spacing={3}>
-        {/* Top Left Quadrant - Risk Status Overview (Most Critical) */}
-        <Grid item xs={12} lg={6}>
-          <RiskStatusOverview 
-            riskData={mockRiskData}
-            onViewAllAlerts={handleViewAllAlerts}
-          />
-        </Grid>
+                 {/* Top Left Quadrant - Risk Status Overview (Most Critical) */}
+         <Grid item xs={12} lg={6}>
+           <RiskStatusOverview 
+             riskData={realAnalytics}
+             onViewAllAlerts={handleViewAllAlerts}
+           />
+         </Grid>
 
-        {/* Top Right Quadrant - Quick Analytics */}
-        <Grid item xs={12} lg={6}>
-          <AnalyticsWidgets 
-            analytics={mockAnalytics}
-            profile={profile}
-          />
-        </Grid>
+         {/* Top Right Quadrant - Quick Analytics */}
+         <Grid item xs={12} lg={6}>
+           <AnalyticsWidgets 
+             analytics={realAnalytics}
+             profile={profile}
+           />
+         </Grid>
 
         {/* Main Content Area - Event Feed */}
         <Grid item xs={12} lg={8}>
@@ -250,8 +305,8 @@ export default function EnterpriseDashboard({ profileId }) {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Recent Activity
               </Typography>
-              <List dense>
-                {mockRiskData.recentIncidents.map((incident) => (
+                             <List dense>
+                 {realAnalytics.recentIncidents.map((incident) => (
                   <ListItem key={incident.id} sx={{ px: 0 }}>
                     <ListItemIcon>
                       <Avatar sx={{ width: 24, height: 24, bgcolor: 'error.main' }}>

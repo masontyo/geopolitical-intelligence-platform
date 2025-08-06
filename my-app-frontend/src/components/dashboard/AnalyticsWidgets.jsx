@@ -138,18 +138,18 @@ export default function AnalyticsWidgets({ analytics, profile }) {
       {/* Top Affected Industries */}
       <Box>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-          Top Affected Industries
+          Top Event Categories
         </Typography>
         <List dense>
-          {analytics.topIndustries.map((industry, index) => (
-            <ListItem key={industry} sx={{ px: 0 }}>
+          {analytics.topCategories.map((category, index) => (
+            <ListItem key={category} sx={{ px: 0 }}>
               <ListItemIcon>
                 <Avatar sx={{ width: 24, height: 24, bgcolor: 'secondary.main' }}>
                   <Business sx={{ fontSize: 14 }} />
                 </Avatar>
               </ListItemIcon>
               <ListItemText
-                primary={industry}
+                primary={category}
                 secondary={`${92 - (index * 18)}% impact score`}
                 primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
                 secondaryTypographyProps={{ fontSize: '0.75rem' }}

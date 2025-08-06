@@ -81,10 +81,11 @@ export default function EventFeed({ events, onViewEventDetails, loading }) {
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
-                         event.description?.toLowerCase().includes(filters.search.toLowerCase());
+                         event.description?.toLowerCase().includes(filters.search.toLowerCase()) ||
+                         event.originalTitle?.toLowerCase().includes(filters.search.toLowerCase());
     const matchesRiskLevel = filters.riskLevel === 'all' || event.severity?.toLowerCase() === filters.riskLevel;
-    const matchesRegion = filters.region === 'all' || event.regions?.includes(filters.region);
-    const matchesEventType = filters.eventType === 'all' || event.category?.toLowerCase() === filters.eventType;
+    const matchesRegion = filters.region === 'all' || event.regions?.some(region => region === filters.region);
+    const matchesEventType = filters.eventType === 'all' || event.categories?.some(category => category.toLowerCase() === filters.eventType);
     
     return matchesSearch && matchesRiskLevel && matchesRegion && matchesEventType;
   });
@@ -211,7 +212,7 @@ export default function EventFeed({ events, onViewEventDetails, loading }) {
                         boxShadow: theme.shadows[8]
                       }
                     }}
-                    onClick={() => onViewEventDetails(event._id)}
+                    onClick={() => onViewEventDetails(event._id || event.id || index)}
                   >
                     <CardContent sx={{ pb: 1 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -255,9 +256,9 @@ export default function EventFeed({ events, onViewEventDetails, loading }) {
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {getEventTypeIcon(event.category)}
+                          {getEventTypeIcon(event.categories?.[0])}
                           <Typography variant="caption" color="text.secondary">
-                            {event.category}
+                            {event.categories?.[0] || 'General'}
                           </Typography>
                         </Box>
                       </Box>
@@ -268,7 +269,7 @@ export default function EventFeed({ events, onViewEventDetails, loading }) {
                         startIcon={<Visibility />}
                         onClick={(e) => {
                           e.stopPropagation();
-                          onViewEventDetails(event._id);
+                          onViewEventDetails(event._id || event.id || index);
                         }}
                       >
                         View Details
