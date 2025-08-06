@@ -65,16 +65,20 @@ export default function EventDetails() {
     setError(null);
 
     try {
+      console.log('🔍 Loading event details for ID:', eventId);
       const response = await eventsAPI.getEventDetails(eventId);
+      console.log('📡 API Response:', response);
       
       if (response.success) {
+        console.log('✅ Event data received:', response.event);
         setEvent(response.event);
       } else {
+        console.error('❌ API returned error:', response);
         setError('Failed to load event details');
         showError('Failed to load event details');
       }
     } catch (error) {
-      console.error('Error loading event details:', error);
+      console.error('❌ Error loading event details:', error);
       setError(error.message || 'Failed to load event details');
       showError(error.message || 'Failed to load event details');
     } finally {
