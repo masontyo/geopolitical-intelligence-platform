@@ -81,37 +81,6 @@ export default function EventDetails() {
       setLoading(false);
     }
   };
-        severity: 'Critical',
-        regions: ['North America', 'Europe'],
-        eventDate: '2024-01-15T10:30:00Z',
-        source: {
-          name: 'Reuters',
-          url: 'https://reuters.com/article/cyber-breach',
-          reliability: 'high'
-        },
-        relevanceScore: 0.92,
-        rationale: 'High relevance due to potential regulatory changes and increased cybersecurity requirements that could impact business operations and compliance costs.',
-        contributingFactors: [
-          { factor: 'Government infrastructure impact', weight: 0.4 },
-          { factor: 'Potential regulatory changes', weight: 0.3 },
-          { factor: 'Supply chain security concerns', weight: 0.2 },
-          { factor: 'International relations impact', weight: 0.1 }
-        ],
-        status: 'developing',
-        lastUpdated: '2024-01-17T14:20:00Z'
-      };
-
-      setEvent(mockEvent);
-      info('Event details loaded successfully');
-    } catch (err) {
-      console.error('Error loading event details:', err);
-      const errorMessage = `Failed to load event details: ${err.response?.data?.message || err.message}`;
-      setError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreateCrisisRoom = () => {
     // Navigate to crisis room creation or open crisis room modal
