@@ -297,6 +297,143 @@ IMPORTANT RULES:
   }
 
   /**
+   * Analyze a single event for detailed information
+   */
+  async analyzeSingleEvent(event) {
+    try {
+      if (!this.apiKey) {
+        console.warn('⚠️ OpenAI API key not found, falling back to basic analysis');
+        return this.fallbackSingleEventAnalysis(event);
+      }
+
+      const prompt = this.buildSingleEventAnalysisPrompt(event);
+      
+      const response = await axios.post(`${this.baseURL}/chat/completions`, {
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert geopolitical risk analyst. Analyze this event and provide detailed insights including sentiment, impact assessment, urgency level, and key factors.`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 800,
+        temperature: 0.2,
+        timeout: 15000
+      }, {
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const analysis = this.parseSingleEventResponse(response.data.choices[0].message.content);
+      return analysis;
+
+    } catch (error) {
+      console.error('❌ Single event LLM analysis failed:', error.message);
+      return this.fallbackSingleEventAnalysis(event);
+    }
+  }
+
+  /**
+   * Build prompt for single event analysis
+   */
+  buildSingleEventAnalysisPrompt(event) {
+    return `
+ANALYZE THIS EVENT FOR DETAILED INSIGHTS
+
+EVENT:
+- Title: ${event.title}
+- Description: ${event.description}
+- Category: ${event.category}
+- Severity: ${event.severity}
+- Regions: ${event.regions.join(', ')}
+- Countries: ${event.countries?.join(', ') || 'Not specified'}
+- Source: ${event.source.name}
+- Date: ${event.eventDate}
+
+PROVIDE ANALYSIS IN THIS FORMAT:
+{
+  "sentiment": "positive/negative/neutral",
+  "confidence": 0.85,
+  "impactScore": 0.75,
+  "urgencyLevel": "low/medium/high/critical",
+  "keyFactors": ["factor1", "factor2", "factor3"],
+  "reasoning": "Detailed explanation of why this event is significant",
+  "relevanceScore": 0.78,
+  "isDevelopingEvent": true
+}
+
+Focus on:
+1. Sentiment analysis (how this event affects stakeholders)
+2. Impact assessment (economic, political, social implications)
+3. Urgency level (how quickly action might be needed)
+4. Key contributing factors
+5. Detailed reasoning for the assessment
+`;
+  }
+
+  /**
+   * Parse single event analysis response
+   */
+  parseSingleEventResponse(response) {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      // Fallback parsing
+      const analysis = {
+        sentiment: 'neutral',
+        confidence: 0.8,
+        impactScore: 0.7,
+        urgencyLevel: 'medium',
+        keyFactors: ['Geopolitical tensions', 'Economic impact'],
+        reasoning: response,
+        relevanceScore: 0.75,
+        isDevelopingEvent: true
+      };
+
+      // Extract sentiment
+      if (response.toLowerCase().includes('positive')) analysis.sentiment = 'positive';
+      if (response.toLowerCase().includes('negative')) analysis.sentiment = 'negative';
+
+      // Extract urgency
+      if (response.toLowerCase().includes('critical')) analysis.urgencyLevel = 'critical';
+      if (response.toLowerCase().includes('high')) analysis.urgencyLevel = 'high';
+      if (response.toLowerCase().includes('low')) analysis.urgencyLevel = 'low';
+
+      return analysis;
+
+    } catch (error) {
+      console.error('Error parsing single event response:', error);
+      return this.fallbackSingleEventAnalysis();
+    }
+  }
+
+  /**
+   * Fallback analysis for single event
+   */
+  fallbackSingleEventAnalysis(event) {
+    return {
+      sentiment: 'neutral',
+      confidence: 0.7,
+      impactScore: 0.6,
+      urgencyLevel: event.severity || 'medium',
+      keyFactors: ['Geopolitical tensions', 'Economic impact', 'Regulatory environment'],
+      reasoning: `This ${event.category?.toLowerCase() || 'geopolitical'} event represents a significant development that could impact international relations and economic stability.`,
+      relevanceScore: 0.7,
+      isDevelopingEvent: true
+    };
+  }
+
+  /**
    * Batch analyze multiple events efficiently
    */
   async batchAnalyzeEvents(userProfile, events, maxConcurrent = 5) {
