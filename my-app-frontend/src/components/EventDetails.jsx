@@ -43,7 +43,7 @@ import {
   Bookmark,
   BookmarkBorder
 } from '@mui/icons-material';
-import { userProfileAPI } from '../services/api';
+import { eventsAPI } from '../services/api';
 import { useToast } from './ToastNotifications';
 import { LoadingSpinner } from './LoadingSpinner';
 
@@ -56,30 +56,6 @@ export default function EventDetails() {
   const [bookmarked, setBookmarked] = useState(false);
   const { error: showError, success, info } = useToast();
 
-  // Mock analysis data for demonstration
-  const mockAnalysis = {
-    sentiment: 'negative',
-    confidence: 0.87,
-    impactScore: 0.78,
-    urgencyLevel: 'high',
-    stakeholders: ['Government Officials', 'Business Leaders', 'Media'],
-    recommendations: [
-      'Monitor regulatory changes closely',
-      'Prepare contingency plans for supply chain disruptions',
-      'Engage with local stakeholders proactively'
-    ],
-    timeline: [
-      { date: '2024-01-15', event: 'Initial incident reported', impact: 'low' },
-      { date: '2024-01-16', event: 'Government response announced', impact: 'medium' },
-      { date: '2024-01-17', event: 'International reactions', impact: 'high' }
-    ],
-    relatedEvents: [
-      { id: 'evt_001', title: 'Similar incident in neighboring region', relevance: 0.85 },
-      { id: 'evt_002', title: 'Policy changes in affected sector', relevance: 0.72 },
-      { id: 'evt_003', title: 'Market volatility in related industries', relevance: 0.68 }
-    ]
-  };
-
   useEffect(() => {
     loadEventDetails();
   }, [eventId]);
@@ -89,15 +65,22 @@ export default function EventDetails() {
     setError(null);
 
     try {
-      // For now, we'll use mock data since the backend endpoint might not be fully implemented
-      // In a real implementation, you'd call: const response = await userProfileAPI.getEventDetails(eventId);
+      const response = await eventsAPI.getEventDetails(eventId);
       
-      // Mock event data
-      const mockEvent = {
-        _id: eventId,
-        title: 'Major Cybersecurity Breach Affects Government Infrastructure',
-        description: 'A sophisticated cyber attack has compromised critical government systems, affecting data security and operational capabilities across multiple departments. The breach appears to be state-sponsored and has targeted sensitive information including citizen records and national security data.',
-        category: 'Cybersecurity',
+      if (response.success) {
+        setEvent(response.event);
+      } else {
+        setError('Failed to load event details');
+        showError('Failed to load event details');
+      }
+    } catch (error) {
+      console.error('Error loading event details:', error);
+      setError(error.message || 'Failed to load event details');
+      showError(error.message || 'Failed to load event details');
+    } finally {
+      setLoading(false);
+    }
+  };
         severity: 'Critical',
         regions: ['North America', 'Europe'],
         eventDate: '2024-01-15T10:30:00Z',
@@ -300,11 +283,11 @@ export default function EventDetails() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <LinearProgress 
                         variant="determinate" 
-                        value={mockAnalysis.impactScore * 100} 
+                        value={(event.analysis?.impactScore || 0.7) * 100} 
                         sx={{ flexGrow: 1 }}
                       />
                       <Typography variant="h6">
-                        {Math.round(mockAnalysis.impactScore * 100)}%
+                        {Math.round((event.analysis?.impactScore || 0.7) * 100)}%
                       </Typography>
                     </Box>
                   </CardContent>
@@ -349,7 +332,7 @@ export default function EventDetails() {
               Event Timeline
             </Typography>
             <List>
-              {mockAnalysis.timeline.map((item, index) => (
+              {(event.analysis?.timeline || []).map((item, index) => (
                 <ListItem key={index} sx={{ pl: 0 }}>
                   <ListItemIcon>
                     <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
@@ -376,7 +359,7 @@ export default function EventDetails() {
               Recommended Actions
             </Typography>
             <List>
-              {mockAnalysis.recommendations.map((rec, index) => (
+              {(event.analysis?.recommendations || []).map((rec, index) => (
                 <ListItem key={index} sx={{ pl: 0 }}>
                   <ListItemIcon>
                     <Avatar sx={{ width: 24, height: 24, bgcolor: 'secondary.main' }}>
@@ -484,7 +467,7 @@ export default function EventDetails() {
               Related Events
             </Typography>
             <List dense>
-              {mockAnalysis.relatedEvents.map((relatedEvent) => (
+              {(event.analysis?.relatedEvents || []).map((relatedEvent) => (
                 <ListItem key={relatedEvent.id} sx={{ pl: 0 }}>
                   <ListItemText
                     primary={relatedEvent.title}

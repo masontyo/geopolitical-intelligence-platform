@@ -26,7 +26,7 @@ import {
   CrisisAlert
 } from '@mui/icons-material';
 
-export default function RiskStatusOverview({ riskData, onViewAllAlerts }) {
+export default function RiskStatusOverview({ riskData, onViewAllAlerts, onEventClick }) {
   const theme = useTheme();
 
   const getThreatLevelColor = (level) => {
@@ -135,6 +135,8 @@ export default function RiskStatusOverview({ riskData, onViewAllAlerts }) {
                   secondary={incident.time}
                   primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
                   secondaryTypographyProps={{ fontSize: '0.75rem' }}
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => onEventClick && onEventClick(incident.id || incident._id)}
                 />
                 <Chip 
                   label={incident.severity} 

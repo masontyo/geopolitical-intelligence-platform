@@ -269,6 +269,7 @@ export default function EnterpriseDashboard({ profileId }) {
            <RiskStatusOverview 
              riskData={realAnalytics}
              onViewAllAlerts={handleViewAllAlerts}
+             onEventClick={handleViewEventDetails}
            />
          </Grid>
 
@@ -300,34 +301,7 @@ export default function EnterpriseDashboard({ profileId }) {
               }}
             />
             
-            {/* Recent Activity */}
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Recent Activity
-              </Typography>
-                             <List dense>
-                 {realAnalytics.recentIncidents.map((incident) => (
-                  <ListItem key={incident.id} sx={{ px: 0 }}>
-                    <ListItemIcon>
-                      <Avatar sx={{ width: 24, height: 24, bgcolor: 'error.main' }}>
-                        <Warning sx={{ fontSize: 14 }} />
-                      </Avatar>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={incident.title}
-                      secondary={incident.time}
-                      primaryTypographyProps={{ fontSize: '0.875rem' }}
-                      secondaryTypographyProps={{ fontSize: '0.75rem' }}
-                    />
-                    <Chip 
-                      label={incident.severity} 
-                      size="small"
-                      color={getThreatLevelColor(incident.severity)}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
+
 
             {/* Quick Actions */}
             <Paper sx={{ p: 3 }}>

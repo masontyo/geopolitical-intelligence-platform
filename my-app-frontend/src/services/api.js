@@ -165,6 +165,13 @@ export const eventsAPI = {
     const response = await retryRequest(requestFn);
     return response.data;
   },
+
+  // Get event details by ID
+  getEventDetails: async (eventId) => {
+    const requestFn = () => api.get(`/api/events/${eventId}`);
+    const response = await retryRequest(requestFn);
+    return response.data;
+  },
 };
 
 // Health check
