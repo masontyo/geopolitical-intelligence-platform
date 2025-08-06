@@ -1,3 +1,5 @@
+// App.js - Main application component with routing
+// Updated for enterprise dashboard and real data integration
 import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
