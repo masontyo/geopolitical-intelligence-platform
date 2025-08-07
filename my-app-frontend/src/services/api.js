@@ -14,7 +14,7 @@ console.log('Final API Base URL:', API_BASE_URL);
 // Create axios instance with default configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // Reduced to 15 seconds for faster failure detection
+  timeout: 30000, // Increased to 30 seconds for LLM operations
   headers: {
     'Content-Type': 'application/json',
   },
@@ -123,7 +123,7 @@ export const userProfileAPI = {
     if (options.threshold) params.append('threshold', options.threshold);
     if (options.includeAnalytics) params.append('includeAnalytics', options.includeAnalytics);
     
-    const requestFn = () => api.get(`/api/user-profile/${profileId}/relevant-events?${params.toString()}`);
+    const requestFn = () => api.get(`/api/user-profile/${profileId}/relevant-events?${params.toString()}`, { timeout: 60000 }); // Extended timeout for LLM batch processing
     const response = await retryRequest(requestFn);
     return response.data;
   },
@@ -168,7 +168,7 @@ export const eventsAPI = {
 
   // Get event details by ID
   getEventDetails: async (eventId) => {
-    const requestFn = () => api.get(`/api/events/${eventId}`);
+    const requestFn = () => api.get(`/api/events/${eventId}`, { timeout: 45000 }); // Extended timeout for LLM analysis
     const response = await retryRequest(requestFn);
     return response.data;
   },
