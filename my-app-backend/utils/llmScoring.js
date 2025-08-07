@@ -301,11 +301,17 @@ IMPORTANT RULES:
    */
   async analyzeSingleEvent(event) {
     try {
+      console.log('🔑 Checking API key availability...');
+      console.log('🔑 API key exists:', !!this.apiKey);
+      console.log('🔑 API key length:', this.apiKey ? this.apiKey.length : 0);
+      console.log('🔑 API key starts with:', this.apiKey ? this.apiKey.substring(0, 7) + '...' : 'none');
+      
       if (!this.apiKey) {
         console.warn('⚠️ OpenAI API key not found, falling back to basic analysis');
         return this.fallbackSingleEventAnalysis(event);
       }
 
+      console.log('🚀 Making OpenAI API call...');
       const prompt = this.buildSingleEventAnalysisPrompt(event);
       
       const response = await axios.post(`${this.baseURL}/chat/completions`, {
@@ -330,11 +336,16 @@ IMPORTANT RULES:
         }
       });
 
+      console.log('✅ OpenAI API call successful');
+      console.log('📝 Raw response:', response.data.choices[0].message.content.substring(0, 200) + '...');
+      
       const analysis = this.parseSingleEventResponse(response.data.choices[0].message.content);
+      console.log('📊 Parsed analysis:', analysis);
       return analysis;
 
     } catch (error) {
       console.error('❌ Single event LLM analysis failed:', error.message);
+      console.error('❌ Error details:', error.response?.data || error.code || 'No additional details');
       return this.fallbackSingleEventAnalysis(event);
     }
   }
