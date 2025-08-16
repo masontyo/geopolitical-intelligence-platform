@@ -427,26 +427,28 @@ const PERSONA_FORMS = {
 };
 
 export default function PersonaSpecificForm({ persona, data, onSubmit, onError }) {
-  const [formData, setFormData] = useState(data);
+  const [formData, setFormData] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Initialize form data based on persona
-    if (persona && !formData[persona.id]) {
+    if (persona && PERSONA_FORMS[persona.id]) {
       const initialData = {};
-      PERSONA_FORMS[persona.id]?.fields.forEach(field => {
+      const personaSpecificData = data[persona.id] || {};
+      
+      PERSONA_FORMS[persona.id].fields.forEach(field => {
         if (field.type === 'multiselect') {
-          initialData[field.name] = [];
+          initialData[field.name] = personaSpecificData[field.name] || [];
         } else if (field.type === 'select') {
-          initialData[field.name] = '';
+          initialData[field.name] = personaSpecificData[field.name] || '';
         } else {
-          initialData[field.name] = '';
+          initialData[field.name] = personaSpecificData[field.name] || '';
         }
       });
       setFormData(initialData);
     }
-  }, [persona, formData]);
+  }, [persona, data]);
 
   const handleChange = (fieldName, value) => {
     setFormData(prev => ({ ...prev, [fieldName]: value }));
@@ -458,12 +460,12 @@ export default function PersonaSpecificForm({ persona, data, onSubmit, onError }
   };
 
   const validateForm = () => {
-    if (!persona) return false;
+    if (!persona || !PERSONA_FORMS[persona.id]) return false;
     
     const errors = {};
     const formConfig = PERSONA_FORMS[persona.id];
     
-    formConfig?.fields.forEach(field => {
+    formConfig.fields.forEach(field => {
       if (field.required) {
         if (field.type === 'multiselect') {
           if (!formData[field.name] || formData[field.name].length === 0) {

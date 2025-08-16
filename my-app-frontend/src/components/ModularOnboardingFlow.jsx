@@ -127,13 +127,24 @@ export default function ModularOnboardingFlow() {
 
   const handlePersonaSelection = (persona) => {
     setSelectedPersona(persona);
+    // Initialize persona data structure for the selected persona
+    const initialPersonaData = {};
+    if (persona && persona.id) {
+      initialPersonaData[persona.id] = {};
+    }
+    setPersonaData(initialPersonaData);
     setCompletedSteps(prev => new Set([...prev, 1]));
     setActiveStep(2);
     success(`${persona.name} role selected!`);
   };
 
   const handlePersonaDataSubmit = (data) => {
-    setPersonaData(data);
+    // Store the data under the persona ID
+    const updatedPersonaData = {
+      ...personaData,
+      [selectedPersona.id]: data
+    };
+    setPersonaData(updatedPersonaData);
     setCompletedSteps(prev => new Set([...prev, 2]));
     setActiveStep(3);
     success('Role-specific information saved!');

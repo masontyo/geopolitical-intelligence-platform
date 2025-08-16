@@ -202,6 +202,9 @@ export default function ProfileReview({ basicInfo, persona, personaData, onSubmi
     const config = formConfig[persona.id];
     if (!config) return null;
 
+    // Get the persona-specific data from the nested structure
+    const personaSpecificData = personaData[persona.id] || {};
+
     return (
       <Paper elevation={1} sx={{ p: 3, bgcolor: 'grey.50' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
@@ -218,7 +221,7 @@ export default function ProfileReview({ basicInfo, persona, personaData, onSubmi
                 {field.label}
               </Typography>
               <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
-                {formatValue(personaData[field.key])}
+                {formatValue(personaSpecificData[field.key])}
               </Typography>
             </Grid>
           ))}
