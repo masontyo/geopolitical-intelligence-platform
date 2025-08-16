@@ -4,6 +4,8 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import OnboardingFlow from './components/OnboardingFlow';
+import ModularOnboardingFlow from './components/ModularOnboardingFlow';
+import OnboardingDemo from './components/OnboardingDemo';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
 import EventDetails from './components/EventDetails';
@@ -127,8 +129,10 @@ function App() {
         <Router>
           <div className="App">
             <Routes>
-              <Route path="/" element={<Navigate to="/onboarding" replace />} />
+              <Route path="/" element={<Navigate to="/demo" replace />} />
               <Route path="/onboarding" element={<OnboardingFlow />} />
+              <Route path="/onboarding-modular" element={<ModularOnboardingFlow />} />
+              <Route path="/demo" element={<OnboardingDemo />} />
               <Route path="/dashboard/:profileId" element={
                 <DashboardLayout>
                   <EnterpriseDashboard />
