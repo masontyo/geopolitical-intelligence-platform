@@ -161,7 +161,7 @@ export default function ModularOnboardingFlow() {
       
       success('Onboarding completed successfully!');
       
-      // Navigate to dashboard
+      // Navigate to dashboard instead of demo page
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);

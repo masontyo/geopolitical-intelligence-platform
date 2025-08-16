@@ -133,6 +133,11 @@ function App() {
               <Route path="/onboarding" element={<OnboardingFlow />} />
               <Route path="/onboarding-modular" element={<ModularOnboardingFlow />} />
               <Route path="/demo" element={<OnboardingDemo />} />
+              <Route path="/dashboard" element={
+                <DashboardLayout>
+                  <EnterpriseDashboard />
+                </DashboardLayout>
+              } />
               <Route path="/dashboard/:profileId" element={
                 <DashboardLayout>
                   <EnterpriseDashboard />
