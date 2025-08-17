@@ -17,7 +17,8 @@ import {
   Alert,
   Checkbox,
   ListItemText,
-  OutlinedInput
+  OutlinedInput,
+  ArrowForward
 } from "@mui/material";
 import {
   Business,
@@ -186,12 +187,9 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      onError('Please complete all required fields before continuing');
-      return;
+    if (validateForm()) {
+      onSubmit(formData);
     }
-
-    onSubmit(formData);
   };
 
   return (
@@ -508,14 +506,15 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
       <Divider sx={{ my: 4 }} />
 
       {/* Submit Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Button
           type="submit"
           variant="contained"
           size="large"
-          sx={{ minWidth: 120 }}
+          endIcon={<ArrowForward />}
+          sx={{ minWidth: 200 }}
         >
-          Continue
+          Complete Setup & Go to Dashboard
         </Button>
       </Box>
     </Box>

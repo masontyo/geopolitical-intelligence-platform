@@ -4,47 +4,22 @@ import {
   Box,
   Paper,
   Typography,
-  Stepper,
-  Step,
-  StepLabel,
   Button,
   CircularProgress,
   Alert,
-  Chip,
   Container,
-  Fade,
-  Slide
+  Fade
 } from "@mui/material";
 import {
   Person,
-  Business,
-  Assessment,
-  Dashboard as DashboardIcon,
-  CheckCircle,
   Save,
-  ArrowBack,
   ArrowForward
 } from "@mui/icons-material";
 import BasicInfoForm from "./onboarding/BasicInfoForm";
-import SampleDashboard from "./onboarding/SampleDashboard";
 import { useToast } from "./ToastNotifications";
-
-const STEPS = [
-  { 
-    label: 'Profile Setup', 
-    icon: <Person />, 
-    description: 'Complete your profile and preferences' 
-  },
-  { 
-    label: 'Sample Dashboard', 
-    icon: <DashboardIcon />, 
-    description: 'Preview your personalized experience' 
-  }
-];
 
 export default function ModularOnboardingFlow() {
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -62,8 +37,6 @@ export default function ModularOnboardingFlow() {
     notificationMediums: []
   });
   
-  const [completedSteps, setCompletedSteps] = useState(new Set());
-  
   const { success, error: showError } = useToast();
 
   // Autosave functionality
@@ -71,8 +44,6 @@ export default function ModularOnboardingFlow() {
     const saveData = () => {
       const onboardingData = {
         profileData,
-        activeStep,
-        completedSteps: Array.from(completedSteps),
         timestamp: Date.now()
       };
       localStorage.setItem('onboarding_progress', JSON.stringify(onboardingData));
@@ -81,7 +52,7 @@ export default function ModularOnboardingFlow() {
     // Debounced autosave
     const timeoutId = setTimeout(saveData, 1000);
     return () => clearTimeout(timeoutId);
-  }, [profileData, activeStep, completedSteps]);
+  }, [profileData]);
 
   // Load saved progress on mount
   useEffect(() => {
@@ -93,8 +64,6 @@ export default function ModularOnboardingFlow() {
         
         if (isRecent) {
           setProfileData(parsed.profileData || {});
-          setActiveStep(parsed.activeStep || 0);
-          setCompletedSteps(new Set(parsed.completedSteps || []));
         } else {
           localStorage.removeItem('onboarding_progress');
         }
@@ -105,75 +74,27 @@ export default function ModularOnboardingFlow() {
     }
   }, []);
 
-  const handleProfileSubmit = (data) => {
-    setProfileData(data);
-    setCompletedSteps(prev => new Set([...prev, 0]));
-    setActiveStep(1);
-    success('Profile information saved!');
-  };
-
-  const handleDashboardComplete = async () => {
+  const handleProfileSubmit = async (data) => {
     setLoading(true);
     try {
       // Here you would typically save to your backend
-      console.log('Final profile data:', profileData);
+      console.log('Profile data:', data);
       
       // Clear saved progress
       localStorage.removeItem('onboarding_progress');
       
-      success('Onboarding completed successfully!');
+      success('Profile information saved! Redirecting to dashboard...');
       
-      // Navigate to dashboard
+      // Navigate directly to dashboard
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
       
     } catch (err) {
-      setError('Failed to complete onboarding. Please try again.');
-      showError('Failed to complete onboarding. Please try again.');
+      setError('Failed to save profile. Please try again.');
+      showError('Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleBack = () => {
-    if (activeStep > 0) {
-      setActiveStep(activeStep - 1);
-    }
-  };
-
-  const canProceed = () => {
-    switch (activeStep) {
-      case 0:
-        return profileData.firstName && profileData.company && profileData.industry && 
-               profileData.businessUnits.length > 0 && profileData.riskCategories.length > 0 && 
-               profileData.regions.length > 0 && profileData.notificationFrequency && 
-               profileData.notificationMediums.length > 0;
-      default:
-        return true;
-    }
-  };
-
-  const getStepContent = () => {
-    switch (activeStep) {
-      case 0:
-        return (
-          <BasicInfoForm
-            data={profileData}
-            onSubmit={handleProfileSubmit}
-            onError={setError}
-          />
-        );
-      case 1:
-        return (
-          <SampleDashboard
-            profileData={profileData}
-            onComplete={handleDashboardComplete}
-            onError={setError}
-          />
-        );
-      default:
-        return null;
     }
   };
 
@@ -182,7 +103,7 @@ export default function ModularOnboardingFlow() {
       <Container maxWidth="sm" sx={{ py: 8 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
           <CircularProgress size={60} />
-          <Typography variant="h6">Completing your setup...</Typography>
+          <Typography variant="h6">Setting up your dashboard...</Typography>
         </Box>
       </Container>
     );
@@ -200,40 +121,6 @@ export default function ModularOnboardingFlow() {
         </Typography>
       </Paper>
 
-      {/* Progress Stepper */}
-      <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {STEPS.map((step, index) => (
-            <Step key={step.label}>
-              <StepLabel
-                icon={
-                  completedSteps.has(index) ? (
-                    <CheckCircle color="success" />
-                  ) : (
-                    step.icon
-                  )
-                }
-                sx={{
-                  '& .MuiStepLabel-label': {
-                    fontSize: '0.875rem',
-                    fontWeight: activeStep === index ? 600 : 400
-                  }
-                }}
-              >
-                <Box>
-                  <Typography variant="body2" fontWeight="inherit">
-                    {step.label}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {step.description}
-                  </Typography>
-                </Box>
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Paper>
-
       {/* Error Display */}
       {error && (
         <Alert 
@@ -247,40 +134,15 @@ export default function ModularOnboardingFlow() {
 
       {/* Content Area */}
       <Paper elevation={3} sx={{ p: 4, minHeight: 500 }}>
-        <Slide direction="left" in={true} mountOnEnter unmountOnExit>
+        <Fade in={true} timeout={500}>
           <Box>
-            {getStepContent()}
+            <BasicInfoForm
+              data={profileData}
+              onSubmit={handleProfileSubmit}
+              onError={setError}
+            />
           </Box>
-        </Slide>
-      </Paper>
-
-      {/* Navigation */}
-      <Paper elevation={1} sx={{ p: 3, mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={handleBack}
-          disabled={activeStep === 0}
-          variant="outlined"
-        >
-          Back
-        </Button>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          {activeStep < STEPS.length - 1 && (
-            <Button
-              variant="outlined"
-              onClick={() => setActiveStep(activeStep + 1)}
-              disabled={!canProceed()}
-            >
-              Continue
-            </Button>
-          )}
-        </Box>
-
-        {/* Progress indicator */}
-        <Typography variant="body2" color="text.secondary">
-          Step {activeStep + 1} of {STEPS.length}
-        </Typography>
+        </Fade>
       </Paper>
 
       {/* Help Section */}
