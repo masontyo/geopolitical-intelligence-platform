@@ -25,32 +25,20 @@ import {
   ArrowBack,
   ArrowForward
 } from "@mui/icons-material";
-import PersonaSelection from "./onboarding/PersonaSelection";
 import BasicInfoForm from "./onboarding/BasicInfoForm";
-import PersonaSpecificForm from "./onboarding/PersonaSpecificForm";
-import ProfileReview from "./onboarding/ProfileReview";
+import SampleDashboard from "./onboarding/SampleDashboard";
 import { useToast } from "./ToastNotifications";
 
 const STEPS = [
   { 
-    label: 'Basic Info', 
+    label: 'Profile Setup', 
     icon: <Person />, 
-    description: 'Name, email, organization' 
+    description: 'Complete your profile and preferences' 
   },
   { 
-    label: 'Role Selection', 
-    icon: <Business />, 
-    description: 'Choose your persona' 
-  },
-  { 
-    label: 'Role Details', 
-    icon: <Assessment />, 
-    description: 'Role-specific information' 
-  },
-  { 
-    label: 'Review & Complete', 
-    icon: <CheckCircle />, 
-    description: 'Confirm and finish' 
+    label: 'Sample Dashboard', 
+    icon: <DashboardIcon />, 
+    description: 'Preview your personalized experience' 
   }
 ];
 
@@ -61,16 +49,19 @@ export default function ModularOnboardingFlow() {
   const [error, setError] = useState(null);
   
   // Form data state
-  const [basicInfo, setBasicInfo] = useState({
+  const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
-    organization: '',
-    organizationSize: ''
+    company: '',
+    companySize: '',
+    industry: '',
+    businessUnits: [],
+    riskCategories: [],
+    regions: [],
+    notificationFrequency: '',
+    notificationMediums: []
   });
   
-  const [selectedPersona, setSelectedPersona] = useState(null);
-  const [personaData, setPersonaData] = useState({});
   const [completedSteps, setCompletedSteps] = useState(new Set());
   
   const { success, error: showError } = useToast();
@@ -79,9 +70,7 @@ export default function ModularOnboardingFlow() {
   useEffect(() => {
     const saveData = () => {
       const onboardingData = {
-        basicInfo,
-        selectedPersona,
-        personaData,
+        profileData,
         activeStep,
         completedSteps: Array.from(completedSteps),
         timestamp: Date.now()
@@ -92,7 +81,7 @@ export default function ModularOnboardingFlow() {
     // Debounced autosave
     const timeoutId = setTimeout(saveData, 1000);
     return () => clearTimeout(timeoutId);
-  }, [basicInfo, selectedPersona, personaData, activeStep, completedSteps]);
+  }, [profileData, activeStep, completedSteps]);
 
   // Load saved progress on mount
   useEffect(() => {
@@ -103,9 +92,7 @@ export default function ModularOnboardingFlow() {
         const isRecent = Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000; // 24 hours
         
         if (isRecent) {
-          setBasicInfo(parsed.basicInfo || {});
-          setSelectedPersona(parsed.selectedPersona);
-          setPersonaData(parsed.personaData || {});
+          setProfileData(parsed.profileData || {});
           setActiveStep(parsed.activeStep || 0);
           setCompletedSteps(new Set(parsed.completedSteps || []));
         } else {
@@ -118,50 +105,25 @@ export default function ModularOnboardingFlow() {
     }
   }, []);
 
-  const handleBasicInfoSubmit = (data) => {
-    setBasicInfo(data);
+  const handleProfileSubmit = (data) => {
+    setProfileData(data);
     setCompletedSteps(prev => new Set([...prev, 0]));
     setActiveStep(1);
-    success('Basic information saved!');
+    success('Profile information saved!');
   };
 
-  const handlePersonaSelection = (persona) => {
-    setSelectedPersona(persona);
-    // Initialize persona data structure for the selected persona
-    const initialPersonaData = {};
-    if (persona && persona.id) {
-      initialPersonaData[persona.id] = {};
-    }
-    setPersonaData(initialPersonaData);
-    setCompletedSteps(prev => new Set([...prev, 1]));
-    setActiveStep(2);
-    success(`${persona.name} role selected!`);
-  };
-
-  const handlePersonaDataSubmit = (data) => {
-    // Store the data under the persona ID
-    const updatedPersonaData = {
-      ...personaData,
-      [selectedPersona.id]: data
-    };
-    setPersonaData(updatedPersonaData);
-    setCompletedSteps(prev => new Set([...prev, 2]));
-    setActiveStep(3);
-    success('Role-specific information saved!');
-  };
-
-  const handleProfileComplete = async (finalData) => {
+  const handleDashboardComplete = async () => {
     setLoading(true);
     try {
       // Here you would typically save to your backend
-      console.log('Final onboarding data:', finalData);
+      console.log('Final profile data:', profileData);
       
       // Clear saved progress
       localStorage.removeItem('onboarding_progress');
       
       success('Onboarding completed successfully!');
       
-      // Navigate to dashboard instead of demo page
+      // Navigate to dashboard
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -180,21 +142,13 @@ export default function ModularOnboardingFlow() {
     }
   };
 
-  const handleSkip = () => {
-    setCompletedSteps(prev => new Set([...prev, activeStep]));
-    if (activeStep < STEPS.length - 1) {
-      setActiveStep(activeStep + 1);
-    }
-  };
-
   const canProceed = () => {
     switch (activeStep) {
       case 0:
-        return basicInfo.firstName && basicInfo.email && basicInfo.organization;
-      case 1:
-        return selectedPersona !== null;
-      case 2:
-        return Object.keys(personaData).length > 0;
+        return profileData.firstName && profileData.company && profileData.industry && 
+               profileData.businessUnits.length > 0 && profileData.riskCategories.length > 0 && 
+               profileData.regions.length > 0 && profileData.notificationFrequency && 
+               profileData.notificationMediums.length > 0;
       default:
         return true;
     }
@@ -205,37 +159,17 @@ export default function ModularOnboardingFlow() {
       case 0:
         return (
           <BasicInfoForm
-            data={basicInfo}
-            onSubmit={handleBasicInfoSubmit}
+            data={profileData}
+            onSubmit={handleProfileSubmit}
             onError={setError}
           />
         );
       case 1:
         return (
-          <PersonaSelection
-            selectedPersona={selectedPersona}
-            onSelect={handlePersonaSelection}
+          <SampleDashboard
+            profileData={profileData}
+            onComplete={handleDashboardComplete}
             onError={setError}
-          />
-        );
-      case 2:
-        return (
-          <PersonaSpecificForm
-            persona={selectedPersona}
-            data={personaData}
-            onSubmit={handlePersonaDataSubmit}
-            onError={setError}
-          />
-        );
-      case 3:
-        return (
-          <ProfileReview
-            basicInfo={basicInfo}
-            persona={selectedPersona}
-            personaData={personaData}
-            onSubmit={handleProfileComplete}
-            onError={setError}
-            onEdit={() => setActiveStep(0)}
           />
         );
       default:
@@ -335,17 +269,6 @@ export default function ModularOnboardingFlow() {
           {activeStep < STEPS.length - 1 && (
             <Button
               variant="outlined"
-              onClick={handleSkip}
-              disabled={!canProceed()}
-            >
-              Skip for now
-            </Button>
-          )}
-          
-          {activeStep < STEPS.length - 1 && (
-            <Button
-              variant="contained"
-              endIcon={<ArrowForward />}
               onClick={() => setActiveStep(activeStep + 1)}
               disabled={!canProceed()}
             >
