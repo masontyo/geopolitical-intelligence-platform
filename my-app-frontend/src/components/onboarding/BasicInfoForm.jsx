@@ -100,6 +100,49 @@ const REGIONS = [
   "Oceania"
 ];
 
+// Company sizes
+const COMPANY_SIZES = [
+  "1-10 employees",
+  "11-50 employees", 
+  "51-200 employees",
+  "201-1,000 employees",
+  "1,001-10,000 employees",
+  "10,001+ employees"
+];
+
+// Industries
+const INDUSTRIES = [
+  "Technology & Software",
+  "E-commerce & Technology",
+  "Technology & Consumer Electronics",
+  "Technology & Digital Services",
+  "Automotive & Clean Energy",
+  "Retail & E-commerce",
+  "Financial Services & Banking",
+  "Healthcare & Pharmaceuticals",
+  "Consumer Goods & Manufacturing",
+  "Energy & Oil & Gas",
+  "Beverages & Consumer Goods",
+  "Food & Restaurant Services",
+  "Apparel & Sports Equipment",
+  "Entertainment & Media",
+  "Entertainment & Streaming",
+  "Food & Beverage Services",
+  "Logistics & Transportation",
+  "Aerospace & Defense",
+  "Industrial & Manufacturing",
+  "Technology & Consulting",
+  "Real Estate",
+  "Education",
+  "Government & Public Sector",
+  "Non-Profit",
+  "Agriculture",
+  "Construction",
+  "Media & Communications",
+  "Professional Services",
+  "Other"
+];
+
 // Notification preferences
 const NOTIFICATION_FREQUENCIES = [
   { value: "immediate", label: "Immediate - Real-time alerts" },
@@ -269,15 +312,26 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Industry"
-              value={formData.industry}
-              onChange={(e) => handleChange('industry', e.target.value)}
-              error={!!validationErrors.industry}
-              helperText={validationErrors.industry || "Auto-filled from company selection"}
-              required
-            />
+            <FormControl fullWidth error={!!validationErrors.industry} required>
+              <InputLabel>Industry</InputLabel>
+              <Select
+                value={formData.industry}
+                onChange={(e) => handleChange('industry', e.target.value)}
+                label="Industry"
+              >
+                {INDUSTRIES.map((industry) => (
+                  <MenuItem key={industry} value={industry}>
+                    {industry}
+                  </MenuItem>
+                ))}
+              </Select>
+              {validationErrors.industry && (
+                <FormHelperText>{validationErrors.industry}</FormHelperText>
+              )}
+              <FormHelperText>
+                Auto-filled from company selection, but you can change it
+              </FormHelperText>
+            </FormControl>
           </Grid>
           
           <Grid item xs={12} sm={6}>
@@ -288,12 +342,11 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
                 onChange={(e) => handleChange('companySize', e.target.value)}
                 label="Company Size"
               >
-                <MenuItem value="1-10">1-10 employees</MenuItem>
-                <MenuItem value="11-50">11-50 employees</MenuItem>
-                <MenuItem value="51-200">51-200 employees</MenuItem>
-                <MenuItem value="201-1000">201-1,000 employees</MenuItem>
-                <MenuItem value="1001-10000">1,001-10,000 employees</MenuItem>
-                <MenuItem value="10001+">10,001+ employees</MenuItem>
+                {COMPANY_SIZES.map((size) => (
+                  <MenuItem key={size} value={size}>
+                    {size}
+                  </MenuItem>
+                ))}
               </Select>
               {validationErrors.companySize && (
                 <FormHelperText>{validationErrors.companySize}</FormHelperText>
