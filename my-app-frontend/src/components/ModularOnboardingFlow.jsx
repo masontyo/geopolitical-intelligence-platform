@@ -10,11 +10,6 @@ import {
   Container,
   Fade
 } from "@mui/material";
-import {
-  Person,
-  Save,
-  ArrowForward
-} from "@mui/icons-material";
 import BasicInfoForm from "./onboarding/BasicInfoForm";
 import { useToast } from "./ToastNotifications";
 

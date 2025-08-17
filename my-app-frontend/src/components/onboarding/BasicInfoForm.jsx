@@ -17,15 +17,15 @@ import {
   Alert,
   Checkbox,
   ListItemText,
-  OutlinedInput,
-  ArrowForward
+  OutlinedInput
 } from "@mui/material";
 import {
   Business,
   LocationOn,
   Notifications,
   Security,
-  TrendingUp
+  TrendingUp,
+  ArrowForward
 } from "@mui/icons-material";
 
 // Company database with autocomplete and industry mapping
