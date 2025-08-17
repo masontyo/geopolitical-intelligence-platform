@@ -65,8 +65,8 @@ export default function EnterpriseDashboard({ profileId }) {
       title: "Supply Chain Disruption in Asia Pacific",
       description: "Port closures and logistics delays affecting multiple industries across the region",
       severity: "high",
-      category: "Supply Chain Risk",
-      region: "Asia Pacific",
+      categories: ["Supply Chain Risk"],
+      regions: ["Asia Pacific"],
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
       actionSteps: [
         { id: 1, text: "Contact key suppliers", status: "pending" },
@@ -79,8 +79,8 @@ export default function EnterpriseDashboard({ profileId }) {
       title: "New Regulatory Requirements in Europe",
       description: "Updated GDPR compliance requirements affecting data processing operations",
       severity: "medium",
-      category: "Regulatory Risk",
-      region: "Europe",
+      categories: ["Regulatory Risk"],
+      regions: ["Europe"],
       timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
       actionSteps: [
         { id: 4, text: "Review current policies", status: "completed" },
@@ -92,8 +92,8 @@ export default function EnterpriseDashboard({ profileId }) {
       title: "Cybersecurity Threat Detection",
       description: "Increased phishing attempts targeting financial services sector",
       severity: "high",
-      category: "Cybersecurity Risk",
-      region: "North America",
+      categories: ["Cybersecurity Risk"],
+      regions: ["North America"],
       timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
       actionSteps: [
         { id: 6, text: "Enhance email filtering", status: "completed" },
@@ -105,8 +105,8 @@ export default function EnterpriseDashboard({ profileId }) {
       title: "Market Volatility in Emerging Markets",
       description: "Currency fluctuations and political instability affecting investment portfolios",
       severity: "medium",
-      category: "Market Risk",
-      region: "Latin America",
+      categories: ["Market Risk"],
+      regions: ["Latin America"],
       timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
       actionSteps: [
         { id: 8, text: "Review portfolio exposure", status: "in-progress" },
@@ -118,8 +118,8 @@ export default function EnterpriseDashboard({ profileId }) {
       title: "Environmental Compliance Updates",
       description: "New sustainability reporting requirements for manufacturing operations",
       severity: "low",
-      category: "Environmental Risk",
-      region: "North America",
+      categories: ["Environmental Risk"],
+      regions: ["North America"],
       timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
       actionSteps: [
         { id: 10, text: "Assess current practices", status: "pending" },
@@ -131,8 +131,8 @@ export default function EnterpriseDashboard({ profileId }) {
       title: "Geopolitical Tensions in Middle East",
       description: "Escalating regional conflicts affecting oil supply and energy markets",
       severity: "high",
-      category: "Geopolitical Risk",
-      region: "Middle East",
+      categories: ["Geopolitical Risk"],
+      regions: ["Middle East"],
       timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
       actionSteps: [
         { id: 12, text: "Monitor energy prices", status: "completed" },
@@ -383,7 +383,7 @@ export default function EnterpriseDashboard({ profileId }) {
                     {/* Event Metadata */}
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
                       <Chip 
-                        label={event.category} 
+                        label={event.categories?.[0] || event.category || 'Unknown Category'} 
                         size="small" 
                         variant="filled"
                         color="primary"
@@ -401,7 +401,7 @@ export default function EnterpriseDashboard({ profileId }) {
                         }}
                       />
                       <Chip 
-                        label={event.region} 
+                        label={event.regions?.[0] || event.region || 'Unknown Region'} 
                         size="small" 
                         variant="filled"
                         color="secondary"
