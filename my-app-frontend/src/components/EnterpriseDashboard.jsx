@@ -384,20 +384,42 @@ export default function EnterpriseDashboard({ profileId }) {
                       label={event.category} 
                       size="small" 
                       variant="outlined"
-                      sx={{ fontSize: '0.7rem', height: 20 }}
+                      sx={{ 
+                        fontSize: '0.75rem', 
+                        height: 24,
+                        minWidth: 'fit-content',
+                        '& .MuiChip-label': {
+                          px: 1,
+                          fontWeight: 500
+                        }
+                      }}
                     />
                     <Chip 
                       label={event.region} 
                       size="small" 
                       variant="outlined"
-                      icon={<LocationOn sx={{ fontSize: '0.8rem' }} />}
-                      sx={{ fontSize: '0.7rem', height: 20 }}
+                      icon={<LocationOn sx={{ fontSize: '1rem' }} />}
+                      sx={{ 
+                        fontSize: '0.75rem', 
+                        height: 24,
+                        minWidth: 'fit-content',
+                        '& .MuiChip-label': {
+                          px: 1,
+                          fontWeight: 500
+                        }
+                      }}
                     />
                   </Box>
 
                   {/* Timestamp */}
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.7rem' }}>
-                    <Schedule sx={{ fontSize: '0.75rem' }} />
+                  <Typography variant="caption" color="text.secondary" sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 0.5, 
+                    fontSize: '0.75rem',
+                    fontWeight: 500
+                  }}>
+                    <Schedule sx={{ fontSize: '0.875rem' }} />
                     {formatTimestamp(event.timestamp)}
                   </Typography>
                 </CardContent>
