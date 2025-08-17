@@ -313,7 +313,7 @@ export default function EnterpriseDashboard({ profileId }) {
       {/* Main Content Layout */}
       <Grid container spacing={3}>
         {/* Left Side - Events Grid */}
-        <Grid item xs={12} lg={8}>
+        <Grid item xs={12} md={8} lg={8}>
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
               Recent Events
@@ -343,14 +343,14 @@ export default function EnterpriseDashboard({ profileId }) {
                   }}
                   onClick={() => handleViewEventDetails(event.id)}
                 >
-                  <CardContent sx={{ p: 2 }}>
+                  <CardContent sx={{ p: 1.5 }}>
                     {/* Event Header */}
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
                       {getSeverityIcon(event.severity)}
                       <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                         <Typography variant="h6" sx={{ 
                           fontWeight: 600, 
-                          fontSize: '1rem',
+                          fontSize: '0.9rem',
                           lineHeight: 1.3,
                           mb: 0.5
                         }}>
@@ -361,36 +361,37 @@ export default function EnterpriseDashboard({ profileId }) {
 
                     {/* Event Description */}
                     <Typography variant="body2" color="text.secondary" sx={{ 
-                      mb: 2, 
+                      mb: 1.5, 
                       lineHeight: 1.4,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      fontSize: '0.8rem'
                     }}>
                       {event.description}
                     </Typography>
 
                     {/* Event Metadata */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
                       <Chip 
                         label={event.category} 
                         size="small" 
                         variant="outlined"
-                        sx={{ fontSize: '0.75rem' }}
+                        sx={{ fontSize: '0.7rem', height: 20 }}
                       />
                       <Chip 
                         label={event.region} 
                         size="small" 
                         variant="outlined"
-                        icon={<LocationOn sx={{ fontSize: '1rem' }} />}
-                        sx={{ fontSize: '0.75rem' }}
+                        icon={<LocationOn sx={{ fontSize: '0.8rem' }} />}
+                        sx={{ fontSize: '0.7rem', height: 20 }}
                       />
                     </Box>
 
                     {/* Timestamp */}
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Schedule sx={{ fontSize: '0.875rem' }} />
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.7rem' }}>
+                      <Schedule sx={{ fontSize: '0.75rem' }} />
                       {formatTimestamp(event.timestamp)}
                     </Typography>
                   </CardContent>
@@ -401,8 +402,8 @@ export default function EnterpriseDashboard({ profileId }) {
         </Grid>
 
         {/* Right Side - Action Steps */}
-        <Grid item xs={12} lg={4}>
-          <Paper sx={{ p: 3, height: 'fit-content' }}>
+        <Grid item xs={12} md={4} lg={4}>
+          <Paper sx={{ p: 3, height: 'fit-content', position: 'sticky', top: 24 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Action Steps
@@ -508,7 +509,7 @@ function DashboardSkeleton() {
       
       <Grid container spacing={3}>
         {/* Events Grid Skeleton */}
-        <Grid item xs={12} lg={8}>
+        <Grid item xs={12} md={8} lg={8}>
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Skeleton variant="text" width="30%" height={32} />
             <Skeleton variant="rectangular" width={100} height={36} />
@@ -517,14 +518,14 @@ function DashboardSkeleton() {
           <Grid container spacing={2}>
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Grid item xs={12} sm={6} key={i}>
-                <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" height={180} sx={{ borderRadius: 1 }} />
               </Grid>
             ))}
           </Grid>
         </Grid>
         
         {/* Action Steps Skeleton */}
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} md={4} lg={4}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Skeleton variant="text" width="40%" height={24} />
