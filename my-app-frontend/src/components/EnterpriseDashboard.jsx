@@ -243,6 +243,22 @@ export default function EnterpriseDashboard({ profileId }) {
     }
   };
 
+  // Helper function to safely format timestamps
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'Recent';
+    if (timestamp instanceof Date) {
+      return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    // If it's a string or number, try to convert to Date
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) return 'Recent';
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      return 'Recent';
+    }
+  };
+
   if (loading) {
     return <DashboardSkeleton />;
   }
@@ -375,7 +391,7 @@ export default function EnterpriseDashboard({ profileId }) {
                     {/* Timestamp */}
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <Schedule sx={{ fontSize: '0.875rem' }} />
-                      {event.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {formatTimestamp(event.timestamp)}
                     </Typography>
                   </CardContent>
                 </Card>
