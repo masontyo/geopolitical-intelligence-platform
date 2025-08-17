@@ -30,11 +30,8 @@ import {
   CheckCircleOutline
 } from "@mui/icons-material";
 
-// Generate fake data based on user profile
-const generateSampleData = (profileData) => {
-  const riskLevels = ['Low', 'Medium', 'High', 'Critical'];
-  const alertTypes = ['Geopolitical', 'Supply Chain', 'Regulatory', 'Cybersecurity'];
-  
+// Generate generic sample data (not personalized)
+const generateSampleData = () => {
   return {
     riskMetrics: {
       overallRisk: 'Medium',
@@ -48,7 +45,7 @@ const generateSampleData = (profileData) => {
           severity: 'High',
           title: 'Regional tensions affecting supply chain routes',
           description: 'Increased military activity in key shipping lanes may impact delivery timelines',
-          region: profileData.regions[0] || 'Asia Pacific',
+          region: 'Asia Pacific',
           timestamp: '2 hours ago',
           impact: 'Supply Chain Risk: High'
         },
@@ -68,7 +65,7 @@ const generateSampleData = (profileData) => {
           severity: 'Low',
           title: 'Weather delays in logistics hub',
           description: 'Severe weather conditions affecting operations in major port',
-          region: profileData.regions[1] || 'North America',
+          region: 'North America',
           timestamp: '1 day ago',
           impact: 'Operational Risk: Low'
         }
@@ -77,21 +74,21 @@ const generateSampleData = (profileData) => {
     insights: [
       {
         title: 'Supply Chain Resilience',
-        description: 'Based on your focus on Supply Chain Risk, we recommend diversifying suppliers in Asia Pacific region',
+        description: 'Monitor key supply chain nodes and identify potential disruption risks before they impact operations',
         confidence: 89,
         impact: 'High',
         category: 'Supply Chain Risk'
       },
       {
         title: 'Regulatory Compliance',
-        description: 'Your business units indicate high compliance needs. New regulations in your regions require attention',
+        description: 'Stay ahead of changing regulations with automated monitoring and compliance alerts',
         confidence: 92,
         impact: 'Medium',
         category: 'Regulatory Risk'
       },
       {
         title: 'Geopolitical Monitoring',
-        description: 'Recent events in your regions of interest suggest increased monitoring of political developments',
+        description: 'Track political developments and policy changes that could affect your business operations',
         confidence: 78,
         impact: 'Medium',
         category: 'Geopolitical Risk'
@@ -113,20 +110,20 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
   useEffect(() => {
     // Simulate loading time for demo purposes
     const timer = setTimeout(() => {
-      setSampleData(generateSampleData(profileData));
+      setSampleData(generateSampleData());
       setIsLoading(false);
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [profileData]);
+  }, []);
 
   if (isLoading) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
         <CircularProgress size={60} sx={{ mb: 3 }} />
-        <Typography variant="h6">Generating your personalized dashboard...</Typography>
+        <Typography variant="h6">Loading sample dashboard...</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Analyzing your profile and creating relevant insights
+          This is what your dashboard could look like
         </Typography>
       </Box>
     );
@@ -135,7 +132,7 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
   if (!sampleData) {
     return (
       <Alert severity="error">
-        Failed to generate sample dashboard. Please try again.
+        Failed to load sample dashboard. Please try again.
       </Alert>
     );
   }
@@ -157,18 +154,28 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
-        Your Personalized Dashboard Preview
+        Sample Dashboard Preview
       </Typography>
       
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-        Here's what you'll see based on your profile. This data will be used to personalize your AI-powered insights.
+        This is an example of what your dashboard could look like. Your actual dashboard will be personalized 
+        based on the profile information you just provided.
       </Typography>
+
+      {/* Sample Data Notice */}
+      <Alert severity="info" sx={{ mb: 4 }}>
+        <Typography variant="body2">
+          <strong>Note:</strong> This dashboard shows sample data and examples. Your real dashboard will display 
+          actual alerts, insights, and recommendations based on your company, business units, risk categories, 
+          and regions of interest.
+        </Typography>
+      </Alert>
 
       {/* Risk Overview */}
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           <Security color="primary" />
-          Risk Overview
+          Risk Overview (Sample)
         </Typography>
         
         <Grid container spacing={3} alignItems="center">
@@ -218,7 +225,11 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           <Warning color="warning" />
-          Active Alerts ({sampleData.riskMetrics.alerts.length})
+          Sample Alerts ({sampleData.riskMetrics.alerts.length})
+        </Typography>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          These are examples of the types of alerts you might see based on your risk categories and regions
         </Typography>
         
         <Grid container spacing={2}>
@@ -272,12 +283,11 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           <TrendingUp color="primary" />
-          AI-Powered Insights
+          Sample AI Insights
         </Typography>
         
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Based on your profile: {profileData.company} ({profileData.industry}), 
-          focusing on {profileData.riskCategories.join(', ')} risks
+          These are examples of the types of insights and recommendations the AI could provide
         </Typography>
         
         <Grid container spacing={2}>
@@ -320,7 +330,11 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
           <CheckCircleOutline color="success" />
-          Recommended Actions
+          Sample Recommendations
+        </Typography>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Examples of actionable recommendations the platform could provide
         </Typography>
         
         <List>
@@ -342,6 +356,10 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
       <Paper elevation={1} sx={{ p: 3, mb: 4, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.200' }}>
         <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
           Your Profile Summary
+        </Typography>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Based on the information you provided, your dashboard will be personalized for:
         </Typography>
         
         <Grid container spacing={2}>
@@ -413,8 +431,8 @@ export default function SampleDashboard({ profileData, onComplete, onError }) {
       {/* Additional Info */}
       <Paper elevation={1} sx={{ p: 2, mt: 4, bgcolor: 'grey.50' }}>
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-          This preview shows how your profile data will be used to personalize alerts, insights, and recommendations. 
-          The AI will learn from your preferences to provide increasingly relevant information.
+          Your actual dashboard will show real-time alerts, insights, and recommendations based on your profile. 
+          The AI will continuously learn from your preferences to provide increasingly relevant information.
         </Typography>
       </Paper>
     </Box>

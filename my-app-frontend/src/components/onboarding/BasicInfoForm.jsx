@@ -316,6 +316,14 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           Select the business units or divisions you work with or oversee
         </Typography>
         
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>Example:</strong> If you select "Risk Management" and "Supply Chain", you'll see alerts like 
+            "Supply chain disruption in Asia Pacific affecting your risk profile" and 
+            "New regulations in Europe requiring risk assessment updates"
+          </Typography>
+        </Alert>
+        
         <FormControl fullWidth error={!!validationErrors.businessUnits} required>
           <InputLabel>Business Units</InputLabel>
           <Select
@@ -355,6 +363,14 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           Select the risk categories most relevant to your organization
         </Typography>
         
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>Example:</strong> Choosing "Supply Chain Risk" will show you alerts about port closures, 
+            supplier disruptions, and logistics delays. Selecting "Regulatory Risk" will highlight new compliance 
+            requirements and policy changes.
+          </Typography>
+        </Alert>
+        
         <FormControl fullWidth error={!!validationErrors.riskCategories} required>
           <InputLabel>Risk Categories</InputLabel>
           <Select
@@ -393,6 +409,14 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Select the regions where you have operations, suppliers, or customers
         </Typography>
+        
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>Example:</strong> Selecting "Asia Pacific" will show you alerts about trade tensions, 
+            supply chain disruptions, and regulatory changes in that region. Choosing "Europe" will highlight 
+            GDPR updates, Brexit impacts, and EU policy changes.
+          </Typography>
+        </Alert>
         
         <FormControl fullWidth error={!!validationErrors.regions} required>
           <InputLabel>Regions</InputLabel>
