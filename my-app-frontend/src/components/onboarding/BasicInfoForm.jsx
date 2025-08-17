@@ -306,18 +306,20 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
                   error={!!validationErrors.company}
                   helperText={validationErrors.company || "Start typing to search or enter manually"}
                   required
+                  sx={{ minHeight: 56 }}
                 />
               )}
             />
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!validationErrors.industry} required>
+            <FormControl fullWidth error={!!validationErrors.industry} required sx={{ minHeight: 56 }}>
               <InputLabel>Industry</InputLabel>
               <Select
                 value={formData.industry}
                 onChange={(e) => handleChange('industry', e.target.value)}
                 label="Industry"
+                sx={{ minHeight: 56 }}
               >
                 {INDUSTRIES.map((industry) => (
                   <MenuItem key={industry} value={industry}>
@@ -335,12 +337,13 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!validationErrors.companySize} required>
+            <FormControl fullWidth error={!!validationErrors.companySize} required sx={{ minHeight: 56 }}>
               <InputLabel>Company Size</InputLabel>
               <Select
                 value={formData.companySize}
                 onChange={(e) => handleChange('companySize', e.target.value)}
                 label="Company Size"
+                sx={{ minHeight: 56 }}
               >
                 {COMPANY_SIZES.map((size) => (
                   <MenuItem key={size} value={size}>
@@ -375,7 +378,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           </Typography>
         </Alert>
         
-        <FormControl fullWidth error={!!validationErrors.businessUnits} required>
+        <FormControl fullWidth error={!!validationErrors.businessUnits} required sx={{ minHeight: 56 }}>
           <InputLabel>Business Units</InputLabel>
           <Select
             multiple
@@ -389,6 +392,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
                 ))}
               </Box>
             )}
+            sx={{ minHeight: 56 }}
           >
             {BUSINESS_UNITS.map((unit) => (
               <MenuItem key={unit} value={unit}>
@@ -422,7 +426,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           </Typography>
         </Alert>
         
-        <FormControl fullWidth error={!!validationErrors.riskCategories} required>
+        <FormControl fullWidth error={!!validationErrors.riskCategories} required sx={{ minHeight: 56 }}>
           <InputLabel>Risk Categories</InputLabel>
           <Select
             multiple
@@ -436,6 +440,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
                 ))}
               </Box>
             )}
+            sx={{ minHeight: 56 }}
           >
             {RISK_CATEGORIES.map((category) => (
               <MenuItem key={category} value={category}>
@@ -469,7 +474,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           </Typography>
         </Alert>
         
-        <FormControl fullWidth error={!!validationErrors.regions} required>
+        <FormControl fullWidth error={!!validationErrors.regions} required sx={{ minHeight: 56 }}>
           <InputLabel>Regions</InputLabel>
           <Select
             multiple
@@ -483,6 +488,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
                 ))}
               </Box>
             )}
+            sx={{ minHeight: 56 }}
           >
             {REGIONS.map((region) => (
               <MenuItem key={region} value={region}>
@@ -506,12 +512,13 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
         
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!validationErrors.notificationFrequency} required>
+            <FormControl fullWidth error={!!validationErrors.notificationFrequency} required sx={{ minHeight: 56 }}>
               <InputLabel>Notification Frequency</InputLabel>
               <Select
                 value={formData.notificationFrequency}
                 onChange={(e) => handleChange('notificationFrequency', e.target.value)}
                 label="Notification Frequency"
+                sx={{ minHeight: 56 }}
               >
                 {NOTIFICATION_FREQUENCIES.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -526,7 +533,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!validationErrors.notificationMediums} required>
+            <FormControl fullWidth error={!!validationErrors.notificationMediums} required sx={{ minHeight: 56 }}>
               <InputLabel>Notification Mediums</InputLabel>
               <Select
                 multiple
@@ -540,6 +547,7 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
                     ))}
                   </Box>
                 )}
+                sx={{ minHeight: 56 }}
               >
                 {NOTIFICATION_MEDIUMS.map((medium) => (
                   <MenuItem key={medium} value={medium}>
