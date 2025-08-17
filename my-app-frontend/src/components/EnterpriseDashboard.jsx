@@ -333,98 +333,109 @@ export default function EnterpriseDashboard({ profileId }) {
             gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
             gap: 2 
           }}>
-            {relevantEvents.slice(0, 6).map((event) => (
-              <Card 
-                key={event.id}
-                sx={{ 
-                  height: 200, // Fixed height for consistency
-                  width: '100%', // Full width within grid cell
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: theme.shadows[8]
-                  }
-                }}
-                onClick={() => handleViewEventDetails(event.id)}
-              >
-                <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  {/* Event Header */}
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
-                    {getSeverityIcon(event.severity)}
-                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Typography variant="h6" sx={{ 
-                        fontWeight: 600, 
-                        fontSize: '0.9rem',
-                        lineHeight: 1.3,
-                        mb: 0.5
-                      }}>
-                        {event.title}
-                      </Typography>
+            {relevantEvents.slice(0, 6).map((event) => {
+              console.log('Rendering event:', event); // Debug log
+              return (
+                <Card 
+                  key={event.id}
+                  sx={{ 
+                    height: 200, // Fixed height for consistency
+                    width: '100%', // Full width within grid cell
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[8]
+                    }
+                  }}
+                  onClick={() => handleViewEventDetails(event.id)}
+                >
+                  <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    {/* Event Header */}
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                      {getSeverityIcon(event.severity)}
+                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                        <Typography variant="h6" sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.9rem',
+                          lineHeight: 1.3,
+                          mb: 0.5
+                        }}>
+                          {event.title}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
 
-                  {/* Event Description */}
-                  <Typography variant="body2" color="text.secondary" sx={{ 
-                    mb: 1.5, 
-                    lineHeight: 1.4,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    fontSize: '0.8rem',
-                    flexGrow: 1 // Take up remaining space
-                  }}>
-                    {event.description}
-                  </Typography>
+                    {/* Event Description */}
+                    <Typography variant="body2" color="text.secondary" sx={{ 
+                      mb: 1.5, 
+                      lineHeight: 1.4,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      fontSize: '0.8rem',
+                      flexGrow: 1 // Take up remaining space
+                    }}>
+                      {event.description}
+                    </Typography>
 
-                  {/* Event Metadata */}
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
-                    <Chip 
-                      label={event.category} 
-                      size="small" 
-                      variant="outlined"
-                      sx={{ 
-                        fontSize: '0.75rem', 
-                        height: 24,
-                        minWidth: 'fit-content',
-                        '& .MuiChip-label': {
-                          px: 1,
-                          fontWeight: 500
-                        }
-                      }}
-                    />
-                    <Chip 
-                      label={event.region} 
-                      size="small" 
-                      variant="outlined"
-                      icon={<LocationOn sx={{ fontSize: '1rem' }} />}
-                      sx={{ 
-                        fontSize: '0.75rem', 
-                        height: 24,
-                        minWidth: 'fit-content',
-                        '& .MuiChip-label': {
-                          px: 1,
-                          fontWeight: 500
-                        }
-                      }}
-                    />
-                  </Box>
+                    {/* Event Metadata */}
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                      <Chip 
+                        label={event.category} 
+                        size="small" 
+                        variant="filled"
+                        color="primary"
+                        sx={{ 
+                          fontSize: '0.8rem', 
+                          height: 28,
+                          minWidth: 'fit-content',
+                          fontWeight: 600,
+                          backgroundColor: theme.palette.primary.main,
+                          color: 'white',
+                          '& .MuiChip-label': {
+                            px: 1.5,
+                            fontWeight: 600
+                          }
+                        }}
+                      />
+                      <Chip 
+                        label={event.region} 
+                        size="small" 
+                        variant="filled"
+                        color="secondary"
+                        icon={<LocationOn sx={{ fontSize: '1.1rem', color: 'white' }} />}
+                        sx={{ 
+                          fontSize: '0.8rem', 
+                          height: 28,
+                          minWidth: 'fit-content',
+                          fontWeight: 600,
+                          backgroundColor: theme.palette.secondary.main,
+                          color: 'white',
+                          '& .MuiChip-label': {
+                            px: 1.5,
+                            fontWeight: 600
+                          }
+                        }}
+                      />
+                    </Box>
 
-                  {/* Timestamp */}
-                  <Typography variant="caption" color="text.secondary" sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 0.5, 
-                    fontSize: '0.75rem',
-                    fontWeight: 500
-                  }}>
-                    <Schedule sx={{ fontSize: '0.875rem' }} />
-                    {formatTimestamp(event.timestamp)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
+                    {/* Timestamp */}
+                    <Typography variant="caption" color="text.secondary" sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 0.5, 
+                      fontSize: '0.75rem',
+                      fontWeight: 500
+                    }}>
+                      <Schedule sx={{ fontSize: '0.875rem' }} />
+                      {formatTimestamp(event.timestamp)}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </Box>
         </Box>
 
