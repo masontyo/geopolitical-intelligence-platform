@@ -26,7 +26,8 @@ import {
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
   AccountCircle,
-  Refresh
+  Refresh,
+  Security
 } from '@mui/icons-material';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useToast } from './ToastNotifications';
