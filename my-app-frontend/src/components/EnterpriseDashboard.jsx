@@ -63,7 +63,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 1,
       title: "Supply Chain Disruption in Asia Pacific",
-      description: "Port closures disrupting supply chains",
+      description: "Port closures",
       severity: "high",
       categories: ["Supply Chain Risk"],
       regions: ["Asia Pacific"],
@@ -77,7 +77,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 2,
       title: "New Regulatory Requirements in Europe",
-      description: "New GDPR rules for data processing",
+      description: "New GDPR rules",
       severity: "medium",
       categories: ["Regulatory Risk"],
       regions: ["Europe"],
@@ -90,7 +90,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 3,
       title: "Cybersecurity Threat Detection",
-      description: "Phishing attacks on financial services",
+      description: "Phishing attacks",
       severity: "high",
       categories: ["Cybersecurity Risk"],
       regions: ["North America"],
@@ -103,7 +103,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 4,
       title: "Market Volatility in Emerging Markets",
-      description: "Currency volatility affecting investments",
+      description: "Currency volatility",
       severity: "medium",
       categories: ["Market Risk"],
       regions: ["Latin America"],
@@ -116,7 +116,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 5,
       title: "Environmental Compliance Updates",
-      description: "New sustainability rules for manufacturers",
+      description: "New sustainability rules",
       severity: "low",
       categories: ["Environmental Risk"],
       regions: ["North America"],
@@ -129,7 +129,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 6,
       title: "Geopolitical Tensions in Middle East",
-      description: "Regional conflicts disrupting energy markets",
+      description: "Regional conflicts",
       severity: "high",
       categories: ["Geopolitical Risk"],
       regions: ["Middle East"],
