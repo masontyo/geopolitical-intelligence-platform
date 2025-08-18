@@ -63,7 +63,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 1,
       title: "Supply Chain Disruption in Asia Pacific",
-      description: "Port closures and logistics delays affecting multiple industries across the region",
+      description: "Port closures causing supply chain disruptions across Asia Pacific region",
       severity: "high",
       categories: ["Supply Chain Risk"],
       regions: ["Asia Pacific"],
@@ -77,7 +77,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 2,
       title: "New Regulatory Requirements in Europe",
-      description: "Updated GDPR compliance requirements affecting data processing operations",
+      description: "New GDPR compliance rules for data processing operations",
       severity: "medium",
       categories: ["Regulatory Risk"],
       regions: ["Europe"],
@@ -90,7 +90,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 3,
       title: "Cybersecurity Threat Detection",
-      description: "Increased phishing attempts targeting financial services sector",
+      description: "Rising phishing attacks targeting financial services",
       severity: "high",
       categories: ["Cybersecurity Risk"],
       regions: ["North America"],
@@ -103,7 +103,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 4,
       title: "Market Volatility in Emerging Markets",
-      description: "Currency fluctuations and political instability affecting investment portfolios",
+      description: "Currency volatility and political unrest impacting investments",
       severity: "medium",
       categories: ["Market Risk"],
       regions: ["Latin America"],
@@ -116,7 +116,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 5,
       title: "Environmental Compliance Updates",
-      description: "New sustainability reporting requirements for manufacturing operations",
+      description: "New sustainability reporting rules for manufacturers",
       severity: "low",
       categories: ["Environmental Risk"],
       regions: ["North America"],
@@ -129,7 +129,7 @@ export default function EnterpriseDashboard({ profileId }) {
     {
       id: 6,
       title: "Geopolitical Tensions in Middle East",
-      description: "Escalating regional conflicts affecting oil supply and energy markets",
+      description: "Regional conflicts disrupting oil supply and energy markets",
       severity: "high",
       categories: ["Geopolitical Risk"],
       regions: ["Middle East"],
@@ -371,7 +371,7 @@ export default function EnterpriseDashboard({ profileId }) {
                       mb: 1.5, 
                       lineHeight: 1.4,
                       display: '-webkit-box',
-                      WebkitLineClamp: 2,
+                                             WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                       fontSize: '0.8rem',
