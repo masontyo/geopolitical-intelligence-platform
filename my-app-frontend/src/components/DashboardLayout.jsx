@@ -91,7 +91,7 @@ export default function DashboardLayout({ children }) {
         alignItems: 'center',
         gap: 1
       }}>
-        <WarningIcon color="primary" sx={{ fontSize: 28 }} />
+        <Security color="primary" sx={{ fontSize: 28 }} />
         <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
           RiskIntel
         </Typography>
