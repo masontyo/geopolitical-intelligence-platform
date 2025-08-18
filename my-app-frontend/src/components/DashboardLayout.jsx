@@ -24,14 +24,8 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
-  Warning as WarningIcon,
-  Map as MapIcon,
-  Analytics as AnalyticsIcon,
-  Notifications as NotificationsIcon,
   Settings as SettingsIcon,
   AccountCircle,
-  ChevronLeft,
-  ChevronRight,
   Refresh
 } from '@mui/icons-material';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
@@ -57,10 +51,6 @@ export default function DashboardLayout({ children }) {
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: `/dashboard/${profileId || ''}` },
-    { text: 'Risk Alerts', icon: <WarningIcon />, path: '/alerts', badge: 3 },
-    { text: 'Geographic View', icon: <MapIcon />, path: '/geographic' },
-    { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
-    { text: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' }
   ];
 
@@ -201,10 +191,6 @@ export default function DashboardLayout({ children }) {
             </IconButton>
             <Typography variant="h6" noWrap component="div">
               {location.pathname === '/dashboard' ? 'Risk Intelligence Dashboard' : 
-               location.pathname === '/alerts' ? 'Risk Alerts' :
-               location.pathname === '/geographic' ? 'Geographic Risk View' :
-               location.pathname === '/analytics' ? 'Analytics' :
-               location.pathname === '/notifications' ? 'Notifications' :
                location.pathname === '/settings' ? 'Settings' : 'Dashboard'}
             </Typography>
           </Box>
