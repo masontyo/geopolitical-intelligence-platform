@@ -46,9 +46,39 @@ export default function DashboardLayout({ children }) {
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [profile, setProfile] = useState(null);
 
   // Get profileId from URL params or localStorage
   const profileId = urlProfileId || localStorage.getItem('currentProfileId');
+
+  // Load user profile data from localStorage
+  useEffect(() => {
+    const loadProfile = () => {
+      try {
+        // Try to get profile from onboarding data
+        const onboardingData = localStorage.getItem('onboarding_progress');
+        if (onboardingData) {
+          const parsed = JSON.parse(onboardingData);
+          if (parsed.profileData) {
+            setProfile(parsed.profileData);
+            return;
+          }
+        }
+        
+        // Fallback: try to get from currentProfileId
+        if (profileId) {
+          const profileData = localStorage.getItem(`profile_${profileId}`);
+          if (profileData) {
+            setProfile(JSON.parse(profileData));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    };
+
+    loadProfile();
+  }, [profileId]);
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: `/dashboard/${profileId || ''}` },
@@ -154,10 +184,10 @@ export default function DashboardLayout({ children }) {
           </Avatar>
           <Box sx={{ flexGrow: 1, minWidth: 0 }}>
             <Typography variant="subtitle2" noWrap>
-              John Smith
+              {profile?.firstName && profile?.lastName ? `${profile.firstName} ${profile.lastName}` : 'User'}
             </Typography>
             <Typography variant="caption" color="text.secondary" noWrap>
-              CRO • TechCorp
+              {profile?.company ? profile.company : 'Company'} • {profile?.industry ? profile.industry : 'Industry'}
             </Typography>
           </Box>
         </Box>

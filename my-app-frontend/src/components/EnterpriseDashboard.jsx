@@ -162,6 +162,35 @@ export default function EnterpriseDashboard({ profileId }) {
     }
   }, [effectiveProfileId]);
 
+  // Load user profile data from localStorage
+  useEffect(() => {
+    const loadProfile = () => {
+      try {
+        // Try to get profile from onboarding data
+        const onboardingData = localStorage.getItem('onboarding_progress');
+        if (onboardingData) {
+          const parsed = JSON.parse(onboardingData);
+          if (parsed.profileData) {
+            setProfile(parsed.profileData);
+            return;
+          }
+        }
+        
+        // Fallback: try to get from currentProfileId
+        if (effectiveProfileId) {
+          const profileData = localStorage.getItem(`profile_${effectiveProfileId}`);
+          if (profileData) {
+            setProfile(JSON.parse(profileData));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    };
+
+    loadProfile();
+  }, [effectiveProfileId]);
+
   const loadDashboardData = async () => {
     if (!effectiveProfileId) {
       setError('No profile ID provided. Please complete onboarding first.');
@@ -292,10 +321,10 @@ export default function EnterpriseDashboard({ profileId }) {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Box>
             <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-              Welcome back, {profile?.name || 'User'}
+              Welcome back, {profile?.firstName && profile?.lastName ? `${profile.firstName} ${profile.lastName}` : 'User'}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {profile?.organization || 'Your Organization'} • {profile?.industry || 'Industry'} • Last updated: {lastUpdated.toLocaleTimeString()}
+              {profile?.company || 'Your Company'} • {profile?.industry || 'Industry'} • Last updated: {lastUpdated.toLocaleTimeString()}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
