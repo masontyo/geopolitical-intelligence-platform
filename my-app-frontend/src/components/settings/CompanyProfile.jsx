@@ -17,7 +17,8 @@ import {
   Alert,
   Divider,
   useTheme,
-  IconButton
+  IconButton,
+  Autocomplete
 } from '@mui/material';
 import {
   Business,
@@ -269,12 +270,34 @@ export default function CompanyProfile() {
         
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
-            <TextField
+            <Autocomplete
               fullWidth
-              label="Company Name"
-              value={formData.company}
-              onChange={(e) => handleChange('company', e.target.value)}
-              placeholder="Enter company name"
+              options={COMPANY_DATABASE}
+              getOptionLabel={(option) => option.name}
+              value={COMPANY_DATABASE.find(company => company.name === formData.company) || null}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  handleChange('company', newValue.name);
+                  handleChange('industry', newValue.industry);
+                } else {
+                  handleChange('company', '');
+                  handleChange('industry', '');
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Company Name"
+                  placeholder="Start typing company name..."
+                />
+              )}
+              freeSolo
+              onInputChange={(event, newInputValue) => {
+                if (!newInputValue) {
+                  handleChange('company', '');
+                  handleChange('industry', '');
+                }
+              }}
             />
           </Grid>
           

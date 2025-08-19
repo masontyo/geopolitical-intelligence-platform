@@ -294,18 +294,23 @@ export default function AccountSettings() {
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={securitySettings.twoFactorAuth}
-                    onChange={(e) => handleSecurityChange('twoFactorAuth', e.target.checked)}
-                  />
-                }
-                label="Two-Factor Authentication"
-              />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                Two-Factor Authentication
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
                 Add an extra layer of security to your account
               </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  // TODO: Implement 2FA setup flow
+                  alert('2FA setup coming soon!');
+                }}
+                sx={{ alignSelf: 'flex-start' }}
+              >
+                {securitySettings.twoFactorAuth ? 'Manage 2FA' : 'Setup 2FA'}
+              </Button>
             </FormGroup>
           </Grid>
           

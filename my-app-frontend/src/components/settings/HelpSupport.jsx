@@ -41,8 +41,7 @@ export default function HelpSupport() {
   const navigate = useNavigate();
   const [contactForm, setContactForm] = useState({
     subject: '',
-    message: '',
-    priority: 'medium'
+    message: ''
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -131,7 +130,7 @@ export default function HelpSupport() {
     console.log('Contact form submitted:', contactForm);
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
-    setContactForm({ subject: '', message: '', priority: 'medium' });
+    setContactForm({ subject: '', message: '' });
   };
 
   const handleSupportAction = (channel) => {
@@ -334,21 +333,7 @@ export default function HelpSupport() {
               />
             </Grid>
             
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                select
-                label="Priority"
-                value={contactForm.priority}
-                onChange={(e) => setContactForm(prev => ({ ...prev, priority: e.target.value }))}
-                required
-              >
-                <MenuItem value="low">Low - General question</MenuItem>
-                <MenuItem value="medium">Medium - Feature request</MenuItem>
-                <MenuItem value="high">High - Bug or critical issue</MenuItem>
-                <MenuItem value="urgent">Urgent - System down</MenuItem>
-              </TextField>
-            </Grid>
+
             
             <Grid item xs={12}>
               <TextField
