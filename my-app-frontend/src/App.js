@@ -9,6 +9,11 @@ import OnboardingDemo from './components/OnboardingDemo';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
 import EventDetails from './components/EventDetails';
+import Settings from './components/Settings';
+import CompanyProfile from './components/settings/CompanyProfile';
+import AccountSettings from './components/settings/AccountSettings';
+import DataPrivacy from './components/settings/DataPrivacy';
+import HelpSupport from './components/settings/HelpSupport';
 import { ToastProvider } from './components/ToastNotifications';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -166,7 +171,27 @@ function App() {
               } />
               <Route path="/settings" element={
                 <DashboardLayout>
-                  <div>Settings Page - Coming Soon</div>
+                  <Settings />
+                </DashboardLayout>
+              } />
+              <Route path="/settings/company" element={
+                <DashboardLayout>
+                  <CompanyProfile />
+                </DashboardLayout>
+              } />
+              <Route path="/settings/account" element={
+                <DashboardLayout>
+                  <AccountSettings />
+                </DashboardLayout>
+              } />
+              <Route path="/settings/privacy" element={
+                <DashboardLayout>
+                  <DataPrivacy />
+                </DashboardLayout>
+              } />
+              <Route path="/settings/support" element={
+                <DashboardLayout>
+                  <HelpSupport />
                 </DashboardLayout>
               } />
             </Routes>
