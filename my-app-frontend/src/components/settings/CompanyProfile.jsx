@@ -271,7 +271,6 @@ export default function CompanyProfile() {
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
             <Autocomplete
-              fullWidth
               options={COMPANY_DATABASE}
               getOptionLabel={(option) => option.name}
               value={COMPANY_DATABASE.find(company => company.name === formData.company) || null}
@@ -289,6 +288,7 @@ export default function CompanyProfile() {
                   {...params}
                   label="Company Name"
                   placeholder="Start typing company name..."
+                  fullWidth
                 />
               )}
               freeSolo
@@ -298,6 +298,7 @@ export default function CompanyProfile() {
                   handleChange('industry', '');
                 }
               }}
+              sx={{ width: '100%' }}
             />
           </Grid>
           
