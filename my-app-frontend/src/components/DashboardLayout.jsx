@@ -196,7 +196,7 @@ export default function DashboardLayout({ children }) {
               {profile?.firstName && profile?.lastName ? `${profile.firstName} ${profile.lastName}` : 'User'}
             </Typography>
             <Typography variant="caption" color="text.secondary" noWrap>
-              {profile?.company ? profile.company : 'Company'} • {profile?.industry ? profile.industry : 'Industry'}
+              {profile?.company ? profile.company : 'Company'}
             </Typography>
           </Box>
         </Box>

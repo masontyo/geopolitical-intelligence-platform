@@ -330,10 +330,10 @@ export default function EnterpriseDashboard({ profileId }) {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Box>
             <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-              Welcome back, {profile?.firstName && profile?.lastName ? `${profile.firstName} ${profile.lastName}` : 'User'}
+              Welcome back, {profile?.firstName || 'User'}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {profile?.company || 'Your Company'} • {profile?.industry || 'Industry'} • Last updated: {lastUpdated.toLocaleTimeString()}
+              {profile?.company || 'Your Company'} • Last updated: {lastUpdated.toLocaleTimeString()}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
