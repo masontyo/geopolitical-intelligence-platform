@@ -132,7 +132,7 @@ export default function AccountSettings() {
     }
   };
 
-  const handlePasswordChange = async () => {
+  const handlePasswordSubmit = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setError('New passwords do not match.');
       return;
@@ -444,7 +444,7 @@ export default function AccountSettings() {
         <DialogActions>
           <Button onClick={() => setShowPasswordDialog(false)}>Cancel</Button>
           <Button 
-            onClick={handlePasswordChange} 
+            onClick={handlePasswordSubmit} 
             variant="contained"
             disabled={loading}
           >
