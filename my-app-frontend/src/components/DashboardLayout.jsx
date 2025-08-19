@@ -55,7 +55,16 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     const loadProfile = () => {
       try {
-        // Try to get profile from onboarding data
+        // Try to get profile from persistent user profile storage
+        const userProfile = localStorage.getItem('user_profile');
+        if (userProfile) {
+          const parsed = JSON.parse(userProfile);
+          console.log('DashboardLayout: Loaded profile from user_profile:', parsed);
+          setProfile(parsed);
+          return;
+        }
+        
+        // Fallback: try to get from onboarding data
         const onboardingData = localStorage.getItem('onboarding_progress');
         if (onboardingData) {
           const parsed = JSON.parse(onboardingData);

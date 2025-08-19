@@ -75,6 +75,9 @@ export default function ModularOnboardingFlow() {
       // Here you would typically save to your backend
       console.log('Profile data:', data);
       
+      // Save profile data to persistent storage for dashboard
+      localStorage.setItem('user_profile', JSON.stringify(data));
+      
       // Clear saved progress
       localStorage.removeItem('onboarding_progress');
       
