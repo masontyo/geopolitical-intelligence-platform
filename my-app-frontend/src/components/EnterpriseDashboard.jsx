@@ -562,25 +562,48 @@ export default function EnterpriseDashboard({ profileId }) {
                   </Box>
 
                   {/* Action Metadata */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {action.category || 'General'}
-                    </Typography>
-                    <Chip 
-                      label={action.priority} 
-                      size="small" 
-                      color={getPriorityColor(action.priority)}
-                      sx={{ fontSize: '0.7rem' }}
-                    />
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {/* Event Link */}
+                    {action.eventTitle && action.eventId && (
+                      <Typography 
+                        variant="caption" 
+                        color="primary" 
+                        sx={{ 
+                          fontWeight: 500, 
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          '&:hover': { opacity: 0.8 }
+                        }}
+                        onClick={() => navigate(`/event/${action.eventId}`)}
+                      >
+                        📋 {action.eventTitle}
+                      </Typography>
+                    )}
+                    
+                    {/* Priority and Status */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Chip 
+                        label={action.priority} 
+                        size="small" 
+                        color={getPriorityColor(action.priority)}
+                        sx={{ fontSize: '0.7rem' }}
+                      />
+                      <Chip 
+                        label={action.status} 
+                        size="small" 
+                        color={getStatusColor(action.status)}
+                        sx={{ fontSize: '0.7rem' }}
+                      />
+                    </Box>
                   </Box>
                 </Box>
               )) : (
                 <Box sx={{ textAlign: 'center', py: 3 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    No action steps defined yet
+                    No action steps yet
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Complete onboarding to add action steps, or add them later from your dashboard.
+                    Click on any event to add action steps that will appear here.
                   </Typography>
                 </Box>
               )}

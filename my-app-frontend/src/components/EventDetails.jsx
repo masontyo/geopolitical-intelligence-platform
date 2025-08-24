@@ -90,7 +90,10 @@ export default function EventDetails() {
   useEffect(() => {
     if (event) {
       const savedActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
-      const eventActions = savedActions.filter(action => action.eventId === event.id);
+      // Only show actions that were created as custom actions (not recommended ones)
+      const eventActions = savedActions.filter(action => 
+        action.eventId === event.id && action.isCustomAction
+      );
       setCustomActions(eventActions);
     }
   }, [event]);
@@ -187,14 +190,12 @@ export default function EventDetails() {
       ...action,
       eventId: event.id,
       eventTitle: event.title,
+      isCustomAction: false, // Mark as recommended action
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    // Add to custom actions
-    setCustomActions(prev => [...prev, newAction]);
-
-    // Save to localStorage for dashboard
+    // Save to localStorage for dashboard (don't add to local custom actions state)
     const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
     const updatedActions = [...existingActions, newAction];
     localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
@@ -210,6 +211,7 @@ export default function EventDetails() {
       ...actionFormData,
       eventId: event.id,
       eventTitle: event.title,
+      isCustomAction: true, // Mark as custom action
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
