@@ -3,9 +3,9 @@
 import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import OnboardingFlow from './components/OnboardingFlow';
-import ModularOnboardingFlow from './components/ModularOnboardingFlow';
-import OnboardingDemo from './components/OnboardingDemo';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './components/Login';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
 import EventDetails from './components/EventDetails';
@@ -98,13 +98,9 @@ const theme = createTheme({
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           },
         },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        outlined: {
+          borderWidth: 1.5,
+          fontWeight: 500,
         },
       },
     },
@@ -113,16 +109,20 @@ const theme = createTheme({
         root: {
           borderRadius: 12,
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          '&:hover': {
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
         },
       },
     },
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 6,
+          borderRadius: 8,
           fontWeight: 500,
         },
       },
@@ -134,89 +134,150 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ToastProvider>
-        <Router>
-          <div className="App">
-            <Routes>
-              <Route path="/" element={<Navigate to="/demo" replace />} />
-              <Route path="/onboarding" element={<OnboardingFlow />} />
-              <Route path="/onboarding-modular" element={<ModularOnboardingFlow />} />
-              <Route path="/demo" element={<OnboardingDemo />} />
-              <Route path="/dashboard" element={
-                <DashboardLayout>
-                  <EnterpriseDashboard />
-                </DashboardLayout>
-              } />
-              <Route path="/dashboard/:profileId" element={
-                <DashboardLayout>
-                  <EnterpriseDashboard />
-                </DashboardLayout>
-              } />
-              <Route path="/event/:eventId" element={<EventDetails />} />
-              <Route path="/events" element={
-                <DashboardLayout>
-                  <EventsList />
-                </DashboardLayout>
-              } />
-              <Route path="/tasks" element={
-                <DashboardLayout>
-                  <TasksPage />
-                </DashboardLayout>
-              } />
-              <Route path="/checklist" element={
-                <DashboardLayout>
-                  <ChecklistPage />
-                </DashboardLayout>
-              } />
-              <Route path="/alerts" element={
-                <DashboardLayout>
-                  <AlertsPage />
-                </DashboardLayout>
-              } />
-              <Route path="/geographic" element={
-                <DashboardLayout>
-                  <div>Geographic View - Coming Soon</div>
-                </DashboardLayout>
-              } />
-              <Route path="/analytics" element={
-                <DashboardLayout>
-                  <div>Analytics Page - Coming Soon</div>
-                </DashboardLayout>
-              } />
-              <Route path="/notifications" element={
-                <DashboardLayout>
-                  <div>Notifications Page - Coming Soon</div>
-                </DashboardLayout>
-              } />
-              <Route path="/settings" element={
-                <DashboardLayout>
-                  <Settings />
-                </DashboardLayout>
-              } />
-              <Route path="/settings/company" element={
-                <DashboardLayout>
-                  <CompanyProfile />
-                </DashboardLayout>
-              } />
-              <Route path="/settings/account" element={
-                <DashboardLayout>
-                  <AccountSettings />
-                </DashboardLayout>
-              } />
-              <Route path="/settings/privacy" element={
-                <DashboardLayout>
-                  <DataPrivacy />
-                </DashboardLayout>
-              } />
-              <Route path="/settings/support" element={
-                <DashboardLayout>
-                  <HelpSupport />
-                </DashboardLayout>
-              } />
-            </Routes>
-          </div>
-        </Router>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+            <div className="App">
+              <Routes>
+                {/* Public routes */}
+                <Route path="/login" element={<Login />} />
+                
+                {/* Protected routes - require authentication */}
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Navigate to="/dashboard" replace />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <EnterpriseDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/dashboard/:profileId" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <EnterpriseDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/event/:eventId" element={
+                  <ProtectedRoute>
+                    <EventDetails />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/events" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <EventsList />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/tasks" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <TasksPage />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/checklist" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ChecklistPage />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/alerts" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AlertsPage />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/geographic" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <div>Geographic View - Coming Soon</div>
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <div>Analytics Page - Coming Soon</div>
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <div>Notifications Page - Coming Soon</div>
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Settings />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings/company" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CompanyProfile />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings/account" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AccountSettings />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings/privacy" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <DataPrivacy />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings/support" element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <HelpSupport />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Catch all route - redirect to dashboard */}
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <Navigate to="/dashboard" replace />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </div>
+          </Router>
+        </ToastProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

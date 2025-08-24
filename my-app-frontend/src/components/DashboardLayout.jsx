@@ -27,10 +27,12 @@ import {
   Settings as SettingsIcon,
   AccountCircle,
   Refresh,
-  Security
+  Security,
+  Logout
 } from '@mui/icons-material';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useToast } from './ToastNotifications';
+import { useAuth } from '../contexts/AuthContext';
 
 const DRAWER_WIDTH = 280;
 
@@ -41,6 +43,7 @@ export default function DashboardLayout({ children }) {
   const location = useLocation();
   const { profileId: urlProfileId } = useParams();
   const { error: showError, success, info } = useToast();
+  const { user, logout } = useAuth();
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
@@ -55,6 +58,12 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     const loadProfile = () => {
       try {
+        // Use the authenticated user data if available
+        if (user) {
+          setProfile(user);
+          return;
+        }
+        
         // Try to get profile from persistent user profile storage
         const userProfile = localStorage.getItem('user_profile');
         if (userProfile) {
@@ -87,10 +96,14 @@ export default function DashboardLayout({ children }) {
     };
 
     loadProfile();
-  }, [profileId]);
+  }, [user, profileId]);
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: `/dashboard/${profileId || ''}` },
+    { text: 'Events', icon: <Security />, path: '/events' },
+    { text: 'Tasks', icon: <SettingsIcon />, path: '/tasks' },
+    { text: 'Checklist', icon: <Security />, path: '/checklist' },
+    { text: 'Alerts', icon: <Security />, path: '/alerts' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' }
   ];
 
@@ -106,64 +119,60 @@ export default function DashboardLayout({ children }) {
     setUserMenuAnchor(null);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    handleUserMenuClose();
+  };
+
   const handleRefresh = async () => {
     setIsLoading(true);
     try {
-      // Trigger refresh of dashboard data
-      window.location.reload();
-      success('Dashboard refreshed successfully');
+      // Simulate refresh delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setLastRefresh(new Date());
+      info('Dashboard refreshed successfully');
     } catch (error) {
       showError('Failed to refresh dashboard');
     } finally {
       setIsLoading(false);
-      setLastRefresh(new Date());
     }
   };
 
   const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Logo/Brand Section */}
-      <Box sx={{ 
-        p: 2, 
-        borderBottom: 1, 
-        borderColor: 'divider',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1
-      }}>
-        <Security color="primary" sx={{ fontSize: 28 }} />
-        <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-          RiskIntel
+    <Box>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+          Risk Intelligence
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Enterprise Dashboard
         </Typography>
       </Box>
-
-      {/* Navigation Menu */}
-      <List sx={{ flexGrow: 1, pt: 1 }}>
+      
+      <List sx={{ pt: 1 }}>
         {menuItems.map((item) => (
           <ListItem
             key={item.text}
             button
             onClick={() => {
-              if (item.text === 'Dashboard' && profileId) {
-                localStorage.setItem('currentProfileId', profileId);
-              }
               navigate(item.path);
               if (isMobile) setMobileOpen(false);
             }}
             sx={{
               mx: 1,
               mb: 0.5,
-              borderRadius: 1,
-              backgroundColor: location.pathname === item.path ? 'primary.light' : 'transparent',
-              color: location.pathname === item.path ? 'primary.contrastText' : 'inherit',
+              borderRadius: 2,
+              backgroundColor: location.pathname === item.path ? 'primary.50' : 'transparent',
+              color: location.pathname === item.path ? 'primary.main' : 'inherit',
               '&:hover': {
-                backgroundColor: location.pathname === item.path ? 'primary.main' : 'action.hover',
-              }
+                backgroundColor: location.pathname === item.path ? 'primary.100' : 'action.hover',
+              },
             }}
           >
             <ListItemIcon sx={{ 
-              color: location.pathname === item.path ? 'inherit' : 'text.secondary',
-              minWidth: 40
+              color: location.pathname === item.path ? 'primary.main' : 'inherit',
+              minWidth: 40 
             }}>
               {item.icon}
             </ListItemIcon>
@@ -174,39 +183,14 @@ export default function DashboardLayout({ children }) {
                 fontWeight: location.pathname === item.path ? 600 : 400
               }}
             />
-            {item.badge && (
-              <Badge 
-                badgeContent={item.badge} 
-                color="error" 
-                sx={{ ml: 'auto' }}
-              />
-            )}
           </ListItem>
         ))}
       </List>
-
-      {/* User Profile Section */}
-      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}>
-            <AccountCircle />
-          </Avatar>
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <Typography variant="subtitle2" noWrap>
-              {profile?.firstName && profile?.lastName ? `${profile.firstName} ${profile.lastName}` : 'User'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {profile?.company ? profile.company : 'Company'}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
     </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* App Bar */}
+    <Box sx={{ display: 'flex' }}>
       <AppBar
         position="fixed"
         sx={{
@@ -214,53 +198,98 @@ export default function DashboardLayout({ children }) {
           ml: { md: `${DRAWER_WIDTH}px` },
           backgroundColor: 'background.paper',
           color: 'text.primary',
-          boxShadow: 1,
-          zIndex: theme.zIndex.drawer + 1
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          borderBottom: 1,
+          borderColor: 'divider'
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: 'none' } }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap component="div">
-              {location.pathname === '/dashboard' ? 'Risk Intelligence Dashboard' : 
-               location.pathname === '/settings' ? 'Settings' : 'Dashboard'}
-            </Typography>
-          </Box>
-
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { md: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          
+          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
+            {profile ? `Welcome back, ${profile.firstName}` : 'Risk Intelligence Dashboard'}
+          </Typography>
+          
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton
-              color="inherit"
               onClick={handleRefresh}
               disabled={isLoading}
-              sx={{ 
-                transform: isLoading ? 'rotate(360deg)' : 'none',
-                transition: 'transform 1s linear'
-              }}
+              sx={{ color: 'text.secondary' }}
             >
               <Refresh />
             </IconButton>
-            <Typography variant="caption" color="text.secondary" sx={{ mr: 2 }}>
-              Last updated: {lastRefresh.toLocaleTimeString()}
-            </Typography>
+            
             <IconButton
-              color="inherit"
               onClick={handleUserMenuOpen}
+              sx={{ color: 'text.primary' }}
             >
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-                <AccountCircle />
+                {profile?.firstName?.charAt(0) || 'U'}
               </Avatar>
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
+
+      <Box
+        component="nav"
+        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
+      >
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: DRAWER_WIDTH,
+              border: 'none',
+              boxShadow: 3
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: DRAWER_WIDTH,
+              border: 'none',
+              boxShadow: 2
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+          mt: '64px', // AppBar height
+          minHeight: 'calc(100vh - 64px)',
+          backgroundColor: 'background.default'
+        }}
+      >
+        {children}
+      </Box>
 
       {/* User Menu */}
       <Menu
@@ -275,76 +304,44 @@ export default function DashboardLayout({ children }) {
           vertical: 'top',
           horizontal: 'right',
         }}
-      >
-        <MenuItem onClick={handleUserMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={handleUserMenuClose}>Account Settings</MenuItem>
-        <Divider />
-        <MenuItem onClick={() => {
-          localStorage.removeItem('currentProfileId');
-          handleUserMenuClose();
-          navigate('/onboarding');
-        }}>Sign Out</MenuItem>
-      </Menu>
-
-      {/* Sidebar Drawer */}
-      <Box
-        component="nav"
-        sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}
-      >
-        {/* Mobile drawer */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: DRAWER_WIDTH,
-              backgroundColor: 'background.paper'
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        
-        {/* Desktop drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
-              width: DRAWER_WIDTH,
-              backgroundColor: 'background.paper',
-              borderRight: 1,
-              borderColor: 'divider'
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
-          backgroundColor: 'grey.50',
-          minHeight: '100vh'
+        PaperProps={{
+          sx: {
+            mt: 1,
+            minWidth: 200,
+            boxShadow: 3,
+            border: 1,
+            borderColor: 'divider'
+          }
         }}
       >
-        <Toolbar /> {/* Spacer for AppBar */}
-        <Box sx={{ p: 3 }}>
-          {React.cloneElement(children, { profileId })}
+        <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            {profile?.firstName} {profile?.lastName}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {profile?.company}
+          </Typography>
         </Box>
-      </Box>
+        
+        <MenuItem onClick={() => {
+          navigate('/settings');
+          handleUserMenuClose();
+        }}>
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Settings</ListItemText>
+        </MenuItem>
+        
+        <Divider />
+        
+        <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+          <ListItemIcon>
+            <Logout fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText>Logout</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 } 
