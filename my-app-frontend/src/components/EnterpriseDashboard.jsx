@@ -53,7 +53,7 @@ export default function EnterpriseDashboard({ profileId }) {
   const [relevantEvents, setRelevantEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+
   const [actionSteps, setActionSteps] = useState([]);
 
   // Fallback to localStorage if profileId is not provided
@@ -273,14 +273,12 @@ export default function EnterpriseDashboard({ profileId }) {
 
       setProfile(profileResponse.profile);
       setRelevantEvents(eventsResponse.events || sampleEvents);
-      setLastUpdated(new Date());
       
       info(`Dashboard loaded successfully. Found ${eventsResponse.events?.length || 0} relevant events.`);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
       // Fall back to sample data
       setRelevantEvents(sampleEvents);
-      setLastUpdated(new Date());
     } finally {
       setLoading(false);
     }
@@ -387,7 +385,7 @@ export default function EnterpriseDashboard({ profileId }) {
               Welcome back, {profile?.firstName || 'User'}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {profile?.company || 'Your Company'} • Last updated: {lastUpdated.toLocaleTimeString()}
+              Risk Intelligence Dashboard
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
