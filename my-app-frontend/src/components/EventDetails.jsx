@@ -485,235 +485,268 @@ export default function EventDetails() {
               </Button>
             </Box>
             
-            {/* Custom Actions - Compact List */}
-            {customActions.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                <Typography variant="body2" color="text.secondary">
-                  No custom actions added yet. Add specific actions to address this event's impact.
-                </Typography>
-              </Box>
-            ) : (
-              <List dense sx={{ p: 0 }}>
-                {customActions.map((action) => (
-                  <ListItem key={action.id} sx={{ 
-                    pl: 0, 
-                    border: 1, 
-                    borderColor: 'divider', 
-                    borderRadius: 1, 
-                    mb: 1,
-                    bgcolor: 'background.paper'
-                  }}>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
-                            {action.text}
-                          </Typography>
-                          <Chip
-                            label={action.priority}
-                            size="small"
-                            color={getPriorityColor(action.priority)}
-                            sx={{ fontSize: '0.7rem' }}
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-                          {action.description && (
-                            <Typography variant="caption" color="text.secondary">
-                              {action.description}
-                            </Typography>
-                          )}
-                          {action.dueDate && (
-                            <Typography variant="caption" color="text.secondary">
-                              Due: {new Date(action.dueDate).toLocaleDateString()}
-                            </Typography>
-                          )}
-                          {action.assignedTo && (
-                            <Typography variant="caption" color="text.secondary">
-                              Assigned: {action.assignedTo}
-                            </Typography>
-                          )}
-                        </Box>
-                      }
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        edge="end"
-                        size="small"
-                        onClick={() => handleEditAction(action)}
-                        sx={{ mr: 1 }}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        edge="end"
-                        size="small"
-                        onClick={() => handleDeleteAction(action.id)}
-                        color="error"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
+            {/* Recommended Actions - Compact */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, color: 'text.secondary' }}>
+                Recommended Actions
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {getRecommendedActions(event).map((action, index) => (
+                  <Chip
+                    key={index}
+                    label={action.text}
+                    variant="outlined"
+                    size="small"
+                    onClick={() => handleAddRecommendedAction(action)}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' }
+                    }}
+                  />
                 ))}
-              </List>
-            )}
+              </Box>
+            </Box>
+            
+            {/* Custom Actions - Compact List */}
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, color: 'text.secondary' }}>
+                Your Custom Actions
+              </Typography>
+              {customActions.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No custom actions added yet. Add specific actions to address this event's impact.
+                  </Typography>
+                </Box>
+              ) : (
+                <List dense sx={{ p: 0 }}>
+                  {customActions.map((action) => (
+                    <ListItem key={action.id} sx={{ 
+                      pl: 0, 
+                      border: 1, 
+                      borderColor: 'divider', 
+                      borderRadius: 1, 
+                      mb: 1,
+                      bgcolor: 'background.paper'
+                    }}>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
+                              {action.text}
+                            </Typography>
+                            <Chip
+                              label={action.priority}
+                              size="small"
+                              color={getPriorityColor(action.priority)}
+                              sx={{ fontSize: '0.7rem' }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+                            {action.description && (
+                              <Typography variant="caption" color="text.secondary">
+                                {action.description}
+                              </Typography>
+                            )}
+                            {action.dueDate && (
+                              <Typography variant="caption" color="text.secondary">
+                                Due: {new Date(action.dueDate).toLocaleDateString()}
+                              </Typography>
+                            )}
+                            {action.assignedTo && (
+                              <Typography variant="caption" color="text.secondary">
+                                Assigned: {action.assignedTo}
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          edge="end"
+                          size="small"
+                          onClick={() => handleEditAction(action)}
+                          sx={{ mr: 1 }}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          size="small"
+                          onClick={() => handleDeleteAction(action.id)}
+                          color="error"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
           </Paper>
         </Grid>
 
         {/* Sidebar - Right Side */}
         <Grid item xs={12} lg={4}>
-          {/* Technical Details - Collapsible */}
-          <Paper sx={{ mb: 3 }}>
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Info color="action" />
-                  <Typography variant="h6">Technical Details</Typography>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {/* AI Analysis Scores */}
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Relevance Score
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={event.relevanceScore * 100} 
-                        sx={{ flexGrow: 1 }}
-                      />
-                      <Typography variant="body2">
-                        {Math.round(event.relevanceScore * 100)}%
-                      </Typography>
-                    </Box>
+          {/* Technical Details and Related Events - Side by Side */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* Technical Details - Collapsible */}
+            <Paper>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Info color="action" />
+                    <Typography variant="h6">Technical Details</Typography>
                   </Box>
-                  
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Impact Score
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={(event.analysis?.impactScore || 0.7) * 100} 
-                        sx={{ flexGrow: 1 }}
-                      />
-                      <Typography variant="body2">
-                        {Math.round((event.analysis?.impactScore || 0.7) * 100)}%
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Contributing Factors */}
-                  {event.analysis?.contributingFactors && event.analysis.contributingFactors.length > 0 && (
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {/* AI Analysis Scores */}
                     <Box>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        Contributing Factors
+                        Relevance Score
                       </Typography>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        {event.analysis.contributingFactors.map((factor, index) => (
-                          <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="caption" sx={{ flexGrow: 1 }}>
-                              {factor.factor}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {Math.round(factor.weight * 100)}%
-                            </Typography>
-                          </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={event.relevanceScore * 100} 
+                          sx={{ flexGrow: 1 }}
+                        />
+                        <Typography variant="body2">
+                          {Math.round(event.relevanceScore * 100)}%
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Impact Score
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={(event.analysis?.impactScore || 0.7) * 100} 
+                          sx={{ flexGrow: 1 }}
+                        />
+                        <Typography variant="body2">
+                          {Math.round((event.analysis?.impactScore || 0.7) * 100)}%
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Contributing Factors */}
+                    {event.analysis?.contributingFactors && event.analysis.contributingFactors.length > 0 && (
+                      <Box>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          Contributing Factors
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          {event.analysis.contributingFactors.map((factor, index) => (
+                            <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Typography variant="caption" sx={{ flexGrow: 1 }}>
+                                {factor.factor}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {Math.round(factor.weight * 100)}%
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* Event Details */}
+                    <Divider />
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Regions Affected
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                        {event.regions?.map((region, index) => (
+                          <Chip 
+                            key={index} 
+                            icon={<LocationOn />} 
+                            label={region} 
+                            size="small" 
+                            variant="outlined"
+                          />
                         ))}
                       </Box>
                     </Box>
-                  )}
-
-                  {/* Event Details */}
-                  <Divider />
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Regions Affected
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                      {event.regions?.map((region, index) => (
+                    
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Source
+                      </Typography>
+                      <Link href={event.source?.url} target="_blank" variant="body2">
+                        {event.source?.name}
+                      </Link>
+                      {event.source?.reliability && (
                         <Chip 
-                          key={index} 
-                          icon={<LocationOn />} 
-                          label={region} 
+                          label={`Reliability: ${event.source.reliability}`} 
                           size="small" 
-                          variant="outlined"
+                          color="success"
+                          sx={{ ml: 1 }}
                         />
-                      ))}
+                      )}
+                    </Box>
+
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Status
+                      </Typography>
+                      <Chip 
+                        label={event.status} 
+                        color={event.status === 'developing' ? 'warning' : 'default'}
+                        size="small"
+                      />
+                    </Box>
+
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Last Updated
+                      </Typography>
+                      <Typography variant="body2">
+                        {new Date(event.lastUpdated).toLocaleString()}
+                      </Typography>
                     </Box>
                   </Box>
-                  
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Source
-                    </Typography>
-                    <Link href={event.source?.url} target="_blank" variant="body2">
-                      {event.source?.name}
-                    </Link>
-                    {event.source?.reliability && (
-                      <Chip 
-                        label={`Reliability: ${event.source.reliability}`} 
-                        size="small" 
-                        color="success"
-                        sx={{ ml: 1 }}
-                      />
-                    )}
-                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
 
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Status
-                    </Typography>
-                    <Chip 
-                      label={event.status} 
-                      color={event.status === 'developing' ? 'warning' : 'default'}
-                      size="small"
-                    />
-                  </Box>
-
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Last Updated
-                    </Typography>
-                    <Typography variant="body2">
-                      {new Date(event.lastUpdated).toLocaleString()}
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          </Paper>
-
-          {/* Related Events */}
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Related Events
-            </Typography>
-            {event.analysis?.relatedEvents && event.analysis.relatedEvents.length > 0 ? (
-              <List dense sx={{ p: 0 }}>
-                {event.analysis.relatedEvents.map((relatedEvent) => (
-                  <ListItem key={relatedEvent.id} sx={{ pl: 0, mb: 1 }}>
-                    <ListItemText
-                      primary={relatedEvent.title}
-                      secondary={`Relevance: ${Math.round(relatedEvent.relevance * 100)}%`}
-                    />
-                    <Button size="small" variant="text">
-                      View
-                    </Button>
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                No related events found
+            {/* Related Events - Horizontal Layout */}
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Related Events
               </Typography>
-            )}
-          </Paper>
+              {event.analysis?.relatedEvents && event.analysis.relatedEvents.length > 0 ? (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {event.analysis.relatedEvents.map((relatedEvent) => (
+                    <Chip
+                      key={relatedEvent.id}
+                      label={relatedEvent.title}
+                      variant="outlined"
+                      size="small"
+                      onClick={() => {
+                        // Navigate to a new page for related event details
+                        // For now, just show a toast
+                        info(`Navigate to related event ${relatedEvent.title}`);
+                      }}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                  No related events found
+                </Typography>
+              )}
+            </Paper>
+          </Box>
         </Grid>
       </Grid>
 
