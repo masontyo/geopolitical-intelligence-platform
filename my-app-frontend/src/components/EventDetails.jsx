@@ -187,7 +187,10 @@ export default function EventDetails() {
   const handleAddRecommendedAction = (action) => {
     const newAction = {
       id: Date.now(),
-      ...action,
+      text: action.text || 'Action step',
+      description: action.description || '',
+      priority: action.priority || 'medium',
+      status: 'pending', // Recommended actions start as pending
       eventId: event.id,
       eventTitle: event.title,
       isCustomAction: false, // Mark as recommended action
@@ -208,7 +211,12 @@ export default function EventDetails() {
 
     const newAction = {
       id: Date.now(),
-      ...actionFormData,
+      text: actionFormData.text || 'Custom action',
+      description: actionFormData.description || '',
+      priority: actionFormData.priority || 'medium',
+      status: actionFormData.status || 'pending',
+      dueDate: actionFormData.dueDate || '',
+      assignedTo: actionFormData.assignedTo || '',
       eventId: event.id,
       eventTitle: event.title,
       isCustomAction: true, // Mark as custom action
@@ -604,25 +612,19 @@ export default function EventDetails() {
                   {customActions.map((action) => (
                     <ListItem key={action.id} sx={{ pl: 0, border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}>
                       <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
-                              {action.text}
-                            </Typography>
-                            <Chip
-                              label={action.status}
-                              size="small"
-                              color={getStatusColor(action.status)}
-                              sx={{ fontSize: '0.7rem' }}
-                            />
-                            <Chip
-                              label={action.priority}
-                              size="small"
-                              color={getPriorityColor(action.priority)}
-                              sx={{ fontSize: '0.7rem' }}
-                            />
-                          </Box>
-                        }
+                                                 primary={
+                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                             <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
+                               {action.text}
+                             </Typography>
+                             <Chip
+                               label={action.priority}
+                               size="small"
+                               color={getPriorityColor(action.priority)}
+                               sx={{ fontSize: '0.7rem' }}
+                             />
+                           </Box>
+                         }
                         secondary={
                           <Box>
                             {action.description && (

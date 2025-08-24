@@ -179,6 +179,7 @@ export default function EnterpriseDashboard({ profileId }) {
           if (dashboardActions) {
             try {
               const parsedActions = JSON.parse(dashboardActions);
+              console.log('Dashboard: Loaded action steps from profile:', parsedActions);
               setActionSteps(parsedActions);
             } catch (err) {
               console.error('Error loading dashboard action steps:', err);
@@ -241,6 +242,7 @@ export default function EnterpriseDashboard({ profileId }) {
       if (e.key === 'dashboard_action_steps') {
         try {
           const newActions = JSON.parse(e.newValue || '[]');
+          console.log('Dashboard: Action steps updated:', newActions);
           setActionSteps(newActions);
         } catch (err) {
           console.error('Error parsing updated action steps:', err);
@@ -580,18 +582,12 @@ export default function EnterpriseDashboard({ profileId }) {
                       </Typography>
                     )}
                     
-                    {/* Priority and Status */}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {/* Priority Only - Status already shown in header */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
                       <Chip 
                         label={action.priority} 
                         size="small" 
                         color={getPriorityColor(action.priority)}
-                        sx={{ fontSize: '0.7rem' }}
-                      />
-                      <Chip 
-                        label={action.status} 
-                        size="small" 
-                        color={getStatusColor(action.status)}
                         sx={{ fontSize: '0.7rem' }}
                       />
                     </Box>
