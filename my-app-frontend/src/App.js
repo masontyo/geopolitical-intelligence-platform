@@ -11,7 +11,7 @@ import EnterpriseDashboard from './components/EnterpriseDashboard';
 import EventDetails from './components/EventDetails';
 import EventsList from './components/EventsList';
 import TasksPage from './components/TasksPage';
-import ChecklistPage from './components/ChecklistPage';
+
 import AlertsPage from './components/AlertsPage';
 import Settings from './components/Settings';
 import CompanyProfile from './components/settings/CompanyProfile';
@@ -190,7 +190,7 @@ function App() {
                 <Route path="/checklist" element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      <ChecklistPage />
+                      <Navigate to="/tasks" replace />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } />

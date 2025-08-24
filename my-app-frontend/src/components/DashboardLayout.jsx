@@ -101,8 +101,7 @@ export default function DashboardLayout({ children }) {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: `/dashboard/${profileId || ''}` },
     { text: 'Events', icon: <Security />, path: '/events' },
-    { text: 'Tasks', icon: <SettingsIcon />, path: '/tasks' },
-    { text: 'Checklist', icon: <Security />, path: '/checklist' },
+          { text: 'Tasks & Checklists', icon: <SettingsIcon />, path: '/tasks' },
     { text: 'Alerts', icon: <Security />, path: '/alerts' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' }
   ];
