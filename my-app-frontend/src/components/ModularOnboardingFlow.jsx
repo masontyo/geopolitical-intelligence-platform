@@ -10,6 +10,11 @@ import {
   Container,
   Fade
 } from "@mui/material";
+import {
+  Person,
+  Business,
+  CheckCircle
+} from "@mui/icons-material";
 import BasicInfoForm from "./onboarding/BasicInfoForm";
 import { useToast } from "./ToastNotifications";
 
@@ -17,137 +22,101 @@ export default function ModularOnboardingFlow() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Form data state
-  const [profileData, setProfileData] = useState({
-    firstName: '',
-    lastName: '',
-    company: '',
-    companySize: '',
-    industry: '',
-    businessUnits: [],
-    riskCategories: [],
-    regions: [],
-    notificationFrequency: '',
-    notificationMediums: []
-  });
-  
-  const { success, error: showError } = useToast();
-
-  // Autosave functionality
-  useEffect(() => {
-    const saveData = () => {
-      const onboardingData = {
-        profileData,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('onboarding_progress', JSON.stringify(onboardingData));
-    };
-
-    // Debounced autosave
-    const timeoutId = setTimeout(saveData, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [profileData]);
-
-  // Load saved progress on mount
-  useEffect(() => {
-    const savedData = localStorage.getItem('onboarding_progress');
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        const isRecent = Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000; // 24 hours
-        
-        if (isRecent) {
-          setProfileData(parsed.profileData || {});
-        } else {
-          localStorage.removeItem('onboarding_progress');
-        }
-      } catch (err) {
-        console.error('Error loading saved progress:', err);
-        localStorage.removeItem('onboarding_progress');
-      }
-    }
-  }, []);
+  const [profileData, setProfileData] = useState(null);
 
   const handleProfileSubmit = async (data) => {
     setLoading(true);
+    setError(null);
+
     try {
-      // Here you would typically save to your backend
-      console.log('Profile data:', data);
+      // Save profile data to localStorage
+      const profileToSave = {
+        ...data,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save to multiple locations for persistence
+      localStorage.setItem('user_profile', JSON.stringify(profileToSave));
+      localStorage.setItem('currentProfileId', profileToSave.id);
+      localStorage.setItem(`profile_${profileToSave.id}`, JSON.stringify(profileToSave));
       
-      // Save profile data to persistent storage for dashboard
-      localStorage.setItem('user_profile', JSON.stringify(data));
+      // Save onboarding progress
+      localStorage.setItem('onboarding_progress', JSON.stringify({
+        profileData: profileToSave,
+        completed: true,
+        completedAt: new Date().toISOString()
+      }));
+
+      setProfileData(profileToSave);
       
-      // Clear saved progress
-      localStorage.removeItem('onboarding_progress');
-      
-      success('Profile information saved! Redirecting to dashboard...');
-      
-      // Navigate directly to dashboard
+      // Show success message and redirect to dashboard
       setTimeout(() => {
         navigate('/dashboard');
-      }, 1500);
-      
+      }, 1000);
+
     } catch (err) {
+      console.error('Error saving profile:', err);
       setError('Failed to save profile. Please try again.');
-      showError('Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleError = (errorMessage) => {
+    setError(errorMessage);
+  };
+
   if (loading) {
     return (
-      <Container maxWidth="sm" sx={{ py: 8 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-          <CircularProgress size={60} />
-          <Typography variant="h6">Setting up your dashboard...</Typography>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <CircularProgress size={60} sx={{ mb: 3 }} />
+          <Typography variant="h5" gutterBottom>
+            Setting up your profile...
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Please wait while we configure your personalized experience
+          </Typography>
         </Box>
       </Container>
     );
   }
 
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Paper elevation={2} sx={{ p: 4, mb: 4, textAlign: 'center' }}>
-        <Typography variant="h4" gutterBottom color="primary">
-          Welcome to Geopolitical Intelligence Platform
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Let's get you set up in under 5 minutes
-        </Typography>
-      </Paper>
+  if (profileData) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Fade in={true} timeout={1000}>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 3 }} />
+            <Typography variant="h4" gutterBottom sx={{ color: 'success.main' }}>
+              Profile Setup Complete!
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              Redirecting you to your personalized dashboard...
+            </Typography>
+            <CircularProgress size={24} />
+          </Box>
+        </Fade>
+      </Container>
+    );
+  }
 
-      {/* Error Display */}
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
       {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mb: 3 }}
-          onClose={() => setError(null)}
-        >
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      {/* Content Area */}
-      <Paper elevation={3} sx={{ p: 4, minHeight: 500 }}>
-        <Fade in={true} timeout={500}>
-          <Box>
-            <BasicInfoForm
-              data={profileData}
-              onSubmit={handleProfileSubmit}
-              onError={setError}
-            />
-          </Box>
-        </Fade>
-      </Paper>
-
-      {/* Help Section */}
-      <Paper elevation={1} sx={{ p: 2, mt: 3, bgcolor: 'grey.50' }}>
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-          Need help? Contact support at support@geointel.com or call +1-555-INTEL-01
-        </Typography>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <BasicInfoForm 
+          data={{}}
+          onSubmit={handleProfileSubmit}
+          onError={handleError}
+        />
       </Paper>
     </Container>
   );

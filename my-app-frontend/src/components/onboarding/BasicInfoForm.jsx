@@ -561,14 +561,15 @@ export default function BasicInfoForm({ data, onSubmit, onError }) {
 
       <Divider sx={{ my: 4 }} />
 
-      {/* Submit Button */}
+      {/* Complete Setup Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <Button
-          type="submit"
+          type="button"
           variant="contained"
           size="large"
           endIcon={<ArrowForward />}
           sx={{ minWidth: 200 }}
+          onClick={() => onSubmit(formData)}
         >
           Complete Setup & Go to Dashboard
         </Button>

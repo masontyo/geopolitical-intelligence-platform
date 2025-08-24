@@ -54,6 +54,7 @@ export default function EnterpriseDashboard({ profileId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [actionSteps, setActionSteps] = useState([]);
 
   // Fallback to localStorage if profileId is not provided
   const effectiveProfileId = profileId || localStorage.getItem('currentProfileId');
@@ -172,6 +173,17 @@ export default function EnterpriseDashboard({ profileId }) {
           const parsed = JSON.parse(userProfile);
           console.log('EnterpriseDashboard: Loaded profile from user_profile:', parsed);
           setProfile(parsed);
+          
+          // Load action steps from dashboard storage
+          const dashboardActions = localStorage.getItem('dashboard_action_steps');
+          if (dashboardActions) {
+            try {
+              const parsedActions = JSON.parse(dashboardActions);
+              setActionSteps(parsedActions);
+            } catch (err) {
+              console.error('Error loading dashboard action steps:', err);
+            }
+          }
           return;
         }
         
@@ -181,6 +193,17 @@ export default function EnterpriseDashboard({ profileId }) {
           const parsed = JSON.parse(onboardingData);
           if (parsed.profileData) {
             setProfile(parsed.profileData);
+            
+            // Load action steps from dashboard storage
+            const dashboardActions = localStorage.getItem('dashboard_action_steps');
+            if (dashboardActions) {
+              try {
+                const parsedActions = JSON.parse(dashboardActions);
+                setActionSteps(parsedActions);
+              } catch (err) {
+                console.error('Error loading dashboard action steps:', err);
+              }
+            }
             return;
           }
         }
@@ -189,7 +212,19 @@ export default function EnterpriseDashboard({ profileId }) {
         if (effectiveProfileId) {
           const profileData = localStorage.getItem(`profile_${effectiveProfileId}`);
           if (profileData) {
-            setProfile(JSON.parse(profileData));
+            const parsed = JSON.parse(profileData);
+            setProfile(parsed);
+            
+            // Load action steps from dashboard storage
+            const dashboardActions = localStorage.getItem('dashboard_action_steps');
+            if (dashboardActions) {
+              try {
+                const parsedActions = JSON.parse(dashboardActions);
+                setActionSteps(parsedActions);
+              } catch (err) {
+                console.error('Error loading dashboard action steps:', err);
+              }
+            }
           }
         }
       } catch (error) {
@@ -199,6 +234,23 @@ export default function EnterpriseDashboard({ profileId }) {
 
     loadProfile();
   }, [effectiveProfileId]);
+
+  // Listen for changes to action steps in localStorage
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'dashboard_action_steps') {
+        try {
+          const newActions = JSON.parse(e.newValue || '[]');
+          setActionSteps(newActions);
+        } catch (err) {
+          console.error('Error parsing updated action steps:', err);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const loadDashboardData = async () => {
     if (!effectiveProfileId) {
@@ -481,22 +533,14 @@ export default function EnterpriseDashboard({ profileId }) {
           top: 24
         }}>
           <Paper sx={{ p: 3, height: 'fit-content' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Action Steps
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Add />}
-                onClick={() => navigate('/actions')}
-              >
-                Add New
-              </Button>
-            </Box>
+                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+               <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                 Action Steps
+               </Typography>
+             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {sampleActionSteps.map((action) => (
+              {actionSteps.length > 0 ? actionSteps.map((action) => (
                 <Box key={action.id} sx={{ 
                   p: 2, 
                   border: 1, 
@@ -520,7 +564,7 @@ export default function EnterpriseDashboard({ profileId }) {
                   {/* Action Metadata */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="caption" color="text.secondary">
-                      {action.event}
+                      {action.category || 'General'}
                     </Typography>
                     <Chip 
                       label={action.priority} 
@@ -530,7 +574,16 @@ export default function EnterpriseDashboard({ profileId }) {
                     />
                   </Box>
                 </Box>
-              ))}
+              )) : (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    No action steps defined yet
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Complete onboarding to add action steps, or add them later from your dashboard.
+                  </Typography>
+                </Box>
+              )}
             </Box>
 
             <Divider sx={{ my: 3 }} />
