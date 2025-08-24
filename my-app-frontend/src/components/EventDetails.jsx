@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -65,6 +65,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 export default function EventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -373,8 +374,8 @@ export default function EventDetails() {
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
-        <Button onClick={() => navigate('/events')} startIcon={<ArrowBack />}>
-          Back to Events
+        <Button onClick={() => navigate(-1)} startIcon={<ArrowBack />}>
+          Go Back
         </Button>
       </Container>
     );
@@ -386,8 +387,8 @@ export default function EventDetails() {
         <Alert severity="warning" sx={{ mb: 3 }}>
           Event not found
         </Alert>
-        <Button onClick={() => navigate('/events')} startIcon={<ArrowBack />}>
-          Back to Events
+        <Button onClick={() => navigate(-1)} startIcon={<ArrowBack />}>
+          Go Back
         </Button>
       </Container>
     );
@@ -397,7 +398,7 @@ export default function EventDetails() {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <IconButton onClick={() => navigate('/events')} sx={{ mr: 1 }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ mr: 1 }}>
           <ArrowBack />
         </IconButton>
         <Box sx={{ flexGrow: 1 }}>

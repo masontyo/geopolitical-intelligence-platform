@@ -313,7 +313,9 @@ export default function EnterpriseDashboard({ profileId }) {
   };
 
   const handleViewEventDetails = (eventId) => {
-    navigate(`/event/${eventId}`);
+    navigate(`/event/${eventId}`, { 
+      state: { from: '/dashboard' }
+    });
   };
 
   const handleViewAllEvents = () => {
@@ -597,7 +599,9 @@ export default function EnterpriseDashboard({ profileId }) {
                           textDecoration: 'underline',
                           '&:hover': { opacity: 0.8 }
                         }}
-                        onClick={() => navigate(`/event/${action.eventId}`)}
+                        onClick={() => navigate(`/event/${action.eventId}`, { 
+                          state: { from: '/dashboard' }
+                        })}
                       >
                         📋 {action.eventTitle}
                       </Typography>

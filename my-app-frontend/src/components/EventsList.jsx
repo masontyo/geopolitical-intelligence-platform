@@ -148,7 +148,9 @@ export default function EventsList() {
   };
 
   const handleEventClick = (eventId) => {
-    navigate(`/event/${eventId}`);
+    navigate(`/event/${eventId}`, { 
+      state: { from: '/events' }
+    });
   };
 
   if (loading) {
