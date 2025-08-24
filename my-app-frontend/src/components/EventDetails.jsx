@@ -55,7 +55,8 @@ import {
   Add,
   Edit,
   Delete,
-  Info
+  Info,
+  CheckCircle
 } from '@mui/icons-material';
 import { eventsAPI } from '../services/api';
 import { useToast } from './ToastNotifications';
@@ -189,6 +190,16 @@ export default function EventDetails() {
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'in-progress': return 'warning';
+      case 'pending': return 'default';
+      case 'on-hold': return 'error';
+      default: return 'default';
+    }
+  };
+
   const getRecommendedActions = (event) => {
     // Generate context-aware recommended actions based on event type
     const baseActions = [
@@ -308,6 +319,20 @@ export default function EventDetails() {
     
     setCustomActions(customActions.filter(action => action.id !== actionId));
     success('Action step deleted');
+  };
+
+  const handleCompleteAction = (actionId) => {
+    // Update action status to completed in both dashboard storage and local state
+    const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
+    const updatedActions = existingActions.map(action => 
+      action.id === actionId ? { ...action, status: 'completed', completedAt: new Date().toISOString() } : action
+    );
+    localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
+    
+    setCustomActions(customActions.map(action => 
+      action.id === actionId ? { ...action, status: 'completed', completedAt: new Date().toISOString() } : action
+    ));
+    success('Action step marked as completed');
   };
 
   const validateActionForm = () => {
@@ -541,6 +566,12 @@ export default function EventDetails() {
                               color={getPriorityColor(action.priority)}
                               sx={{ fontSize: '0.7rem' }}
                             />
+                            <Chip
+                              label={action.status}
+                              size="small"
+                              color={getStatusColor(action.status)}
+                              sx={{ fontSize: '0.7rem' }}
+                            />
                           </Box>
                         }
                         secondary={
@@ -580,6 +611,16 @@ export default function EventDetails() {
                         >
                           <Delete />
                         </IconButton>
+                        {action.status !== 'completed' && (
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleCompleteAction(action.id)}
+                            color="success"
+                          >
+                            <CheckCircle />
+                          </IconButton>
+                        )}
                       </ListItemSecondaryAction>
                     </ListItem>
                   ))}

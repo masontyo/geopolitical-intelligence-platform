@@ -37,7 +37,8 @@ import {
   Add,
   Flag,
   Assignment,
-  CheckBox
+  CheckBox,
+  Delete
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { userProfileAPI } from '../services/api';
@@ -253,6 +254,28 @@ export default function EnterpriseDashboard({ profileId }) {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+
+  const handleCompleteAction = (actionId) => {
+    // Update action status to completed in dashboard storage
+    const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
+    const updatedActions = existingActions.map(action => 
+      action.id === actionId ? { ...action, status: 'completed', completedAt: new Date().toISOString() } : action
+    );
+    localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
+    
+    setActionSteps(updatedActions);
+    success('Action step marked as completed');
+  };
+
+  const handleDeleteAction = (actionId) => {
+    // Remove action from dashboard storage
+    const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
+    const updatedActions = existingActions.filter(action => action.id !== actionId);
+    localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
+    
+    setActionSteps(updatedActions);
+    success('Action step deleted');
+  };
 
   const loadDashboardData = async () => {
     if (!effectiveProfileId) {
@@ -589,6 +612,28 @@ export default function EnterpriseDashboard({ profileId }) {
                         sx={{ fontSize: '0.7rem' }}
                       />
                     </Box>
+                  </Box>
+
+                  {/* Action Buttons */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
+                    {action.status !== 'completed' && (
+                      <IconButton
+                        size="small"
+                        onClick={() => handleCompleteAction(action.id)}
+                        color="success"
+                        sx={{ p: 0.5 }}
+                      >
+                        <CheckCircle fontSize="small" />
+                      </IconButton>
+                    )}
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteAction(action.id)}
+                      color="error"
+                      sx={{ p: 0.5 }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
                   </Box>
                 </Box>
               )) : (
