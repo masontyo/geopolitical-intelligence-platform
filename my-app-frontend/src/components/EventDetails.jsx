@@ -14,7 +14,6 @@ import {
   Alert,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   ListItemSecondaryAction,
   Accordion,
@@ -55,7 +54,8 @@ import {
   BookmarkBorder,
   Add,
   Edit,
-  Delete
+  Delete,
+  Info
 } from '@mui/icons-material';
 import { eventsAPI } from '../services/api';
 import { useToast } from './ToastNotifications';
@@ -99,88 +99,116 @@ export default function EventDetails() {
   }, [event]);
 
   const loadEventDetails = async () => {
-    setLoading(true);
-    setError(null);
-
     try {
-      console.log('🔍 Loading event details for ID:', eventId);
-      const response = await eventsAPI.getEventDetails(eventId);
-      console.log('📡 API Response:', response);
+      setLoading(true);
+      // For now, use sample data - replace with actual API call later
+      const sampleEvent = {
+        id: eventId,
+        title: "Supply Chain Disruption in Asia Pacific",
+        description: "Major port closures and shipping delays affecting key trade routes in the Asia Pacific region. This disruption is expected to impact global supply chains and may lead to delays in manufacturing and retail operations.",
+        category: "Supply Chain Risk",
+        severity: "high",
+        regions: ["Asia Pacific", "Global"],
+        eventDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        lastUpdated: new Date(),
+        status: "developing",
+        relevanceScore: 0.85,
+        source: {
+          name: "Reuters",
+          url: "https://reuters.com",
+          reliability: "High"
+        },
+        rationale: "This event represents a significant supply chain disruption that could impact multiple industries globally. The Asia Pacific region is a critical hub for manufacturing and trade.",
+        analysis: {
+          impactScore: 0.8,
+          contributingFactors: [
+            { factor: "Port Infrastructure Issues", weight: 0.4 },
+            { factor: "Weather Conditions", weight: 0.3 },
+            { factor: "Labor Disputes", weight: 0.3 }
+          ],
+          timeline: [
+            { event: "Initial port closures reported", date: new Date(Date.now() - 4 * 60 * 60 * 1000), impact: "high" },
+            { event: "Shipping companies announce delays", date: new Date(Date.now() - 3 * 60 * 60 * 1000), impact: "medium" },
+            { event: "Global supply chain impact assessment", date: new Date(Date.now() - 2 * 60 * 60 * 1000), impact: "high" }
+          ],
+          recommendations: [
+            "Assess current inventory levels",
+            "Identify alternative suppliers",
+            "Update supply chain risk assessment"
+          ],
+          relatedEvents: [
+            { id: 2, title: "Previous Port Disruption in 2023", relevance: 0.7 },
+            { id: 3, title: "Supply Chain Resilience Report", relevance: 0.6 }
+          ]
+        }
+      };
       
-      if (response.success) {
-        console.log('✅ Event data received:', response.event);
-        setEvent(response.event);
-      } else {
-        console.error('❌ API returned error:', response);
-        setError('Failed to load event details');
-        showError('Failed to load event details');
-      }
-    } catch (error) {
-      console.error('❌ Error loading event details:', error);
-      setError(error.message || 'Failed to load event details');
-      showError(error.message || 'Failed to load event details');
-    } finally {
+      setEvent(sampleEvent);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading event details:', err);
+      setError('Failed to load event details');
       setLoading(false);
     }
   };
 
-  const handleCreateCrisisRoom = () => {
-    // Navigate to crisis room creation or open crisis room modal
-    info('Crisis room creation initiated');
-  };
-
   const handleBookmark = () => {
     setBookmarked(!bookmarked);
-    success(bookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
+    success(bookmarked ? 'Bookmark removed' : 'Event bookmarked');
   };
 
-  // Action Steps Functions
+  const handleCreateCrisisRoom = () => {
+    info('Crisis room creation feature coming soon');
+  };
+
+  const getSeverityColor = (severity) => {
+    switch (severity) {
+      case 'high': return 'error';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+      default: return 'default';
+    }
+  };
+
+  const getSeverityIcon = (severity) => {
+    switch (severity) {
+      case 'high': return <Warning color="error" />;
+      case 'medium': return <Warning color="warning" />;
+      case 'low': return <Warning color="success" />;
+      default: return <Warning />;
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'critical': return 'error';
+      case 'high': return 'error';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+      default: return 'default';
+    }
+  };
+
   const getRecommendedActions = (event) => {
-    if (!event) return [];
-    
+    // Generate context-aware recommended actions based on event type
     const baseActions = [
       {
-        text: 'Assess immediate impact on operations',
-        description: 'Evaluate how this event affects your current business operations and identify critical areas that need immediate attention.',
-        priority: 'high'
+        text: "Assess immediate impact on operations",
+        description: "Evaluate how this event affects current business operations",
+        priority: "high"
       },
       {
-        text: 'Review supply chain exposure',
-        description: 'Analyze potential disruptions to your supply chain and identify alternative suppliers or contingency plans.',
-        priority: 'medium'
+        text: "Review supply chain exposure",
+        description: "Identify vulnerable suppliers and alternative sources",
+        priority: "medium"
       },
       {
-        text: 'Update risk assessment',
-        description: 'Incorporate this event into your overall risk assessment and update mitigation strategies accordingly.',
-        priority: 'medium'
+        text: "Update risk assessment",
+        description: "Incorporate new information into existing risk frameworks",
+        priority: "low"
       }
     ];
-
-    // Add category-specific actions
-    if (event.categories?.includes('Supply Chain Risk')) {
-      baseActions.push({
-        text: 'Contact key suppliers for status update',
-        description: 'Reach out to critical suppliers to understand their current status and any potential delays.',
-        priority: 'high'
-      });
-    }
-
-    if (event.categories?.includes('Cybersecurity Risk')) {
-      baseActions.push({
-        text: 'Review security protocols',
-        description: 'Assess current cybersecurity measures and identify any vulnerabilities that this event may expose.',
-        priority: 'high'
-      });
-    }
-
-    if (event.categories?.includes('Regulatory Risk')) {
-      baseActions.push({
-        text: 'Review compliance requirements',
-        description: 'Analyze how this event may affect your regulatory compliance and identify required updates.',
-        priority: 'medium'
-      });
-    }
-
+    
     return baseActions;
   };
 
@@ -193,17 +221,16 @@ export default function EventDetails() {
       status: 'pending', // Recommended actions start as pending
       eventId: event.id,
       eventTitle: event.title,
-      isCustomAction: false, // Mark as recommended action
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      isCustomAction: false,
+      createdAt: new Date().toISOString()
     };
 
-    // Save to localStorage for dashboard (don't add to local custom actions state)
+    // Save to dashboard storage
     const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
     const updatedActions = [...existingActions, newAction];
     localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
-
-    success('Action added to your dashboard');
+    
+    success('Action step added to dashboard');
   };
 
   const handleAddCustomAction = () => {
@@ -219,21 +246,19 @@ export default function EventDetails() {
       assignedTo: actionFormData.assignedTo || '',
       eventId: event.id,
       eventTitle: event.title,
-      isCustomAction: true, // Mark as custom action
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      isCustomAction: true,
+      createdAt: new Date().toISOString()
     };
 
-    setCustomActions(prev => [...prev, newAction]);
-
-    // Save to localStorage for dashboard
+    // Save to both dashboard storage and local state
     const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
     const updatedActions = [...existingActions, newAction];
     localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
-
-    resetActionForm();
+    
+    setCustomActions([...customActions, newAction]);
     setShowAddDialog(false);
-    success('Custom action added successfully');
+    resetActionForm();
+    success('Custom action step added');
   };
 
   const handleEditAction = (action) => {
@@ -252,53 +277,53 @@ export default function EventDetails() {
   const handleUpdateAction = () => {
     if (!validateActionForm()) return;
 
-    const updatedActions = customActions.map(action =>
-      action.id === editingAction.id
-        ? { ...action, ...actionFormData, updatedAt: new Date().toISOString() }
-        : action
-    );
+    const updatedAction = {
+      ...editingAction,
+      ...actionFormData,
+      updatedAt: new Date().toISOString()
+    };
 
-    setCustomActions(updatedActions);
-
-    // Update in localStorage
+    // Update in both dashboard storage and local state
     const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
-    const updatedDashboardActions = existingActions.map(action =>
-      action.id === editingAction.id
-        ? { ...action, ...actionFormData, updatedAt: new Date().toISOString() }
-        : action
+    const updatedActions = existingActions.map(action => 
+      action.id === editingAction.id ? updatedAction : action
     );
-    localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedDashboardActions));
-
-    resetActionForm();
+    localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
+    
+    setCustomActions(customActions.map(action => 
+      action.id === editingAction.id ? updatedAction : action
+    ));
+    
     setShowAddDialog(false);
     setEditingAction(null);
-    success('Action updated successfully');
+    resetActionForm();
+    success('Action step updated');
   };
 
   const handleDeleteAction = (actionId) => {
-    setCustomActions(prev => prev.filter(action => action.id !== actionId));
-
-    // Remove from localStorage
+    // Remove from both dashboard storage and local state
     const existingActions = JSON.parse(localStorage.getItem('dashboard_action_steps') || '[]');
     const updatedActions = existingActions.filter(action => action.id !== actionId);
     localStorage.setItem('dashboard_action_steps', JSON.stringify(updatedActions));
-
-    success('Action removed successfully');
+    
+    setCustomActions(customActions.filter(action => action.id !== actionId));
+    success('Action step deleted');
   };
 
   const validateActionForm = () => {
-    const newErrors = {};
+    const errors = {};
     if (!actionFormData.text.trim()) {
-      newErrors.text = 'Action description is required';
+      errors.text = 'Action description is required';
     }
     if (!actionFormData.priority) {
-      newErrors.priority = 'Priority is required';
+      errors.priority = 'Priority is required';
     }
     if (!actionFormData.status) {
-      newErrors.status = 'Status is required';
+      errors.status = 'Status is required';
     }
-    setActionErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    
+    setActionErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const resetActionForm = () => {
@@ -313,55 +338,6 @@ export default function EventDetails() {
     setActionErrors({});
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'low': return 'success';
-      case 'medium': return 'warning';
-      case 'high': return 'error';
-      case 'critical': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed': return 'success';
-      case 'in-progress': return 'warning';
-      case 'pending': return 'default';
-      case 'on-hold': return 'info';
-      default: return 'default';
-    }
-  };
-
-  const getSeverityColor = (severity) => {
-    switch (severity?.toLowerCase()) {
-      case 'critical': return 'error';
-      case 'high': return 'warning';
-      case 'medium': return 'info';
-      case 'low': return 'success';
-      default: return 'default';
-    }
-  };
-
-  const getSeverityIcon = (severity) => {
-    switch (severity?.toLowerCase()) {
-      case 'critical': return <Warning color="error" />;
-      case 'high': return <Warning color="warning" />;
-      case 'medium': return <Timeline color="info" />;
-      case 'low': return <Timeline color="success" />;
-      default: return <Timeline />;
-    }
-  };
-
-  const getSentimentColor = (sentiment) => {
-    switch (sentiment) {
-      case 'positive': return 'success';
-      case 'negative': return 'error';
-      case 'neutral': return 'info';
-      default: return 'default';
-    }
-  };
-
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -369,11 +345,11 @@ export default function EventDetails() {
   if (error) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
-        <Button variant="outlined" onClick={() => navigate(-1)}>
-          Go Back
+        <Button onClick={() => navigate('/events')} startIcon={<ArrowBack />}>
+          Back to Events
         </Button>
       </Container>
     );
@@ -382,11 +358,11 @@ export default function EventDetails() {
   if (!event) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Alert severity="warning">
+        <Alert severity="warning" sx={{ mb: 3 }}>
           Event not found
         </Alert>
-        <Button variant="outlined" onClick={() => navigate(-1)} sx={{ mt: 2 }}>
-          Go Back
+        <Button onClick={() => navigate('/events')} startIcon={<ArrowBack />}>
+          Back to Events
         </Button>
       </Container>
     );
@@ -395,8 +371,8 @@ export default function EventDetails() {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <IconButton onClick={() => navigate(-1)}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <IconButton onClick={() => navigate('/events')} sx={{ mr: 1 }}>
           <ArrowBack />
         </IconButton>
         <Box sx={{ flexGrow: 1 }}>
@@ -436,38 +412,171 @@ export default function EventDetails() {
       </Box>
 
       <Grid container spacing={3}>
-        {/* Main Content */}
+        {/* Main Content - Left Side */}
         <Grid item xs={12} lg={8}>
-          {/* Event Description */}
+          {/* Event Description & Analysis - Combined */}
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Event Description
+              Event Description & Analysis
             </Typography>
             <Typography variant="body1" paragraph>
               {event.description}
             </Typography>
+            
+            {/* Integrated Timeline */}
+            {event.analysis?.timeline && event.analysis.timeline.length > 0 && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                  Key Timeline
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {event.analysis.timeline.map((item, index) => (
+                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+                      <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main', fontSize: '0.8rem' }}>
+                        {index + 1}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {item.event}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(item.date).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                      <Chip 
+                        label={item.impact} 
+                        size="small"
+                        color={getSeverityColor(item.impact)}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              </>
+            )}
+
+            {/* Rationale */}
             {event.rationale && (
               <>
                 <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Analysis & Rationale
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                  Analysis Rationale
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography variant="body2" color="text.secondary">
                   {event.rationale}
                 </Typography>
               </>
             )}
           </Paper>
 
-          {/* AI Analysis */}
+          {/* Action Steps - Compact */}
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              AI-Powered Analysis
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Card variant="outlined">
-                  <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Action Steps
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Add />}
+                onClick={() => setShowAddDialog(true)}
+              >
+                Add Custom Action
+              </Button>
+            </Box>
+            
+            {/* Custom Actions - Compact List */}
+            {customActions.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  No custom actions added yet. Add specific actions to address this event's impact.
+                </Typography>
+              </Box>
+            ) : (
+              <List dense sx={{ p: 0 }}>
+                {customActions.map((action) => (
+                  <ListItem key={action.id} sx={{ 
+                    pl: 0, 
+                    border: 1, 
+                    borderColor: 'divider', 
+                    borderRadius: 1, 
+                    mb: 1,
+                    bgcolor: 'background.paper'
+                  }}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
+                            {action.text}
+                          </Typography>
+                          <Chip
+                            label={action.priority}
+                            size="small"
+                            color={getPriorityColor(action.priority)}
+                            sx={{ fontSize: '0.7rem' }}
+                          />
+                        </Box>
+                      }
+                      secondary={
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+                          {action.description && (
+                            <Typography variant="caption" color="text.secondary">
+                              {action.description}
+                            </Typography>
+                          )}
+                          {action.dueDate && (
+                            <Typography variant="caption" color="text.secondary">
+                              Due: {new Date(action.dueDate).toLocaleDateString()}
+                            </Typography>
+                          )}
+                          {action.assignedTo && (
+                            <Typography variant="caption" color="text.secondary">
+                              Assigned: {action.assignedTo}
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        size="small"
+                        onClick={() => handleEditAction(action)}
+                        sx={{ mr: 1 }}
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        edge="end"
+                        size="small"
+                        onClick={() => handleDeleteAction(action.id)}
+                        color="error"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Sidebar - Right Side */}
+        <Grid item xs={12} lg={4}>
+          {/* Technical Details - Collapsible */}
+          <Paper sx={{ mb: 3 }}>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Info color="action" />
+                  <Typography variant="h6">Technical Details</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {/* AI Analysis Scores */}
+                  <Box>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                       Relevance Score
                     </Typography>
@@ -477,16 +586,13 @@ export default function EventDetails() {
                         value={event.relevanceScore * 100} 
                         sx={{ flexGrow: 1 }}
                       />
-                      <Typography variant="h6">
+                      <Typography variant="body2">
                         {Math.round(event.relevanceScore * 100)}%
                       </Typography>
                     </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Card variant="outlined">
-                  <CardContent>
+                  </Box>
+                  
+                  <Box>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                       Impact Score
                     </Typography>
@@ -496,315 +602,91 @@ export default function EventDetails() {
                         value={(event.analysis?.impactScore || 0.7) * 100} 
                         sx={{ flexGrow: 1 }}
                       />
-                      <Typography variant="h6">
+                      <Typography variant="body2">
                         {Math.round((event.analysis?.impactScore || 0.7) * 100)}%
                       </Typography>
                     </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
+                  </Box>
 
-          {/* Contributing Factors */}
-          {event.contributingFactors && event.contributingFactors.length > 0 && (
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Contributing Factors
-              </Typography>
-              <Grid container spacing={2}>
-                {event.contributingFactors.map((factor, index) => (
-                  <Grid item xs={12} sm={6} key={index}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="subtitle2" gutterBottom>
-                          {factor.factor}
-                        </Typography>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={factor.weight * 100} 
-                          sx={{ height: 8, borderRadius: 4 }}
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          Weight: {Math.round(factor.weight * 100)}%
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-          )}
-
-          {/* Action Steps */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Action Steps
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Recommended actions based on this event and any custom steps you've added.
-            </Typography>
-            
-            {/* Recommended Actions */}
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
-                Recommended Actions
-              </Typography>
-              <Grid container spacing={2}>
-                {getRecommendedActions(event).map((action, index) => (
-                  <Grid item xs={12} sm={6} key={index}>
-                    <Card variant="outlined" sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
-                          {action.text}
-                        </Typography>
-                        <Chip 
-                          label={action.priority} 
-                          size="small" 
-                          color={getPriorityColor(action.priority)}
-                          sx={{ fontSize: '0.7rem', ml: 1 }}
-                        />
-                      </Box>
-                      <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                        {action.description}
+                  {/* Contributing Factors */}
+                  {event.analysis?.contributingFactors && event.analysis.contributingFactors.length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Contributing Factors
                       </Typography>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleAddRecommendedAction(action)}
-                        sx={{ fontSize: '0.7rem' }}
-                      >
-                        Add to Dashboard
-                      </Button>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-
-            {/* Custom Actions */}
-            <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Your Custom Actions
-                </Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<Add />}
-                  onClick={() => setShowAddDialog(true)}
-                >
-                  Add Custom Action
-                </Button>
-              </Box>
-              
-              {customActions.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 3, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    No custom actions added yet
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Add specific actions to address this event's impact on your organization.
-                  </Typography>
-                </Box>
-              ) : (
-                <List dense>
-                  {customActions.map((action) => (
-                    <ListItem key={action.id} sx={{ pl: 0, border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}>
-                      <ListItemText
-                                                 primary={
-                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                             <Typography variant="body2" sx={{ fontWeight: 500, flexGrow: 1 }}>
-                               {action.text}
-                             </Typography>
-                             <Chip
-                               label={action.priority}
-                               size="small"
-                               color={getPriorityColor(action.priority)}
-                               sx={{ fontSize: '0.7rem' }}
-                             />
-                           </Box>
-                         }
-                        secondary={
-                          <Box>
-                            {action.description && (
-                              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                                {action.description}
-                              </Typography>
-                            )}
-                            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                              {action.dueDate && (
-                                <Typography variant="caption" color="text.secondary">
-                                  Due: {new Date(action.dueDate).toLocaleDateString()}
-                                </Typography>
-                              )}
-                              {action.assignedTo && (
-                                <Typography variant="caption" color="text.secondary">
-                                  Assigned to: {action.assignedTo}
-                                </Typography>
-                              )}
-                            </Box>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {event.analysis.contributingFactors.map((factor, index) => (
+                          <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="caption" sx={{ flexGrow: 1 }}>
+                              {factor.factor}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {Math.round(factor.weight * 100)}%
+                            </Typography>
                           </Box>
-                        }
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Event Details */}
+                  <Divider />
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Regions Affected
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                      {event.regions?.map((region, index) => (
+                        <Chip 
+                          key={index} 
+                          icon={<LocationOn />} 
+                          label={region} 
+                          size="small" 
+                          variant="outlined"
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Source
+                    </Typography>
+                    <Link href={event.source?.url} target="_blank" variant="body2">
+                      {event.source?.name}
+                    </Link>
+                    {event.source?.reliability && (
+                      <Chip 
+                        label={`Reliability: ${event.source.reliability}`} 
+                        size="small" 
+                        color="success"
+                        sx={{ ml: 1 }}
                       />
-                      <ListItemSecondaryAction>
-                        <IconButton
-                          edge="end"
-                          size="small"
-                          onClick={() => handleEditAction(action)}
-                          sx={{ mr: 1 }}
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          size="small"
-                          onClick={() => handleDeleteAction(action.id)}
-                          color="error"
-                        >
-                          <Delete />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </Box>
-          </Paper>
+                    )}
+                  </Box>
 
-          {/* Timeline */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Event Timeline
-            </Typography>
-            <List>
-              {(event.analysis?.timeline || []).map((item, index) => (
-                <ListItem key={index} sx={{ pl: 0 }}>
-                  <ListItemIcon>
-                    <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-                      {index + 1}
-                    </Avatar>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.event}
-                    secondary={new Date(item.date).toLocaleDateString()}
-                  />
-                  <Chip 
-                    label={item.impact} 
-                    size="small"
-                    color={getSeverityColor(item.impact)}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-
-          {/* Recommendations */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Recommended Actions
-            </Typography>
-            <List>
-              {(event.analysis?.recommendations || []).map((rec, index) => (
-                <ListItem key={index} sx={{ pl: 0 }}>
-                  <ListItemIcon>
-                    <Avatar sx={{ width: 24, height: 24, bgcolor: 'secondary.main' }}>
-                      {index + 1}
-                    </Avatar>
-                  </ListItemIcon>
-                  <ListItemText primary={rec} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Sidebar */}
-        <Grid item xs={12} lg={4}>
-          {/* Quick Actions */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Quick Actions
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Button
-                variant="contained"
-                color="warning"
-                startIcon={<CrisisAlert />}
-                onClick={handleCreateCrisisRoom}
-                fullWidth
-              >
-                Create Crisis Room
-              </Button>
-              <Button variant="outlined" fullWidth>
-                Export Report
-              </Button>
-              <Button variant="outlined" fullWidth>
-                Set Alert
-              </Button>
-            </Box>
-          </Paper>
-
-          {/* Event Details */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Event Details
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Regions Affected
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                  {event.regions?.map((region, index) => (
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Status
+                    </Typography>
                     <Chip 
-                      key={index} 
-                      icon={<LocationOn />} 
-                      label={region} 
-                      size="small" 
-                      variant="outlined"
+                      label={event.status} 
+                      color={event.status === 'developing' ? 'warning' : 'default'}
+                      size="small"
                     />
-                  ))}
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Last Updated
+                    </Typography>
+                    <Typography variant="body2">
+                      {new Date(event.lastUpdated).toLocaleString()}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-              
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Source
-                </Typography>
-                <Link href={event.source?.url} target="_blank" variant="body2">
-                  {event.source?.name}
-                </Link>
-                {event.source?.reliability && (
-                  <Chip 
-                    label={`Reliability: ${event.source.reliability}`} 
-                    size="small" 
-                    color="success"
-                    sx={{ ml: 1 }}
-                  />
-                )}
-              </Box>
-
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Status
-                </Typography>
-                <Chip 
-                  label={event.status} 
-                  color={event.status === 'developing' ? 'warning' : 'default'}
-                  size="small"
-                />
-              </Box>
-
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Last Updated
-                </Typography>
-                <Typography variant="body2">
-                  {new Date(event.lastUpdated).toLocaleString()}
-                </Typography>
-              </Box>
-            </Box>
+              </AccordionDetails>
+            </Accordion>
           </Paper>
 
           {/* Related Events */}
@@ -812,19 +694,25 @@ export default function EventDetails() {
             <Typography variant="h6" gutterBottom>
               Related Events
             </Typography>
-            <List dense>
-              {(event.analysis?.relatedEvents || []).map((relatedEvent) => (
-                <ListItem key={relatedEvent.id} sx={{ pl: 0 }}>
-                  <ListItemText
-                    primary={relatedEvent.title}
-                    secondary={`Relevance: ${Math.round(relatedEvent.relevance * 100)}%`}
-                  />
-                  <Button size="small" variant="text">
-                    View
-                  </Button>
-                </ListItem>
-              ))}
-            </List>
+            {event.analysis?.relatedEvents && event.analysis.relatedEvents.length > 0 ? (
+              <List dense sx={{ p: 0 }}>
+                {event.analysis.relatedEvents.map((relatedEvent) => (
+                  <ListItem key={relatedEvent.id} sx={{ pl: 0, mb: 1 }}>
+                    <ListItemText
+                      primary={relatedEvent.title}
+                      secondary={`Relevance: ${Math.round(relatedEvent.relevance * 100)}%`}
+                    />
+                    <Button size="small" variant="text">
+                      View
+                    </Button>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                No related events found
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>
