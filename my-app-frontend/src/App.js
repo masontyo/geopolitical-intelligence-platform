@@ -9,6 +9,10 @@ import OnboardingDemo from './components/OnboardingDemo';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
 import EventDetails from './components/EventDetails';
+import EventsList from './components/EventsList';
+import TasksPage from './components/TasksPage';
+import ChecklistPage from './components/ChecklistPage';
+import AlertsPage from './components/AlertsPage';
 import Settings from './components/Settings';
 import CompanyProfile from './components/settings/CompanyProfile';
 import AccountSettings from './components/settings/AccountSettings';
@@ -149,9 +153,24 @@ function App() {
                 </DashboardLayout>
               } />
               <Route path="/event/:eventId" element={<EventDetails />} />
+              <Route path="/events" element={
+                <DashboardLayout>
+                  <EventsList />
+                </DashboardLayout>
+              } />
+              <Route path="/tasks" element={
+                <DashboardLayout>
+                  <TasksPage />
+                </DashboardLayout>
+              } />
+              <Route path="/checklist" element={
+                <DashboardLayout>
+                  <ChecklistPage />
+                </DashboardLayout>
+              } />
               <Route path="/alerts" element={
                 <DashboardLayout>
-                  <div>Alerts Page - Coming Soon</div>
+                  <AlertsPage />
                 </DashboardLayout>
               } />
               <Route path="/geographic" element={
