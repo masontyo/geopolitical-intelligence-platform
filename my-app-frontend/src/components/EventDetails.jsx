@@ -103,49 +103,260 @@ export default function EventDetails() {
   const loadEventDetails = async () => {
     try {
       setLoading(true);
-      // For now, use sample data - replace with actual API call later
-      const sampleEvent = {
-        id: eventId,
-        title: "Supply Chain Disruption in Asia Pacific",
-        description: "Major port closures and shipping delays affecting key trade routes in the Asia Pacific region. This disruption is expected to impact global supply chains and may lead to delays in manufacturing and retail operations.",
-        category: "Supply Chain Risk",
-        severity: "high",
-        regions: ["Asia Pacific", "Global"],
-        eventDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        lastUpdated: new Date(),
-        status: "developing",
-        relevanceScore: 0.85,
-        source: {
-          name: "Reuters",
-          url: "https://reuters.com",
-          reliability: "High"
+      
+      // Sample events data that matches the IDs from EnterpriseDashboard and EventsList
+      const sampleEvents = {
+        1: {
+          id: 1,
+          title: "Supply Chain Disruption in Asia Pacific",
+          description: "Major port closures and shipping delays affecting key trade routes in the Asia Pacific region. This disruption is expected to impact global supply chains and may lead to delays in manufacturing and retail operations.",
+          category: "Supply Chain Risk",
+          severity: "high",
+          regions: ["Asia Pacific", "Global"],
+          eventDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          lastUpdated: new Date(),
+          status: "developing",
+          relevanceScore: 0.85,
+          source: {
+            name: "Reuters",
+            url: "https://reuters.com",
+            reliability: "High"
+          },
+          rationale: "This event represents a significant supply chain disruption that could impact multiple industries globally. The Asia Pacific region is a critical hub for manufacturing and trade.",
+          analysis: {
+            impactScore: 0.8,
+            contributingFactors: [
+              { factor: "Port Infrastructure Issues", weight: 0.4 },
+              { factor: "Weather Conditions", weight: 0.3 },
+              { factor: "Labor Disputes", weight: 0.3 }
+            ],
+            timeline: [
+              { event: "Initial port closures reported", date: new Date(Date.now() - 4 * 60 * 60 * 1000), impact: "high" },
+              { event: "Shipping companies announce delays", date: new Date(Date.now() - 3 * 60 * 60 * 1000), impact: "medium" },
+              { event: "Global supply chain impact assessment", date: new Date(Date.now() - 2 * 60 * 60 * 1000), impact: "high" }
+            ],
+            recommendations: [
+              "Assess current inventory levels",
+              "Identify alternative suppliers",
+              "Update supply chain risk assessment"
+            ],
+            relatedEvents: [
+              { id: 2, title: "Previous Port Disruption in 2023", relevance: 0.7 },
+              { id: 3, title: "Supply Chain Resilience Report", relevance: 0.6 }
+            ]
+          }
         },
-        rationale: "This event represents a significant supply chain disruption that could impact multiple industries globally. The Asia Pacific region is a critical hub for manufacturing and trade.",
-        analysis: {
-          impactScore: 0.8,
-          contributingFactors: [
-            { factor: "Port Infrastructure Issues", weight: 0.4 },
-            { factor: "Weather Conditions", weight: 0.3 },
-            { factor: "Labor Disputes", weight: 0.3 }
-          ],
-          timeline: [
-            { event: "Initial port closures reported", date: new Date(Date.now() - 4 * 60 * 60 * 1000), impact: "high" },
-            { event: "Shipping companies announce delays", date: new Date(Date.now() - 3 * 60 * 60 * 1000), impact: "medium" },
-            { event: "Global supply chain impact assessment", date: new Date(Date.now() - 2 * 60 * 60 * 1000), impact: "high" }
-          ],
-          recommendations: [
-            "Assess current inventory levels",
-            "Identify alternative suppliers",
-            "Update supply chain risk assessment"
-          ],
-          relatedEvents: [
-            { id: 2, title: "Previous Port Disruption in 2023", relevance: 0.7 },
-            { id: 3, title: "Supply Chain Resilience Report", relevance: 0.6 }
-          ]
+        2: {
+          id: 2,
+          title: "New Regulatory Requirements in Europe",
+          description: "Updated GDPR compliance requirements for data processing and new sustainability reporting standards affecting European operations. Companies must adapt their data handling practices and environmental reporting frameworks.",
+          category: "Regulatory Risk",
+          severity: "medium",
+          regions: ["Europe", "Global"],
+          eventDate: new Date(Date.now() - 6 * 60 * 60 * 1000),
+          lastUpdated: new Date(),
+          status: "developing",
+          relevanceScore: 0.72,
+          source: {
+            name: "EU Official Journal",
+            url: "https://eur-lex.europa.eu",
+            reliability: "High"
+          },
+          rationale: "New regulatory requirements in Europe will impact data processing and sustainability reporting for companies operating in the region.",
+          analysis: {
+            impactScore: 0.6,
+            contributingFactors: [
+              { factor: "Data Protection Regulations", weight: 0.5 },
+              { factor: "Environmental Reporting Standards", weight: 0.3 },
+              { factor: "Cross-border Data Transfer Rules", weight: 0.2 }
+            ],
+            timeline: [
+              { event: "New regulations published", date: new Date(Date.now() - 8 * 60 * 60 * 1000), impact: "medium" },
+              { event: "Compliance deadline announced", date: new Date(Date.now() - 6 * 60 * 60 * 1000), impact: "high" },
+              { event: "Industry consultation period", date: new Date(Date.now() - 4 * 60 * 60 * 1000), impact: "low" }
+            ],
+            recommendations: [
+              "Review current policies",
+              "Update compliance procedures",
+              "Conduct impact assessment"
+            ],
+            relatedEvents: [
+              { id: 1, title: "Previous GDPR Updates", relevance: 0.8 },
+              { id: 4, title: "Sustainability Reporting Trends", relevance: 0.6 }
+            ]
+          }
+        },
+        3: {
+          id: 3,
+          title: "Cybersecurity Threat Detection",
+          description: "Advanced persistent threat targeting financial institutions and critical infrastructure. Sophisticated attack vectors using social engineering and zero-day exploits have been identified across multiple sectors.",
+          category: "Cybersecurity Risk",
+          severity: "high",
+          regions: ["North America", "Europe", "Global"],
+          eventDate: new Date(Date.now() - 1 * 60 * 60 * 1000),
+          lastUpdated: new Date(),
+          status: "developing",
+          relevanceScore: 0.91,
+          source: {
+            name: "CISA",
+            url: "https://cisa.gov",
+            reliability: "High"
+          },
+          rationale: "This cybersecurity threat poses significant risk to financial institutions and critical infrastructure, requiring immediate attention and response.",
+          analysis: {
+            impactScore: 0.9,
+            contributingFactors: [
+              { factor: "Zero-day Exploits", weight: 0.4 },
+              { factor: "Social Engineering", weight: 0.3 },
+              { factor: "Insider Threats", weight: 0.3 }
+            ],
+            timeline: [
+              { event: "Threat intelligence received", date: new Date(Date.now() - 3 * 60 * 60 * 1000), impact: "high" },
+              { event: "Attack patterns analyzed", date: new Date(Date.now() - 2 * 60 * 60 * 1000), impact: "high" },
+              { event: "Mitigation strategies deployed", date: new Date(Date.now() - 1 * 60 * 60 * 1000), impact: "medium" }
+            ],
+            recommendations: [
+              "Enhance email filtering",
+              "Conduct security training",
+              "Update incident response procedures"
+            ],
+            relatedEvents: [
+              { id: 1, title: "Previous Cyber Attacks", relevance: 0.7 },
+              { id: 5, title: "Security Framework Updates", relevance: 0.8 }
+            ]
+          }
+        },
+        4: {
+          id: 4,
+          title: "Market Volatility in Emerging Markets",
+          description: "Currency fluctuations and political instability affecting investments in Latin American markets. Economic uncertainty driven by policy changes and external factors is creating significant market volatility.",
+          category: "Market Risk",
+          severity: "medium",
+          regions: ["Latin America", "Global"],
+          eventDate: new Date(Date.now() - 4 * 60 * 60 * 1000),
+          lastUpdated: new Date(),
+          status: "developing",
+          relevanceScore: 0.68,
+          source: {
+            name: "Bloomberg",
+            url: "https://bloomberg.com",
+            reliability: "High"
+          },
+          rationale: "Market volatility in emerging markets could impact investment portfolios and business operations in the region.",
+          analysis: {
+            impactScore: 0.7,
+            contributingFactors: [
+              { factor: "Currency Fluctuations", weight: 0.4 },
+              { factor: "Political Instability", weight: 0.3 },
+              { factor: "External Economic Factors", weight: 0.3 }
+            ],
+            timeline: [
+              { event: "Currency devaluation begins", date: new Date(Date.now() - 6 * 60 * 60 * 1000), impact: "high" },
+              { event: "Political announcements", date: new Date(Date.now() - 5 * 60 * 60 * 1000), impact: "medium" },
+              { event: "Market response analysis", date: new Date(Date.now() - 4 * 60 * 60 * 1000), impact: "high" }
+            ],
+            recommendations: [
+              "Review portfolio exposure",
+              "Consult with financial advisors",
+              "Assess currency hedging strategies"
+            ],
+            relatedEvents: [
+              { id: 2, title: "Regulatory Changes", relevance: 0.6 },
+              { id: 6, title: "Geopolitical Developments", relevance: 0.7 }
+            ]
+          }
+        },
+        5: {
+          id: 5,
+          title: "Environmental Compliance Updates",
+          description: "New sustainability reporting requirements for manufacturing and energy sectors. Updated environmental standards requiring enhanced monitoring and reporting of carbon emissions and waste management practices.",
+          category: "Environmental Risk",
+          severity: "low",
+          regions: ["North America", "Global"],
+          eventDate: new Date(Date.now() - 8 * 60 * 60 * 1000),
+          lastUpdated: new Date(),
+          status: "developing",
+          relevanceScore: 0.45,
+          source: {
+            name: "EPA",
+            url: "https://epa.gov",
+            reliability: "High"
+          },
+          rationale: "New environmental compliance requirements will affect manufacturing and energy sectors, requiring updates to reporting and monitoring systems.",
+          analysis: {
+            impactScore: 0.4,
+            contributingFactors: [
+              { factor: "Carbon Reporting Requirements", weight: 0.4 },
+              { factor: "Waste Management Standards", weight: 0.3 },
+              { factor: "Energy Efficiency Standards", weight: 0.3 }
+            ],
+            timeline: [
+              { event: "New standards published", date: new Date(Date.now() - 10 * 60 * 60 * 1000), impact: "low" },
+              { event: "Industry consultation", date: new Date(Date.now() - 9 * 60 * 60 * 1000), impact: "low" },
+              { event: "Implementation timeline announced", date: new Date(Date.now() - 8 * 60 * 60 * 1000), impact: "medium" }
+            ],
+            recommendations: [
+              "Assess current practices",
+              "Develop reporting framework",
+              "Plan implementation timeline"
+            ],
+            relatedEvents: [
+              { id: 2, title: "Regulatory Updates", relevance: 0.6 },
+              { id: 4, title: "Market Impact", relevance: 0.4 }
+            ]
+          }
+        },
+        6: {
+          id: 6,
+          title: "Geopolitical Tensions in Middle East",
+          description: "Regional conflicts affecting energy supply and trade routes. Escalating tensions in the Middle East are impacting oil prices and creating uncertainty in global energy markets and supply chains.",
+          category: "Geopolitical Risk",
+          severity: "high",
+          regions: ["Middle East", "Global"],
+          eventDate: new Date(Date.now() - 3 * 60 * 60 * 1000),
+          lastUpdated: new Date(),
+          status: "developing",
+          relevanceScore: 0.78,
+          source: {
+            name: "BBC News",
+            url: "https://bbc.com",
+            reliability: "High"
+          },
+          rationale: "Geopolitical tensions in the Middle East could significantly impact energy prices and global supply chains, affecting multiple industries worldwide.",
+          analysis: {
+            impactScore: 0.8,
+            contributingFactors: [
+              { factor: "Energy Supply Disruption", weight: 0.4 },
+              { factor: "Trade Route Security", weight: 0.3 },
+              { factor: "Regional Instability", weight: 0.3 }
+            ],
+            timeline: [
+              { event: "Initial tensions reported", date: new Date(Date.now() - 5 * 60 * 60 * 1000), impact: "medium" },
+              { event: "Energy price impact", date: new Date(Date.now() - 4 * 60 * 60 * 1000), impact: "high" },
+              { event: "Supply chain assessment", date: new Date(Date.now() - 3 * 60 * 60 * 1000), impact: "high" }
+            ],
+            recommendations: [
+              "Monitor energy prices",
+              "Assess supply chain impact",
+              "Review geopolitical risk exposure"
+            ],
+            relatedEvents: [
+              { id: 1, title: "Supply Chain Disruptions", relevance: 0.8 },
+              { id: 4, title: "Market Volatility", relevance: 0.7 }
+            ]
+          }
         }
       };
       
-      setEvent(sampleEvent);
+      // Get the event by ID, or show error if not found
+      const selectedEvent = sampleEvents[parseInt(eventId)];
+      if (!selectedEvent) {
+        setError('Event not found');
+        setLoading(false);
+        return;
+      }
+      
+      setEvent(selectedEvent);
       setLoading(false);
     } catch (err) {
       console.error('Error loading event details:', err);
