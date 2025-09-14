@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { userProfileAPI } from '../services/api';
+import aiService from '../services/aiService';
 import { useToast } from './ToastNotifications';
 
 export default function EnterpriseDashboard({ profileId }) {
@@ -41,6 +42,9 @@ export default function EnterpriseDashboard({ profileId }) {
   const [relevantEvents, setRelevantEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [aiInsights, setAiInsights] = useState([]);
+  const [onboardingStatus, setOnboardingStatus] = useState(null);
+  const [aiRecommendations, setAiRecommendations] = useState([]);
 
   const [actionSteps, setActionSteps] = useState([]);
 
@@ -255,30 +259,45 @@ export default function EnterpriseDashboard({ profileId }) {
   };
 
   const loadDashboardData = async () => {
-    if (!effectiveProfileId) {
-      setError('No profile ID provided. Please complete onboarding first.');
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      // Load profile and events
-      const [profileResponse, eventsResponse] = await Promise.all([
-        userProfileAPI.getProfile(effectiveProfileId),
-        userProfileAPI.getRelevantEvents(effectiveProfileId, { includeAnalytics: true })
+      // Load AI intelligence data
+      const [onboardingStatus, aiInsights, aiRecommendations, enhancedNews] = await Promise.all([
+        aiService.getOnboardingStatus('demo-user'),
+        aiService.getAIInsights('demo-user'),
+        aiService.getPersonalizedRecommendations('demo-user', 6),
+        aiService.getEnhancedNews()
       ]);
 
-      setProfile(profileResponse.profile);
-      setRelevantEvents(eventsResponse.events || sampleEvents);
-      
-      info(`Dashboard loaded successfully. Found ${eventsResponse.events?.length || 0} relevant events.`);
+      setOnboardingStatus(onboardingStatus);
+      setAiInsights(aiInsights.insights || []);
+      setAiRecommendations(aiRecommendations.recommendations || []);
+
+      // Use AI-processed events if available, otherwise fall back to sample data
+      if (enhancedNews.events && enhancedNews.events.length > 0) {
+        setRelevantEvents(enhancedNews.events);
+        info(`AI Intelligence loaded successfully. Found ${enhancedNews.events.length} AI-processed events.`);
+      } else {
+        setRelevantEvents(sampleEvents);
+        info(`Using sample data. AI service may be starting up. Found ${sampleEvents.length} sample events.`);
+      }
+
+      // Load profile if available
+      if (effectiveProfileId) {
+        try {
+          const profileResponse = await userProfileAPI.getProfile(effectiveProfileId);
+          setProfile(profileResponse.profile);
+        } catch (err) {
+          console.log('No profile found, using demo mode');
+        }
+      }
     } catch (err) {
       console.error('Error loading dashboard data:', err);
       // Fall back to sample data
       setRelevantEvents(sampleEvents);
+      setError('AI service temporarily unavailable. Showing sample data.');
     } finally {
       setLoading(false);
     }
@@ -379,8 +398,13 @@ export default function EnterpriseDashboard({ profileId }) {
               Welcome back, {profile?.firstName || 'User'}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Risk Intelligence Dashboard
+              AI-Powered Risk Intelligence Dashboard
             </Typography>
+            {onboardingStatus && onboardingStatus.completionPercentage < 100 && (
+              <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
+                Complete your AI setup for personalized insights ({onboardingStatus.completionPercentage}% complete)
+              </Typography>
+            )}
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
@@ -390,9 +414,61 @@ export default function EnterpriseDashboard({ profileId }) {
             >
               Refresh
             </Button>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/onboarding')}
+              sx={{ 
+                background: 'linear-gradient(45deg, #1e3a8a 30%, #3b82f6 90%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #1e40af 30%, #2563eb 90%)',
+                }
+              }}
+            >
+              AI Setup
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={async () => {
+                try {
+                  const result = await aiService.testAIIntelligence();
+                  info(`AI Test: ${result.status} - ${result.message || 'Service responding'}`);
+                } catch (error) {
+                  info(`AI Test: Error - ${error.message}`);
+                }
+              }}
+            >
+              Test AI
+            </Button>
           </Box>
         </Box>
       </Box>
+
+      {/* AI Insights Section */}
+      {aiInsights.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Paper sx={{ p: 2, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.200' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+              🤖 AI Insights
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {aiInsights.map((insight, index) => (
+                <Chip
+                  key={index}
+                  label={insight}
+                  variant="outlined"
+                  size="small"
+                  sx={{ 
+                    bgcolor: 'white',
+                    borderColor: 'primary.300',
+                    color: 'primary.700',
+                    fontWeight: 500
+                  }}
+                />
+              ))}
+            </Box>
+          </Paper>
+        </Box>
+      )}
 
       {/* Main Content Layout */}
       <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
@@ -400,7 +476,7 @@ export default function EnterpriseDashboard({ profileId }) {
         <Box sx={{ flex: '1 1 0%', minWidth: 0 }}>
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Recent Events
+              {aiRecommendations.length > 0 ? 'AI-Recommended Events' : 'Recent Events'}
             </Typography>
             <Button
               variant="outlined"
@@ -417,7 +493,7 @@ export default function EnterpriseDashboard({ profileId }) {
             gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
             gap: 2 
           }}>
-            {relevantEvents.slice(0, 6).map((event) => {
+            {(aiRecommendations.length > 0 ? aiRecommendations : relevantEvents.slice(0, 6)).map((event) => {
               console.log('Rendering event:', event); // Debug log
               return (
                 <Card 
