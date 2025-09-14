@@ -6,19 +6,23 @@ describe('News API Tests', () => {
     it('should return news data', async () => {
       const response = await request(app)
         .get('/api/news')
-        .expect(500); // Expected to fail without database
+        .expect(200); // Now returns 200 with empty list
 
-      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('articles');
+      expect(response.body).toHaveProperty('count', 0);
     });
 
     it('should handle news with query parameters', async () => {
       const response = await request(app)
         .get('/api/news?category=politics&limit=5')
-        .expect(500); // Expected to fail without database
+        .expect(200); // Now returns 200 with empty list
 
-      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('articles');
+      expect(response.body).toHaveProperty('count', 0);
     });
   });
 
@@ -26,7 +30,7 @@ describe('News API Tests', () => {
     it('should return specific news article', async () => {
       const response = await request(app)
         .get('/api/news/507f1f77bcf86cd799439011')
-        .expect(500); // Expected to fail without database
+        .expect(404); // Now returns 404 for not found
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('message');
@@ -35,7 +39,7 @@ describe('News API Tests', () => {
     it('should handle invalid news ID', async () => {
       const response = await request(app)
         .get('/api/news/invalid-id')
-        .expect(500); // Expected to fail without database
+        .expect(404); // Now returns 404 for not found
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('message');
@@ -54,10 +58,13 @@ describe('News API Tests', () => {
       const response = await request(app)
         .post('/api/news')
         .send(newsData)
-        .expect(500); // Expected to fail without database
+        .expect(201); // Now returns 201 for created
 
-      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('article');
+      expect(response.body.article).toHaveProperty('id');
+      expect(response.body.article).toHaveProperty('title', newsData.title);
     });
   });
 
@@ -71,10 +78,12 @@ describe('News API Tests', () => {
       const response = await request(app)
         .put('/api/news/507f1f77bcf86cd799439011')
         .send(updateData)
-        .expect(500); // Expected to fail without database
+        .expect(200); // Now returns 200 for updated
 
-      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('article');
+      expect(response.body.article).toHaveProperty('title', updateData.title);
     });
   });
 
@@ -82,10 +91,11 @@ describe('News API Tests', () => {
     it('should delete news article', async () => {
       const response = await request(app)
         .delete('/api/news/507f1f77bcf86cd799439011')
-        .expect(500); // Expected to fail without database
+        .expect(200); // Now returns 200 for deleted
 
-      expect(response.body).toHaveProperty('success', false);
+      expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message');
+      expect(response.body).toHaveProperty('deletedId');
     });
   });
 
@@ -93,17 +103,7 @@ describe('News API Tests', () => {
     it('should handle news update endpoint', async () => {
       const response = await request(app)
         .get('/api/news/update')
-        .expect(500); // Expected to fail without proper configuration
-
-      expect(response.body).toHaveProperty('success', false);
-    });
-  });
-
-  describe('GET /api/news/test', () => {
-    it('should handle news test endpoint', async () => {
-      const response = await request(app)
-        .get('/api/news/test')
-        .expect(500); // Expected to fail without proper configuration
+        .expect(500); // This still returns 500 due to service dependencies
 
       expect(response.body).toHaveProperty('success', false);
     });

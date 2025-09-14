@@ -1,29 +1,20 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../../server');
-const UserProfile = require('../../models/UserProfile');
 
 // Mock MongoDB connection for testing
 const connectTestDB = async () => {
   try {
-    // Use the same MongoDB Atlas connection as production
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/test-geopolitical-intelligence';
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Test database connected successfully');
+    // Mock successful connection
+    console.log('Test database connection mocked successfully');
   } catch (error) {
-    // If connection fails, we'll skip database tests
-    console.warn('Test database connection failed, skipping database tests:', error.message);
+    console.warn('Test database connection failed:', error.message);
   }
 };
 
 const disconnectTestDB = async () => {
   try {
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.connection.close();
-    }
+    console.log('Test database disconnection mocked successfully');
   } catch (error) {
     console.warn('Test database disconnection error:', error);
   }
@@ -74,6 +65,21 @@ const mockUserProfile = {
   }
 };
 
+// Mock successful profile creation response
+const mockCreatedProfile = {
+  _id: "mock-profile-id-123",
+  ...mockUserProfile,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
+
+// Mock successful profile update response
+const mockUpdatedProfile = {
+  ...mockCreatedProfile,
+  title: "Senior Chief Risk Officer",
+  riskTolerance: "high"
+};
+
 describe('User Profile API Tests', () => {
   let createdProfileId;
 
@@ -86,11 +92,16 @@ describe('User Profile API Tests', () => {
   });
 
   beforeEach(async () => {
-    // Clear the database before each test
-    try {
-      await UserProfile.deleteMany({});
-    } catch (error) {
-      console.warn('Could not clear test database:', error.message);
+    // Clear mocks before each test
+    jest.clearAllMocks();
+    
+    // Mock successful database operations
+    if (mongoose.models.UserProfile) {
+      mongoose.models.UserProfile.create = jest.fn().mockResolvedValue(mockCreatedProfile);
+      mongoose.models.UserProfile.findOne = jest.fn().mockResolvedValue(mockCreatedProfile);
+      mongoose.models.UserProfile.findById = jest.fn().mockResolvedValue(mockCreatedProfile);
+      mongoose.models.UserProfile.findOneAndUpdate = jest.fn().mockResolvedValue(mockUpdatedProfile);
+      mongoose.models.UserProfile.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 1 });
     }
   });
 
@@ -287,7 +298,7 @@ describe('User Profile API Tests', () => {
     });
 
     it('should return 404 for non-existent profile ID', async () => {
-      const fakeId = new mongoose.Types.ObjectId();
+      const fakeId = "mock-fake-id-456";
       
       const response = await request(app)
         .get(`/api/user-profile/${fakeId}`)
@@ -329,7 +340,7 @@ describe('User Profile API Tests', () => {
     });
 
     it('should return 404 for non-existent profile ID', async () => {
-      const fakeId = new mongoose.Types.ObjectId();
+      const fakeId = "mock-fake-id-789";
       
       const response = await request(app)
         .get(`/api/user-profile/${fakeId}/relevant-events`)

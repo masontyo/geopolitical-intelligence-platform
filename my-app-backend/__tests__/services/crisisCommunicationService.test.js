@@ -1,7 +1,5 @@
-const crisisCommunicationService = require('../../services/crisisCommunicationService');
-
-// Mock the models
-jest.mock('../../models/CrisisCommunication', () => ({
+// Mock the models before importing the service
+jest.doMock('../../models/CrisisCommunication', () => ({
   create: jest.fn(),
   findById: jest.fn(),
   find: jest.fn(),
@@ -9,11 +7,11 @@ jest.mock('../../models/CrisisCommunication', () => ({
   findByIdAndDelete: jest.fn()
 }));
 
-jest.mock('../../models/UserProfile', () => ({
+jest.doMock('../../models/UserProfile', () => ({
   findById: jest.fn()
 }));
 
-jest.mock('../../services/notificationService', () => ({
+jest.doMock('../../services/notificationService', () => ({
   sendCrisisNotification: jest.fn(),
   sendEmail: jest.fn(),
   sendSMS: jest.fn(),
@@ -21,9 +19,19 @@ jest.mock('../../services/notificationService', () => ({
   sendTeams: jest.fn()
 }));
 
+// Now import the service after mocking
+const crisisCommunicationService = require('../../services/crisisCommunicationService');
+
 describe('Crisis Communication Service', () => {
+  let CrisisCommunication, UserProfile, notificationService;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Get fresh references to mocked modules
+    CrisisCommunication = require('../../models/CrisisCommunication');
+    UserProfile = require('../../models/UserProfile');
+    notificationService = require('../../services/notificationService');
   });
 
   describe('createCrisisRoom', () => {
@@ -50,10 +58,6 @@ describe('Crisis Communication Service', () => {
         ]
       };
 
-      const CrisisCommunication = require('../../models/CrisisCommunication');
-      const UserProfile = require('../../models/UserProfile');
-      const notificationService = require('../../services/notificationService');
-
       CrisisCommunication.create.mockResolvedValue(mockCrisisRoom);
       UserProfile.findById.mockResolvedValue(mockUserProfile);
       notificationService.sendCrisisNotification.mockResolvedValue(true);
@@ -75,7 +79,6 @@ describe('Crisis Communication Service', () => {
     });
 
     it('should handle errors when creating crisis room', async () => {
-      const CrisisCommunication = require('../../models/CrisisCommunication');
       CrisisCommunication.create.mockRejectedValue(new Error('Database error'));
 
       await expect(
@@ -94,8 +97,9 @@ describe('Crisis Communication Service', () => {
         status: 'active'
       };
 
-      const CrisisCommunication = require('../../models/CrisisCommunication');
-      CrisisCommunication.findById.mockResolvedValue(mockCrisisRoom);
+      CrisisCommunication.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockCrisisRoom)
+      });
 
       const result = await crisisCommunicationService.getCrisisRoom('crisis123');
 
@@ -104,8 +108,9 @@ describe('Crisis Communication Service', () => {
     });
 
     it('should return null for non-existent crisis room', async () => {
-      const CrisisCommunication = require('../../models/CrisisCommunication');
-      CrisisCommunication.findById.mockResolvedValue(null);
+      CrisisCommunication.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null)
+      });
 
       const result = await crisisCommunicationService.getCrisisRoom('nonexistent');
 
@@ -118,18 +123,19 @@ describe('Crisis Communication Service', () => {
       const mockCrisisRooms = [
         {
           _id: 'crisis1',
-          title: 'Crisis 1',
-          severity: 'high'
+          severity: 'high',
+          title: 'Crisis 1'
         },
         {
           _id: 'crisis2',
-          title: 'Crisis 2',
-          severity: 'medium'
+          severity: 'medium',
+          title: 'Crisis 2'
         }
       ];
 
-      const CrisisCommunication = require('../../models/CrisisCommunication');
-      CrisisCommunication.find.mockResolvedValue(mockCrisisRooms);
+      CrisisCommunication.find.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockCrisisRooms)
+      });
 
       const result = await crisisCommunicationService.getAllCrisisRooms();
 
@@ -148,13 +154,13 @@ describe('Crisis Communication Service', () => {
         status: 'active'
       };
 
-      const CrisisCommunication = require('../../models/CrisisCommunication');
       CrisisCommunication.findByIdAndUpdate.mockResolvedValue(mockUpdatedCrisisRoom);
 
       const result = await crisisCommunicationService.updateCrisisRoom(
         'crisis123',
         {
           title: 'Updated Crisis',
+          description: 'Updated description',
           severity: 'critical'
         }
       );
@@ -170,7 +176,6 @@ describe('Crisis Communication Service', () => {
 
   describe('deleteCrisisRoom', () => {
     it('should delete a crisis room successfully', async () => {
-      const CrisisCommunication = require('../../models/CrisisCommunication');
       CrisisCommunication.findByIdAndDelete.mockResolvedValue({ deletedCount: 1 });
 
       const result = await crisisCommunicationService.deleteCrisisRoom('crisis123');
@@ -180,7 +185,6 @@ describe('Crisis Communication Service', () => {
     });
 
     it('should return false when crisis room not found', async () => {
-      const CrisisCommunication = require('../../models/CrisisCommunication');
       CrisisCommunication.findByIdAndDelete.mockResolvedValue({ deletedCount: 0 });
 
       const result = await crisisCommunicationService.deleteCrisisRoom('nonexistent');
@@ -193,14 +197,12 @@ describe('Crisis Communication Service', () => {
     it('should add communication to crisis room', async () => {
       const mockCrisisRoom = {
         _id: 'crisis123',
-        communications: []
+        communications: [],
+        save: jest.fn().mockResolvedValue(true)
       };
 
-      const CrisisCommunication = require('../../models/CrisisCommunication');
-      CrisisCommunication.findById.mockResolvedValue(mockCrisisRoom);
-      CrisisCommunication.findByIdAndUpdate.mockResolvedValue({
-        ...mockCrisisRoom,
-        communications: [{ message: 'Test communication', timestamp: new Date() }]
+      CrisisCommunication.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockCrisisRoom)
       });
 
       const result = await crisisCommunicationService.addCommunication(
@@ -209,7 +211,8 @@ describe('Crisis Communication Service', () => {
       );
 
       expect(result).toBeDefined();
-      expect(CrisisCommunication.findByIdAndUpdate).toHaveBeenCalled();
+      expect(mockCrisisRoom.communications).toHaveLength(1);
+      expect(mockCrisisRoom.save).toHaveBeenCalled();
     });
   });
 
@@ -220,7 +223,6 @@ describe('Crisis Communication Service', () => {
         status: 'resolved'
       };
 
-      const CrisisCommunication = require('../../models/CrisisCommunication');
       CrisisCommunication.findByIdAndUpdate.mockResolvedValue(mockUpdatedCrisisRoom);
 
       const result = await crisisCommunicationService.updateCrisisStatus(
@@ -231,7 +233,7 @@ describe('Crisis Communication Service', () => {
       expect(result).toEqual(mockUpdatedCrisisRoom);
       expect(CrisisCommunication.findByIdAndUpdate).toHaveBeenCalledWith(
         'crisis123',
-        { status: 'resolved' },
+        { 'crisisRoom.status': 'resolved' },
         { new: true }
       );
     });

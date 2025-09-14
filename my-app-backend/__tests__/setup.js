@@ -2,63 +2,42 @@
 process.env.NODE_ENV = 'test';
 process.env.PORT = '5001'; // Use different port for tests
 
-const mongoose = require('mongoose');
+// Set up mock database for tests
+// We're using mocked models instead of real MongoDB
+process.env.MONGODB_URI = 'mock://localhost:27017/test';
+
+// Test environment variables are set in individual test files as needed
 
 // Suppress console logs during tests unless there's an error
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 
-// Mock MongoDB connection for tests
-const mockMongoConnection = {
-  readyState: 1, // Connected
-  db: {
-    admin: () => ({
-      ping: jest.fn().mockResolvedValue({ ok: 1 })
-    })
-  },
-  collections: {},
-  close: jest.fn().mockResolvedValue(undefined)
-};
-
-// Mock mongoose connection
-mongoose.connection = mockMongoConnection;
-
 beforeAll(async () => {
   console.log = jest.fn();
   console.error = jest.fn();
   
-  // Mock mongoose.connect to always succeed
-  mongoose.connect = jest.fn().mockResolvedValue(mockMongoConnection);
-  
-  // Mock mongoose.disconnect
-  mongoose.disconnect = jest.fn().mockResolvedValue(undefined);
-  
-  // Mock mongoose.connection.readyState
-  Object.defineProperty(mongoose.connection, 'readyState', {
-    get: () => 1, // Always return connected state
-    configurable: true
-  });
-  
   console.log('Test environment setup complete');
+  console.log('MongoDB URI:', process.env.MONGODB_URI);
 });
 
 beforeEach(async () => {
   // Clear all mocks before each test
   jest.clearAllMocks();
   
-  // Reset mongoose connection state
-  Object.defineProperty(mongoose.connection, 'readyState', {
-    get: () => 1,
-    configurable: true
-  });
+  // Reset mock states for models
+  try {
+    const UserProfileMock = require('./__mocks__/UserProfile');
+    if (UserProfileMock.resetMock) {
+      UserProfileMock.resetMock();
+    }
+  } catch (error) {
+    // Mock might not be loaded yet, ignore
+  }
 });
 
 afterAll(async () => {
   console.log = originalConsoleLog;
   console.error = originalConsoleError;
-  
-  // Clean up mocks
-  jest.restoreAllMocks();
 });
 
 // Global test timeout

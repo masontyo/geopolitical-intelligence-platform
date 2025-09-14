@@ -68,7 +68,7 @@ class CrisisCommunicationService {
       // Determine severity based on score
       const severity = this.determineSeverity(maxScore);
 
-      const crisisRoom = new CrisisCommunication({
+      const crisisRoomData = {
         eventId,
         crisisRoom: {
           title: crisisData.title || `Crisis Room: ${event.title}`,
@@ -78,20 +78,118 @@ class CrisisCommunicationService {
         },
         stakeholders: crisisData.stakeholders || [],
         templates: crisisData.templates || await this.getDefaultTemplates(),
-        settings: crisisData.settings || {}
-      });
+        settings: crisisData.settings || {},
+        timeline: [{
+          event: 'crisis_room_created',
+          description: 'Crisis communication room created',
+          actorName: crisisData.createdBy || 'System'
+        }]
+      };
 
-      // Add initial timeline entry
-      crisisRoom.timeline.push({
-        event: 'crisis_room_created',
-        description: 'Crisis communication room created',
-        actorName: crisisData.createdBy || 'System'
-      });
-
-      await crisisRoom.save();
+      const crisisRoom = await CrisisCommunication.create(crisisRoomData);
       return crisisRoom;
     } catch (error) {
       console.error('Error creating crisis room:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a crisis room by ID
+   */
+  async getCrisisRoom(crisisRoomId) {
+    try {
+      const crisisRoom = await CrisisCommunication.findById(crisisRoomId).exec();
+      return crisisRoom;
+    } catch (error) {
+      console.error('Error getting crisis room:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all crisis rooms
+   */
+  async getAllCrisisRooms() {
+    try {
+      const crisisRooms = await CrisisCommunication.find({}).exec();
+      return crisisRooms;
+    } catch (error) {
+      console.error('Error getting all crisis rooms:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a crisis room
+   */
+  async updateCrisisRoom(crisisRoomId, updateData) {
+    try {
+      const updatedCrisisRoom = await CrisisCommunication.findByIdAndUpdate(
+        crisisRoomId,
+        updateData,
+        { new: true }
+      );
+      return updatedCrisisRoom;
+    } catch (error) {
+      console.error('Error updating crisis room:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a crisis room
+   */
+  async deleteCrisisRoom(crisisRoomId) {
+    try {
+      const result = await CrisisCommunication.findByIdAndDelete(crisisRoomId);
+      return !!result;
+    } catch (error) {
+      console.error('Error deleting crisis room:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Add communication to crisis room
+   */
+  async addCommunication(crisisRoomId, content) {
+    try {
+      const crisisRoom = await CrisisCommunication.findById(crisisRoomId).exec();
+      if (!crisisRoom) {
+        throw new Error('Crisis room not found');
+      }
+
+      const communication = {
+        type: 'internal_note',
+        channel: 'internal',
+        content: content,
+        sentBy: 'System',
+        timestamp: new Date()
+      };
+
+      crisisRoom.communications.push(communication);
+      await crisisRoom.save();
+      return communication;
+    } catch (error) {
+      console.error('Error adding communication:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update crisis room status
+   */
+  async updateCrisisStatus(crisisRoomId, status) {
+    try {
+      const updatedCrisisRoom = await CrisisCommunication.findByIdAndUpdate(
+        crisisRoomId,
+        { 'crisisRoom.status': status },
+        { new: true }
+      );
+      return updatedCrisisRoom;
+    } catch (error) {
+      console.error('Error updating crisis status:', error);
       throw error;
     }
   }

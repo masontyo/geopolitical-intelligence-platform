@@ -6,8 +6,8 @@
 const axios = require('axios');
 
 class LLMScoringEngine {
-  constructor() {
-    this.apiKey = process.env.OPENAI_API_KEY;
+  constructor(apiKey = null) {
+    this.apiKey = apiKey || process.env.OPENAI_API_KEY;
     this.baseURL = 'https://api.openai.com/v1';
   }
 

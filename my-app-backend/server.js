@@ -9,7 +9,11 @@ const connectDB = require('./config/database');
 const onboardingRoutes = require('./routes/onboarding');
 const userProfileRoutes = require('./routes/userProfile');
 const newsRoutes = require('./routes/news');
+const enhancedNewsRoutes = require('./routes/enhancedNews');
+const linkedinAuthRoutes = require('./routes/linkedinAuth');
 const crisisCommunicationRoutes = require('./routes/crisisCommunication');
+const crisisRoomsRoutes = require('./routes/crisisRooms');
+const eventsRoutes = require('./routes/events');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,67 +22,57 @@ const PORT = process.env.PORT || 3001;
 console.log('Environment PORT:', process.env.PORT);
 console.log('Final PORT:', PORT);
 
-// Connect to MongoDB (skip in test environment)
+// Connect to MongoDB
+// In test environment, skip database connection (using mocked models)
+// In other environments, connect to real database
 if (process.env.NODE_ENV !== 'test') {
   connectDB().catch(err => {
     console.error('Failed to connect to MongoDB:', err);
-    process.exit(1);
   });
 }
 
-// Security middleware
+// Middleware
+app.use(cors());
 app.use(helmet());
-
-// Logging middleware
 app.use(morgan('combined'));
-
-// CORS configuration
-app.use(cors({
-  origin: true, // Allow all origins
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Manual CORS headers for testing
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
-
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Routes
+app.use('/api/onboarding', onboardingRoutes);
+app.use('/api/user-profile', userProfileRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/enhanced-news', enhancedNewsRoutes);
+app.use('/api/linkedin', linkedinAuthRoutes);
+app.use('/api/crisis-communication', crisisCommunicationRoutes);
+app.use('/api/events', eventsRoutes);
+
+// Crisis rooms direct access (for backward compatibility and cleaner API)
+app.use('/api/crisis-rooms', crisisRoomsRoutes);
+
+// Debug: Log all registered routes
+if (process.env.NODE_ENV === 'test') {
+  console.log('Registered routes:');
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      console.log(`${Object.keys(middleware.route.methods).join(',').toUpperCase()} ${middleware.route.path}`);
+    } else if (middleware.name === 'router') {
+      console.log(`Router mounted at: ${middleware.regexp}`);
+    }
+  });
+}
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({
-    status: 'OK',
+    success: true,
+    message: 'Server is running',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// API routes
-app.use('/api', onboardingRoutes);
-app.use('/api', userProfileRoutes);
-app.use('/api', newsRoutes);
-app.use('/api', crisisCommunicationRoutes);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({
-    success: false,
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
-// 404 handler
+// 404 handler for non-existent routes
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -86,12 +80,23 @@ app.use('*', (req, res) => {
   });
 });
 
-// Only start the server if not in test environment
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
+
+// Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`Backend server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
 
-module.exports = app; // Export for testing
+module.exports = app;

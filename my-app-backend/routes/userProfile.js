@@ -15,7 +15,7 @@ const router = express.Router();
  * POST /api/user-profile
  * Create or update a user profile
  */
-router.post('/user-profile', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const profile = req.body;
     
@@ -87,7 +87,7 @@ router.post('/user-profile', async (req, res) => {
  * GET /api/user-profile/:id
  * Get a specific user profile
  */
-router.get('/user-profile/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -126,7 +126,7 @@ router.get('/user-profile/:id', async (req, res) => {
  * GET /api/user-profile/:id/relevant-events
  * Get relevant geopolitical events for a user profile by fetching real-time news and scoring
  */
-router.get('/user-profile/:id/relevant-events', async (req, res) => {
+router.get('/:id/relevant-events', async (req, res) => {
   try {
     const { id } = req.params;
     const { threshold = 0.005, includeAnalytics = false } = req.query;
@@ -413,89 +413,7 @@ router.get('/user-profile/:id/relevant-events', async (req, res) => {
   }
 });
 
-/**
- * POST /api/events
- * Add a geopolitical event (for testing/manual input)
- */
-router.post('/events', async (req, res) => {
-  try {
-    const event = req.body;
-    
-    // Basic validation
-    if (!event.title || !event.description) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title and description are required'
-      });
-    }
-    
-    // Set default event date if not provided
-    if (!event.eventDate) {
-      event.eventDate = new Date();
-    }
-    
-    const newEvent = await GeopoliticalEvent.create(event);
-    
-    res.status(201).json({
-      success: true,
-      message: 'Event created successfully',
-      event: newEvent
-    });
-    
-  } catch (error) {
-    console.error('Error creating event:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
 
-/**
- * GET /api/events
- * Get all geopolitical events
- */
-router.get('/events', async (req, res) => {
-  try {
-    console.log('📊 Fetching geopolitical events...');
-    
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      console.error('MongoDB not connected. ReadyState:', mongoose.connection.readyState);
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection not available. Please try again.'
-      });
-    }
-    
-    const events = await GeopoliticalEvent.find().sort({ eventDate: -1 });
-    
-    console.log(`✅ Found ${events.length} events`);
-    
-    res.status(200).json({
-      success: true,
-      events,
-      total: events.length
-    });
-    
-  } catch (error) {
-    console.error('❌ Error fetching events:', error);
-    
-    // Provide more specific error messages
-    if (error.name === 'MongoNotConnectedError') {
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection lost. Please try again.'
-      });
-    }
-    
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
 
 /**
  * POST /api/seed-database
