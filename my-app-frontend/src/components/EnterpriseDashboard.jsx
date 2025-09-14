@@ -1,40 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Grid,
   Paper,
   Typography,
   Box,
   Card,
   CardContent,
-  CardActions,
   Button,
   IconButton,
   Alert,
-  Avatar,
   Chip,
   Divider,
   Skeleton,
   useTheme,
-  useMediaQuery,
-  Tooltip
+  useMediaQuery
 } from '@mui/material';
 import {
   Warning,
   Error,
   CheckCircle,
-  TrendingUp,
-  TrendingDown,
   LocationOn,
   Schedule,
-  Visibility,
-  CrisisAlert,
-  Notifications,
   Refresh,
   ArrowForward,
-  Security,
-  Business,
   Timeline,
-  Add,
   Flag,
   Assignment,
   CheckBox,
@@ -46,9 +34,8 @@ import { useToast } from './ToastNotifications';
 
 export default function EnterpriseDashboard({ profileId }) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const { error: showError, success, info } = useToast();
+  const { success, info } = useToast();
 
   const [profile, setProfile] = useState(null);
   const [relevantEvents, setRelevantEvents] = useState([]);
@@ -143,16 +130,6 @@ export default function EnterpriseDashboard({ profileId }) {
     }
   ];
 
-  // Sample action steps for the right sidebar
-  const sampleActionSteps = [
-    { id: 1, text: "Contact key suppliers", status: "pending", event: "Supply Chain Disruption", priority: "high" },
-    { id: 2, text: "Assess inventory levels", status: "in-progress", event: "Supply Chain Disruption", priority: "high" },
-    { id: 3, text: "Update risk assessment", status: "pending", event: "Supply Chain Disruption", priority: "medium" },
-    { id: 4, text: "Review current policies", status: "completed", event: "New Regulatory Requirements", priority: "medium" },
-    { id: 5, text: "Update compliance procedures", status: "in-progress", event: "New Regulatory Requirements", priority: "high" },
-    { id: 6, text: "Enhance email filtering", status: "completed", event: "Cybersecurity Threat", priority: "high" },
-    { id: 7, text: "Conduct security training", status: "pending", event: "Cybersecurity Threat", priority: "medium" }
-  ];
 
   useEffect(() => {
     if (effectiveProfileId) {
@@ -322,14 +299,6 @@ export default function EnterpriseDashboard({ profileId }) {
     navigate('/events');
   };
 
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'success';
-      default: return 'default';
-    }
-  };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {

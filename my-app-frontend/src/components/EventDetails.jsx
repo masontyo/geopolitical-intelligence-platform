@@ -7,8 +7,6 @@ import {
   Box,
   Chip,
   Grid,
-  Card,
-  CardContent,
   Divider,
   Button,
   Alert,
@@ -38,17 +36,9 @@ import {
 import {
   ArrowBack,
   Warning,
-  Timeline,
-  Business,
   LocationOn,
   Category,
-  Source,
-  Analytics,
-  TrendingUp,
-  TrendingDown,
-  Assessment,
   ExpandMore,
-  CrisisAlert,
   Share,
   Bookmark,
   BookmarkBorder,
@@ -65,7 +55,6 @@ import { LoadingSpinner } from './LoadingSpinner';
 export default function EventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -82,7 +71,7 @@ export default function EventDetails() {
     description: ''
   });
   const [actionErrors, setActionErrors] = useState({});
-  const { error: showError, success, info } = useToast();
+  const { success, info } = useToast();
 
   useEffect(() => {
     loadEventDetails();
@@ -370,9 +359,6 @@ export default function EventDetails() {
     success(bookmarked ? 'Bookmark removed' : 'Event bookmarked');
   };
 
-  const handleCreateCrisisRoom = () => {
-    info('Crisis room creation feature coming soon');
-  };
 
   const getSeverityColor = (severity) => {
     switch (severity) {
