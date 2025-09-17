@@ -1,5 +1,5 @@
 // AI Service for frontend integration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
 
 class AIService {
   constructor() {

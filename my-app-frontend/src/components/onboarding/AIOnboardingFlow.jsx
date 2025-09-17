@@ -23,11 +23,13 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
+  ListItemIcon
+} from '@mui/material';
+import {
   CheckCircle,
   RadioButtonUnchecked,
   Info
-} from '@mui/material';
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const AIOnboardingFlow = () => {
@@ -100,7 +102,8 @@ const AIOnboardingFlow = () => {
 
   const loadFieldDefinitions = async () => {
     try {
-      const response = await fetch('/api/onboarding/fields');
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/fields`);
       const data = await response.json();
       setFieldDefinitions(data.fieldDefinitions);
     } catch (error) {
@@ -110,8 +113,9 @@ const AIOnboardingFlow = () => {
 
   const loadOnboardingStatus = async () => {
     try {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
       const userId = 'demo-user'; // In real app, get from auth context
-      const response = await fetch(`/api/onboarding/status/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/status/${userId}`);
       const data = await response.json();
       
       if (data.status !== 'not_started') {
@@ -155,7 +159,8 @@ const AIOnboardingFlow = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/onboarding/start', {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +194,8 @@ const AIOnboardingFlow = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/onboarding/update', {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -228,7 +234,8 @@ const AIOnboardingFlow = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/onboarding/complete', {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
