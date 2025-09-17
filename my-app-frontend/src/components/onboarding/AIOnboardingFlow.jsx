@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   FormControl,
-  FormLabel,
   TextField,
   Select,
   MenuItem,
@@ -18,7 +17,6 @@ import {
   Autocomplete,
   Alert,
   LinearProgress,
-  Divider,
   Paper,
   List,
   ListItem,
@@ -26,7 +24,6 @@ import {
   ListItemIcon
 } from '@mui/material';
 import {
-  CheckCircle,
   RadioButtonUnchecked,
   Info
 } from '@mui/icons-material';
@@ -261,22 +258,168 @@ const AIOnboardingFlow = () => {
     }
   };
 
+  // Field configurations with user-friendly labels, descriptions, and placeholders
+  const getFieldConfig = (field) => {
+    const configs = {
+      companyName: {
+        label: 'Company Name',
+        description: 'What is your company called?',
+        placeholder: 'e.g., Acme Corporation, Tesla Inc., Johnson & Johnson',
+        helperText: 'Enter your official company name as it appears in business documents'
+      },
+      industry: {
+        label: 'Industry Sector',
+        description: 'What industry does your company operate in?',
+        helperText: 'This helps us understand industry-specific risks and regulations'
+      },
+      primaryBusiness: {
+        label: 'Primary Business Activity',
+        description: 'What does your company primarily do?',
+        placeholder: 'e.g., Manufacturing automotive parts, Providing cloud software solutions, Operating retail stores',
+        helperText: 'Describe your main business activities in a few words'
+      },
+      headquarters: {
+        label: 'Headquarters Location',
+        description: 'Where is your main office located?',
+        placeholder: 'e.g., New York, NY, USA or London, United Kingdom',
+        helperText: 'City and country of your primary business location'
+      },
+      keyMarkets: {
+        label: 'Key Markets',
+        description: 'Which regions do you sell products or services in?',
+        helperText: 'Select all regions where you have customers or generate revenue'
+      },
+      priorityRegions: {
+        label: 'Priority Monitoring Regions',
+        description: 'Which regions are most critical for you to monitor?',
+        helperText: 'These regions will get extra attention in our risk monitoring'
+      },
+      companySize: {
+        label: 'Company Size',
+        description: 'How many employees does your company have?',
+        helperText: 'This helps us scale risk assessments to your organization size'
+      },
+      riskTolerance: {
+        label: 'Risk Tolerance',
+        description: 'How much risk is your company comfortable with?',
+        helperText: 'Low = Conservative approach, High = More aggressive, willing to accept higher risks'
+      },
+      alertFrequency: {
+        label: 'Alert Frequency',
+        description: 'How often would you like to receive risk alerts?',
+        helperText: 'Real-time for critical situations, Daily for regular monitoring'
+      },
+      concernAreas: {
+        label: 'Risk Areas of Concern',
+        description: 'What types of risks are you most worried about?',
+        helperText: 'Select all risk categories that could significantly impact your business'
+      },
+      offices: {
+        label: 'Office Locations',
+        description: 'Where do you have offices or facilities?',
+        placeholder: 'e.g., Regional sales office in Tokyo, Manufacturing facility in Mexico City',
+        helperText: 'List all significant office locations and their purpose'
+      },
+      manufacturing: {
+        label: 'Manufacturing Facilities',
+        description: 'Where do you manufacture products?',
+        placeholder: 'e.g., Electronics assembly in Shenzhen, China',
+        helperText: 'Include all production facilities and what they produce'
+      },
+      suppliers: {
+        label: 'Supplier Regions',
+        description: 'Where are your key suppliers located?',
+        placeholder: 'e.g., Raw materials from Southeast Asia, Components from Germany',
+        helperText: 'Regions where you source materials, components, or services'
+      },
+      customers: {
+        label: 'Customer Regions',
+        description: 'Where are your main customers located?',
+        placeholder: 'e.g., Enterprise clients in North America, Retail customers in Europe',
+        helperText: 'Geographic distribution of your customer base'
+      },
+      topSuppliers: {
+        label: 'Top Suppliers',
+        description: 'Who are your most important suppliers?',
+        placeholder: 'e.g., Intel (semiconductors), DHL (logistics), AWS (cloud services)',
+        helperText: 'Key suppliers whose disruption would significantly impact your business'
+      },
+      keyCustomers: {
+        label: 'Key Customers',
+        description: 'Who are your most important customers?',
+        placeholder: 'e.g., Major retail chains, Government contracts, Enterprise accounts',
+        helperText: 'Important customers that represent significant revenue'
+      },
+      criticalAssets: {
+        label: 'Critical Assets',
+        description: 'What are your most important business assets?',
+        placeholder: 'e.g., Data centers, Patent portfolio, Brand reputation, Key personnel',
+        helperText: 'Assets whose loss or damage would severely impact operations'
+      },
+      importantPartners: {
+        label: 'Important Partners',
+        description: 'Who are your key business partners?',
+        placeholder: 'e.g., Technology partners, Distribution partners, Joint venture partners',
+        helperText: 'Strategic partners critical to your business operations'
+      },
+      businessUnits: {
+        label: 'Business Units',
+        description: 'What are your main business divisions?',
+        placeholder: 'e.g., Consumer Electronics, Enterprise Software, Financial Services',
+        helperText: 'Major divisions or business units within your organization'
+      },
+      keyPersonnel: {
+        label: 'Key Personnel',
+        description: 'Who are the most important people in your organization?',
+        placeholder: 'e.g., CEO, CTO, Head of Operations, Key sales leaders',
+        helperText: 'Leadership and critical personnel whose absence would impact operations'
+      },
+      revenue: {
+        label: 'Annual Revenue Range',
+        description: 'What is your approximate annual revenue?',
+        helperText: 'This helps us understand your company scale and risk exposure'
+      },
+      pastIncidents: {
+        label: 'Past Risk Incidents',
+        description: 'What major risks has your company faced before?',
+        placeholder: 'e.g., Supply chain disruption in 2020, Cyber attack in 2019, Natural disaster impact',
+        helperText: 'Previous incidents help us understand your risk patterns and vulnerabilities'
+      }
+    };
+    
+    return configs[field] || {
+      label: field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1'),
+      description: `Please provide information about ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`,
+      placeholder: `Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}...`,
+      helperText: 'This information helps us provide better risk analysis'
+    };
+  };
+
   const renderField = (field) => {
     const value = onboardingData[field] || '';
-    const definition = fieldDefinitions[field];
+    const config = getFieldConfig(field);
 
     switch (field) {
       case 'companyName':
       case 'primaryBusiness':
       case 'headquarters':
         return (
-          <TextField
-            fullWidth
-            label={definition?.description || field}
-            value={value}
-            onChange={(e) => handleInputChange(field, e.target.value)}
-            required
-          />
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              {config.label} *
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {config.description}
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder={config.placeholder}
+              value={value}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              required
+              helperText={config.helperText}
+            />
+          </Box>
         );
 
       case 'industry':
@@ -289,17 +432,36 @@ const AIOnboardingFlow = () => {
                       alertFrequencyOptions;
 
         return (
-          <FormControl fullWidth required>
-            <FormLabel>{definition?.description || field}</FormLabel>
-            <Select
-              value={value}
-              onChange={(e) => handleInputChange(field, e.target.value)}
-            >
-              {options.map(option => (
-                <MenuItem key={option} value={option}>{option}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              {config.label} *
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {config.description}
+            </Typography>
+            <FormControl fullWidth required>
+              <Select
+                value={value}
+                onChange={(e) => handleInputChange(field, e.target.value)}
+                displayEmpty
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return <span style={{ color: '#999' }}>Select {config.label.toLowerCase()}</span>;
+                  }
+                  return selected;
+                }}
+              >
+                {options.map(option => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+              {config.helperText && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {config.helperText}
+                </Typography>
+              )}
+            </FormControl>
+          </Box>
         );
 
       case 'keyMarkets':
@@ -308,42 +470,64 @@ const AIOnboardingFlow = () => {
         const multiOptions = field === 'concernAreas' ? concernAreasOptions : regionOptions;
         
         return (
-          <Autocomplete
-            multiple
-            options={multiOptions}
-            value={value || []}
-            onChange={(_, newValue) => handleInputChange(field, newValue)}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  variant="outlined"
-                  label={option}
-                  {...getTagProps({ index })}
-                  key={option}
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              {config.label} *
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {config.description}
+            </Typography>
+            <Autocomplete
+              multiple
+              options={multiOptions}
+              value={value || []}
+              onChange={(_, newValue) => handleInputChange(field, newValue)}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip
+                    variant="outlined"
+                    label={option}
+                    {...getTagProps({ index })}
+                    key={option}
+                    size="small"
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder={`Select ${config.label.toLowerCase()}...`}
+                  required={value?.length === 0}
                 />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={definition?.description || field}
-                placeholder="Select options..."
-                required
-              />
+              )}
+            />
+            {config.helperText && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                {config.helperText}
+              </Typography>
             )}
-          />
+          </Box>
         );
 
       default:
         return (
-          <TextField
-            fullWidth
-            label={definition?.description || field}
-            value={value}
-            onChange={(e) => handleInputChange(field, e.target.value)}
-            multiline
-            rows={3}
-          />
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              {config.label}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {config.description}
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder={config.placeholder}
+              value={value}
+              onChange={(e) => handleInputChange(field, e.target.value)}
+              multiline
+              rows={3}
+              helperText={config.helperText}
+            />
+          </Box>
         );
     }
   };
@@ -353,15 +537,14 @@ const AIOnboardingFlow = () => {
     
     return (
       <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
           {step.description}
         </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Complete the fields below to help our AI understand your business and provide personalized risk intelligence.
+        </Typography>
         
-        {step.fields.map(field => (
-          <Box key={field} sx={{ mb: 3 }}>
-            {renderField(field)}
-          </Box>
-        ))}
+        {step.fields.map(field => renderField(field))}
       </Box>
     );
   };
