@@ -165,7 +165,7 @@ const AIOnboardingFlow = () => {
       await updateOnboarding();
     }
     
-    if (activeStep < steps.length - 1) {
+    if (activeStep < 3) { // We have 4 steps (0, 1, 2, 3)
       setActiveStep(prev => prev + 1);
     }
   };
