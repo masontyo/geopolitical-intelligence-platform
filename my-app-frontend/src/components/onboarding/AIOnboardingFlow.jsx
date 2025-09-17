@@ -38,7 +38,6 @@ const AIOnboardingFlow = () => {
   const [progress, setProgress] = useState(0);
   const [recommendations, setRecommendations] = useState([]);
   const [insights, setInsights] = useState([]);
-  const [fieldDefinitions, setFieldDefinitions] = useState({});
 
   // Field options
   const industryOptions = [
@@ -65,48 +64,72 @@ const AIOnboardingFlow = () => {
     'Eastern Europe', 'Latin America', 'Middle East', 'Africa'
   ];
 
-  const steps = [
-    {
-      label: 'Essential Business Profile',
-      description: 'Basic information about your company and business',
-      fields: [
-        'companyName', 'industry', 'primaryBusiness', 'headquarters',
-        'keyMarkets', 'companySize', 'riskTolerance', 'alertFrequency',
-        'priorityRegions', 'concernAreas'
-      ]
-    },
-    {
-      label: 'Geographic Footprint',
-      description: 'Where you operate, manufacture, and do business',
-      fields: ['offices', 'manufacturing', 'suppliers', 'customers']
-    },
-    {
-      label: 'Key Dependencies',
-      description: 'Your most important suppliers, customers, and assets',
-      fields: ['topSuppliers', 'keyCustomers', 'criticalAssets', 'importantPartners']
-    },
-    {
-      label: 'Enhanced Data (Optional)',
-      description: 'Additional information for better analysis',
-      fields: ['businessUnits', 'keyPersonnel', 'revenue', 'pastIncidents']
+  // Get fields based on industry selection
+  const getStepFields = (stepIndex) => {
+    const industry = onboardingData.industry;
+    
+    const baseSteps = [
+      {
+        label: 'Essential Business Profile',
+        description: 'Basic information about your company and business',
+        fields: [
+          'companyName', 'industry', 'primaryBusiness', 'headquarters',
+          'keyMarkets', 'companySize', 'riskTolerance', 'alertFrequency',
+          'priorityRegions', 'concernAreas'
+        ]
+      },
+      {
+        label: 'Geographic Footprint',
+        description: 'Where you operate and do business',
+        fields: []
+      },
+      {
+        label: 'Key Dependencies',
+        description: 'Your most important suppliers, customers, and assets',
+        fields: ['topSuppliers', 'keyCustomers', 'criticalAssets', 'importantPartners']
+      },
+      {
+        label: 'Enhanced Data (Optional)',
+        description: 'Additional information for better analysis',
+        fields: ['businessUnits', 'keyPersonnel', 'revenue', 'pastIncidents']
+      }
+    ];
+
+    // Customize Geographic Footprint based on industry
+    if (stepIndex === 1) {
+      const manufacturingIndustries = ['Manufacturing', 'Energy'];
+      const serviceIndustries = ['Financial Services', 'Technology', 'Healthcare'];
+      
+      let geoFields = ['offices']; // All companies have offices
+      
+      if (manufacturingIndustries.includes(industry)) {
+        // Manufacturing companies need manufacturing facilities and suppliers
+        geoFields = ['offices', 'manufacturing', 'suppliers'];
+        baseSteps[1].description = 'Where you operate, manufacture, and source materials';
+      } else if (serviceIndustries.includes(industry)) {
+        // Service companies focus on offices and service delivery regions
+        geoFields = ['offices', 'serviceRegions'];
+        baseSteps[1].description = 'Where you operate and deliver services';
+      } else if (industry === 'Retail') {
+        // Retail has stores, suppliers, and distribution
+        geoFields = ['offices', 'stores', 'suppliers', 'distribution'];
+        baseSteps[1].description = 'Where you operate, sell, and source products';
+      } else {
+        // Default for Other or unselected
+        geoFields = ['offices', 'operatingRegions'];
+        baseSteps[1].description = 'Where you operate and do business';
+      }
+      
+      baseSteps[1].fields = geoFields;
     }
-  ];
+
+    return baseSteps[stepIndex];
+  };
+
 
   useEffect(() => {
-    loadFieldDefinitions();
     loadOnboardingStatus();
   }, []);
-
-  const loadFieldDefinitions = async () => {
-    try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
-      const response = await fetch(`${API_BASE_URL}/api/onboarding/fields`);
-      const data = await response.json();
-      setFieldDefinitions(data.fieldDefinitions);
-    } catch (error) {
-      console.error('Error loading field definitions:', error);
-    }
-  };
 
   const loadOnboardingStatus = async () => {
     try {
@@ -384,6 +407,30 @@ const AIOnboardingFlow = () => {
         description: 'What major risks has your company faced before?',
         placeholder: 'e.g., Supply chain disruption in 2020, Cyber attack in 2019, Natural disaster impact',
         helperText: 'Previous incidents help us understand your risk patterns and vulnerabilities'
+      },
+      serviceRegions: {
+        label: 'Service Delivery Regions',
+        description: 'Where do you deliver services to clients?',
+        placeholder: 'e.g., Investment banking in NYC and London, Software services globally, Healthcare in California',
+        helperText: 'Regions where you actively provide services or have client operations'
+      },
+      stores: {
+        label: 'Store/Retail Locations',
+        description: 'Where are your retail stores or sales locations?',
+        placeholder: 'e.g., 500 stores across North America, Flagship stores in major European cities',
+        helperText: 'Physical retail locations where customers can purchase your products'
+      },
+      distribution: {
+        label: 'Distribution Centers',
+        description: 'Where are your distribution and logistics hubs?',
+        placeholder: 'e.g., Distribution centers in Ohio and Nevada, Fulfillment centers in EU',
+        helperText: 'Warehouses and distribution centers that support your retail operations'
+      },
+      operatingRegions: {
+        label: 'Operating Regions',
+        description: 'Where does your company have significant operations?',
+        placeholder: 'e.g., Project offices in emerging markets, Field operations in oil-producing regions',
+        helperText: 'Regions where you have ongoing business operations or projects'
       }
     };
     
@@ -533,7 +580,7 @@ const AIOnboardingFlow = () => {
   };
 
   const renderStepContent = (stepIndex) => {
-    const step = steps[stepIndex];
+    const step = getStepFields(stepIndex); // Get fresh step data based on current industry
     
     return (
       <Box sx={{ mt: 2 }}>
@@ -541,10 +588,22 @@ const AIOnboardingFlow = () => {
           {step.description}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Complete the fields below to help our AI understand your business and provide personalized risk intelligence.
+          {stepIndex === 1 && onboardingData.industry ? 
+            `Based on your ${onboardingData.industry} industry, we'll focus on the most relevant geographic information.` :
+            'Complete the fields below to help our AI understand your business and provide personalized risk intelligence.'
+          }
         </Typography>
         
         {step.fields.map(field => renderField(field))}
+        
+        {/* Show helpful note about overlap reduction */}
+        {stepIndex === 1 && step.fields.length > 0 && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              💡 <strong>Smart Form:</strong> We've customized these questions based on your {onboardingData.industry || 'selected'} industry to avoid redundancy with your earlier answers.
+            </Typography>
+          </Alert>
+        )}
       </Box>
     );
   };
@@ -586,43 +645,46 @@ const AIOnboardingFlow = () => {
       <Card>
         <CardContent>
           <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((step, index) => (
-              <Step key={step.label}>
-                <StepLabel>
-                  {step.label}
-                  <Typography variant="body2" color="text.secondary">
-                    {step.description}
-                  </Typography>
-                </StepLabel>
-                <StepContent>
-                  {renderStepContent(index)}
-                  
-                  <Box sx={{ mb: 2 }}>
-                    <div>
-                      <Button
-                        variant="contained"
-                        onClick={index === steps.length - 1 ? handleComplete : handleNext}
-                        disabled={loading}
-                        sx={{ mt: 1, mr: 1 }}
-                      >
-                        {loading ? 'Processing...' : 
-                         index === steps.length - 1 ? 'Complete Onboarding' : 'Next'}
-                      </Button>
-                      
-                      {index > 0 && (
+            {[0, 1, 2, 3].map((index) => {
+              const step = getStepFields(index);
+              return (
+                <Step key={`step-${index}`}>
+                  <StepLabel>
+                    {step.label}
+                    <Typography variant="body2" color="text.secondary">
+                      {step.description}
+                    </Typography>
+                  </StepLabel>
+                  <StepContent>
+                    {renderStepContent(index)}
+                    
+                    <Box sx={{ mb: 2 }}>
+                      <div>
                         <Button
-                          onClick={handleBack}
+                          variant="contained"
+                          onClick={index === 3 ? handleComplete : handleNext}
                           disabled={loading}
                           sx={{ mt: 1, mr: 1 }}
                         >
-                          Back
+                          {loading ? 'Processing...' : 
+                           index === 3 ? 'Complete Onboarding' : 'Next'}
                         </Button>
-                      )}
-                    </div>
-                  </Box>
-                </StepContent>
-              </Step>
-            ))}
+                        
+                        {index > 0 && (
+                          <Button
+                            onClick={handleBack}
+                            disabled={loading}
+                            sx={{ mt: 1, mr: 1 }}
+                          >
+                            Back
+                          </Button>
+                        )}
+                      </div>
+                    </Box>
+                  </StepContent>
+                </Step>
+              );
+            })}
           </Stepper>
         </CardContent>
       </Card>
