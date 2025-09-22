@@ -1,27 +1,184 @@
 const request = require('supertest');
-const express = require('express');
-const userProfileRoutes = require('../../routes/userProfile');
+const mongoose = require('mongoose');
+const app = require('../../server');
 
-// Create a test app
-const app = express();
-app.use(express.json());
-app.use('/api', userProfileRoutes);
+// Mock mongoose connection
+jest.mock('mongoose', () => {
+  const mockConnection = {
+    readyState: 1, // Connected state
+    close: jest.fn().mockResolvedValue(undefined)
+  };
+  
+  const mockSchema = {
+    index: jest.fn().mockReturnThis(),
+    pre: jest.fn().mockReturnThis(),
+    post: jest.fn().mockReturnThis(),
+    methods: {},
+    statics: {},
+    virtuals: {},
+    Types: {
+      ObjectId: 'ObjectId'
+    }
+  };
+  
+  return {
+    connect: jest.fn().mockResolvedValue(mockConnection),
+    connection: mockConnection,
+    Schema: jest.fn(() => mockSchema),
+    model: jest.fn(),
+    models: {},
+    Types: {
+      ObjectId: {
+        isValid: jest.fn().mockReturnValue(true)
+      }
+    }
+  };
+});
+
+// Mock the models directly to avoid mongoose import issues
+jest.mock('../../models/CrisisCommunication', () => {
+  return {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn(),
+    equals: jest.fn(),
+    in: jest.fn(),
+    nin: jest.fn(),
+    exists: jest.fn(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    pipeline: jest.fn(),
+    addFields: jest.fn(),
+    match: jest.fn(),
+    group: jest.fn(),
+    project: jest.fn(),
+    unwind: jest.fn(),
+    lookup: jest.fn(),
+    facet: jest.fn()
+  };
+});
+
+jest.mock('../../models/GeopoliticalEvent', () => {
+  return {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn().mockReturnThis(),
+    equals: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    nin: jest.fn().mockReturnThis(),
+    exists: jest.fn().mockReturnThis(),
+    countDocuments: jest.fn().mockResolvedValue(0),
+    aggregate: jest.fn().mockReturnThis(),
+    pipeline: jest.fn().mockReturnThis(),
+    addFields: jest.fn().mockReturnThis(),
+    match: jest.fn().mockReturnThis(),
+    group: jest.fn().mockReturnThis(),
+    project: jest.fn().mockReturnThis(),
+    unwind: jest.fn().mockReturnThis(),
+    lookup: jest.fn().mockReturnThis(),
+    facet: jest.fn().mockReturnThis()
+  };
+});
+
+// Mock UserProfile model
+jest.mock('../../models/UserProfile', () => {
+  const mockUserProfile = {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn(),
+    equals: jest.fn(),
+    in: jest.fn(),
+    nin: jest.fn(),
+    exists: jest.fn(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    pipeline: jest.fn(),
+    addFields: jest.fn(),
+    match: jest.fn(),
+    group: jest.fn(),
+    project: jest.fn(),
+    unwind: jest.fn(),
+    lookup: jest.fn(),
+    facet: jest.fn()
+  };
+
+  return mockUserProfile;
+});
 
 describe('User Profile API Integration Tests', () => {
+  let UserProfile;
+
   beforeEach(() => {
-    // Clear in-memory storage before each test
-    // Note: In a real app, this would be handled by the database
-    const routes = require('../../routes/userProfile');
-    // Reset the arrays by requiring the module again
-    delete require.cache[require.resolve('../../routes/userProfile')];
+    // Clear mocks before each test
+    jest.clearAllMocks();
+    
+    // Get the mocked UserProfile model
+    UserProfile = require('../../models/UserProfile');
+    
+    // Set up mock responses
+    UserProfile.findOne.mockResolvedValue(null); // Default to not found for new profiles
+    UserProfile.create.mockImplementation((profileData) => {
+      return Promise.resolve({
+        _id: 'mock-profile-id-123',
+        ...profileData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    });
   });
 
   describe('POST /api/user-profile', () => {
     test('should create a new user profile successfully', async () => {
       const profileData = {
         name: 'John Doe',
-        role: 'CRO',
+        title: 'CRO',
         company: 'Multinational Corp',
+        industry: 'Technology',
         businessUnits: ['Manufacturing', 'Supply Chain'],
         areasOfConcern: ['Trade Relations', 'Supply Chain Disruption'],
         regions: ['Asia', 'Europe'],
@@ -36,7 +193,7 @@ describe('User Profile API Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Profile created successfully');
       expect(response.body.profile).toMatchObject(profileData);
-      expect(response.body.profile.id).toBeDefined();
+      expect(response.body.profile._id).toBeDefined();
       expect(response.body.profile.createdAt).toBeDefined();
     });
 

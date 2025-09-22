@@ -32,6 +32,7 @@ import { useNavigate } from 'react-router-dom';
 import { userProfileAPI } from '../services/api';
 import aiService from '../services/aiService';
 import { useToast } from './ToastNotifications';
+import DetailedWorldMap from './DetailedWorldMap';
 
 export default function EnterpriseDashboard({ profileId }) {
   const theme = useTheme();
@@ -469,6 +470,21 @@ export default function EnterpriseDashboard({ profileId }) {
           </Paper>
         </Box>
       )}
+
+      {/* World Risk Map Section */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Global Risk Overview
+        </Typography>
+        <Box sx={{ 
+          height: { xs: '400px', md: '500px' },
+          width: '100%',
+          borderRadius: 2,
+          overflow: 'hidden'
+        }}>
+          <DetailedWorldMap />
+        </Box>
+      </Box>
 
       {/* Main Content Layout */}
       <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>

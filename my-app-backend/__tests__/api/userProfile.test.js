@@ -2,6 +2,114 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../../server');
 
+// Mock mongoose connection
+jest.mock('mongoose', () => {
+  const mockConnection = {
+    readyState: 1, // Connected state
+    close: jest.fn().mockResolvedValue(undefined)
+  };
+  
+  const mockSchema = {
+    index: jest.fn().mockReturnThis(),
+    pre: jest.fn().mockReturnThis(),
+    post: jest.fn().mockReturnThis(),
+    methods: {},
+    statics: {},
+    virtuals: {},
+    Types: {
+      ObjectId: 'ObjectId'
+    }
+  };
+  
+  return {
+    connect: jest.fn().mockResolvedValue(mockConnection),
+    connection: mockConnection,
+    Schema: jest.fn(() => mockSchema),
+    model: jest.fn(),
+    models: {},
+    Types: {
+      ObjectId: {
+        isValid: jest.fn().mockReturnValue(true)
+      }
+    }
+  };
+});
+
+// Mock the models directly to avoid mongoose import issues
+jest.mock('../../models/CrisisCommunication', () => {
+  return {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn(),
+    equals: jest.fn(),
+    in: jest.fn(),
+    nin: jest.fn(),
+    exists: jest.fn(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    pipeline: jest.fn(),
+    addFields: jest.fn(),
+    match: jest.fn(),
+    group: jest.fn(),
+    project: jest.fn(),
+    unwind: jest.fn(),
+    lookup: jest.fn(),
+    facet: jest.fn()
+  };
+});
+
+jest.mock('../../models/GeopoliticalEvent', () => {
+  return {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn(),
+    equals: jest.fn(),
+    in: jest.fn(),
+    nin: jest.fn(),
+    exists: jest.fn(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    pipeline: jest.fn(),
+    addFields: jest.fn(),
+    match: jest.fn(),
+    group: jest.fn(),
+    project: jest.fn(),
+    unwind: jest.fn(),
+    lookup: jest.fn(),
+    facet: jest.fn()
+  };
+});
+
 // Mock MongoDB connection for testing
 const connectTestDB = async () => {
   try {
@@ -95,14 +203,13 @@ describe('User Profile API Tests', () => {
     // Clear mocks before each test
     jest.clearAllMocks();
     
-    // Mock successful database operations
-    if (mongoose.models.UserProfile) {
-      mongoose.models.UserProfile.create = jest.fn().mockResolvedValue(mockCreatedProfile);
-      mongoose.models.UserProfile.findOne = jest.fn().mockResolvedValue(mockCreatedProfile);
-      mongoose.models.UserProfile.findById = jest.fn().mockResolvedValue(mockCreatedProfile);
-      mongoose.models.UserProfile.findOneAndUpdate = jest.fn().mockResolvedValue(mockUpdatedProfile);
-      mongoose.models.UserProfile.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 1 });
-    }
+    // Mock successful database operations using the UserProfile mock from __mocks__
+    const UserProfile = require('../../__tests__/__mocks__/UserProfile');
+    UserProfile.create = jest.fn().mockResolvedValue(mockCreatedProfile);
+    UserProfile.findOne = jest.fn().mockResolvedValue(null); // Default to not found for new profiles
+    UserProfile.findById = jest.fn().mockResolvedValue(mockCreatedProfile);
+    UserProfile.findByIdAndUpdate = jest.fn().mockResolvedValue(mockUpdatedProfile);
+    UserProfile.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 1 });
   });
 
   describe('POST /api/user-profile', () => {

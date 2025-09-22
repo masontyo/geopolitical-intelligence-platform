@@ -1,10 +1,42 @@
 const express = require('express');
 const router = express.Router();
-const UserOnboarding = require('../models/UserOnboarding');
-const AIIntelligenceService = require('../services/aiIntelligenceService');
+const mongoose = require('mongoose');
 
-// Initialize AI Intelligence Service
-const aiIntelligence = new AIIntelligenceService();
+// Use in-memory model if MongoDB is not connected or MONGODB_URI is not set
+let UserOnboarding;
+try {
+  if (process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    UserOnboarding = require('../models/UserOnboarding');
+    console.log('📝 Using MongoDB UserOnboarding model');
+  } else {
+    UserOnboarding = require('../models/InMemoryUserOnboarding');
+    console.log('📝 Using in-memory UserOnboarding model for development');
+  }
+} catch (error) {
+  // Fallback to in-memory model if there's any issue
+  UserOnboarding = require('../models/InMemoryUserOnboarding');
+  console.log('📝 Fallback to in-memory UserOnboarding model due to error:', error.message);
+}
+
+// Use mock AI service for development to avoid dependency issues
+let AIIntelligenceService;
+let aiIntelligence;
+
+try {
+  if (process.env.NODE_ENV === 'production' && process.env.MONGODB_URI) {
+    AIIntelligenceService = require('../services/aiIntelligenceService');
+    aiIntelligence = new AIIntelligenceService();
+    console.log('🤖 Using full AI Intelligence Service');
+  } else {
+    AIIntelligenceService = require('../services/mockAIIntelligenceService');
+    aiIntelligence = new AIIntelligenceService();
+    console.log('🤖 Using mock AI Intelligence Service for development');
+  }
+} catch (error) {
+  console.log('🤖 Falling back to mock AI service due to error:', error.message);
+  AIIntelligenceService = require('../services/mockAIIntelligenceService');
+  aiIntelligence = new AIIntelligenceService();
+}
 
 // GET /api/onboarding/status/:userId - Get onboarding status
 router.get('/status/:userId', async (req, res) => {

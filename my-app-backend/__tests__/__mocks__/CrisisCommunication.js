@@ -5,7 +5,11 @@ const mockCrisisCommunication = {
   findOne: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
-  findByIdAndUpdate: jest.fn(),
+  findByIdAndUpdate: jest.fn().mockResolvedValue({
+    _id: 'mock-crisis-id',
+    status: 'active',
+    save: jest.fn().mockResolvedValue(true)
+  }),
   findByIdAndDelete: jest.fn(),
   updateOne: jest.fn(),
   updateMany: jest.fn(),

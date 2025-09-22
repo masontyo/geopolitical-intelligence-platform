@@ -3,7 +3,7 @@ import axios from 'axios';
 // API base URL - will use environment variable in production
 const API_BASE_URL = process.env.REACT_APP_API_URL || 
   (window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000' 
+    ? 'http://localhost:3001' 
     : 'https://geop-backend.onrender.com');
 
 console.log('🔍 API Configuration Debug:');

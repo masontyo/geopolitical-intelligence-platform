@@ -3,6 +3,114 @@ const mongoose = require('mongoose');
 const app = require('../../server');
 const UserProfile = require('../../models/UserProfile');
 
+// Mock mongoose connection
+jest.mock('mongoose', () => {
+  const mockConnection = {
+    readyState: 1, // Connected state
+    close: jest.fn().mockResolvedValue(undefined)
+  };
+  
+  const mockSchema = {
+    index: jest.fn().mockReturnThis(),
+    pre: jest.fn().mockReturnThis(),
+    post: jest.fn().mockReturnThis(),
+    methods: {},
+    statics: {},
+    virtuals: {},
+    Types: {
+      ObjectId: 'ObjectId'
+    }
+  };
+  
+  return {
+    connect: jest.fn().mockResolvedValue(mockConnection),
+    connection: mockConnection,
+    Schema: jest.fn(() => mockSchema),
+    model: jest.fn(),
+    models: {},
+    Types: {
+      ObjectId: {
+        isValid: jest.fn().mockReturnValue(true)
+      }
+    }
+  };
+});
+
+// Mock the models directly to avoid mongoose import issues
+jest.mock('../../models/CrisisCommunication', () => {
+  return {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn(),
+    equals: jest.fn(),
+    in: jest.fn(),
+    nin: jest.fn(),
+    exists: jest.fn(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    pipeline: jest.fn(),
+    addFields: jest.fn(),
+    match: jest.fn(),
+    group: jest.fn(),
+    project: jest.fn(),
+    unwind: jest.fn(),
+    lookup: jest.fn(),
+    facet: jest.fn()
+  };
+});
+
+jest.mock('../../models/GeopoliticalEvent', () => {
+  return {
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    updateMany: jest.fn(),
+    deleteOne: jest.fn(),
+    deleteMany: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn(),
+    sort: jest.fn(),
+    limit: jest.fn(),
+    skip: jest.fn(),
+    populate: jest.fn(),
+    select: jest.fn(),
+    where: jest.fn(),
+    equals: jest.fn(),
+    in: jest.fn(),
+    nin: jest.fn(),
+    exists: jest.fn(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    pipeline: jest.fn(),
+    addFields: jest.fn(),
+    match: jest.fn(),
+    group: jest.fn(),
+    project: jest.fn(),
+    unwind: jest.fn(),
+    lookup: jest.fn(),
+    facet: jest.fn()
+  };
+});
+
 // Mock user profile data
 const mockUserProfile1 = {
   name: "John Smith",
@@ -79,51 +187,62 @@ const mockUserProfile2 = {
 };
 
 // Mock the UserProfile model
-jest.mock('../models/UserProfile', () => {
+jest.mock('../../models/UserProfile', () => {
+         const mockProfile = {
+           _id: 'mock-profile-id',
+           name: 'John Smith',
+           title: 'Chief Risk Officer',
+           company: 'TechCorp International',
+           email: 'john.smith@techcorp.com',
+           industry: 'Technology',
+           businessUnits: [
+             {
+               name: 'Software Division',
+               description: 'Enterprise software solutions',
+               regions: ['North America', 'Europe'],
+               products: ['CRM', 'ERP', 'Analytics Platform']
+             },
+             {
+               name: 'Cloud Services',
+               description: 'Cloud infrastructure and services',
+               regions: ['North America', 'Asia Pacific'],
+               products: ['IaaS', 'PaaS', 'SaaS Solutions']
+             }
+           ],
+           areasOfConcern: [
+             {
+               category: 'Trade Relations',
+               description: 'US-China trade tensions and tariffs',
+               priority: 'high'
+             },
+             {
+               category: 'Cybersecurity',
+               description: 'State-sponsored cyber attacks',
+               priority: 'critical'
+             },
+             {
+               category: 'Supply Chain',
+               description: 'Global supply chain disruptions',
+               priority: 'medium'
+             }
+           ],
+           regions: ['North America', 'Europe', 'Asia Pacific'],
+           riskTolerance: 'medium',
+           notificationPreferences: {
+             email: true,
+             frequency: 'daily'
+           },
+           createdAt: new Date().toISOString(),
+           updatedAt: new Date().toISOString(),
+           save: jest.fn().mockResolvedValue(this)
+         };
+
   const mockUserProfile = {
-    save: jest.fn().mockResolvedValue({
-      _id: 'mock-profile-id',
-      name: 'John Doe',
-      title: 'Software Engineer',
-      company: 'TechCorp International',
-      email: 'john.doe@techcorp.com',
-      industry: 'Technology',
-      businessUnits: [
-        {
-          name: 'Engineering',
-          description: 'Software development team',
-          regions: ['North America'],
-          products: ['Web Platform']
-        },
-        {
-          name: 'Sales',
-          description: 'Sales and marketing team',
-          regions: ['North America', 'Europe'],
-          products: ['Enterprise Solutions']
-        }
-      ],
-      areasOfConcern: [
-        {
-          category: 'Cybersecurity',
-          description: 'Data security and privacy',
-          priority: 'high'
-        },
-        {
-          category: 'Data Privacy',
-          description: 'GDPR and compliance',
-          priority: 'medium'
-        }
-      ],
-      regions: ['North America', 'Europe'],
-      riskTolerance: 'medium',
-      notificationPreferences: {
-        email: true,
-        frequency: 'daily'
-      }
-    }),
+    save: jest.fn().mockResolvedValue(mockProfile),
     find: jest.fn().mockReturnValue([]),
-    findOne: jest.fn(),
-    findById: jest.fn(),
+    findOne: jest.fn().mockResolvedValue(null), // Default to not found
+    findById: jest.fn().mockResolvedValue(null),
+    create: jest.fn().mockResolvedValue(mockProfile),
     deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
     deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 })
   };
@@ -134,6 +253,7 @@ jest.mock('../models/UserProfile', () => {
     find: mockUserProfile.find,
     findOne: mockUserProfile.findOne,
     findById: mockUserProfile.findById,
+    create: mockUserProfile.create,
     deleteOne: mockUserProfile.deleteOne,
     deleteMany: mockUserProfile.deleteMany
   };
@@ -229,7 +349,7 @@ describe('User Profile API Tests with MongoDB Integration', () => {
 
     it('should allow different users with same name but different companies', async () => {
       // Mock the find method to return the profiles we expect
-      const UserProfile = require('../models/UserProfile').default;
+      const UserProfile = require('../../models/UserProfile');
       const mockProfiles = [
         {
           _id: 'mock-profile-id-1',
@@ -352,7 +472,7 @@ describe('User Profile API Tests with MongoDB Integration', () => {
         .expect(200);
 
       expect(response1.body.success).toBe(true);
-      expect(response1.body.profile.name).toBe('John Doe');
+      expect(response1.body.profile.name).toBe('John Smith');
       expect(response1.body.profile.company).toBe('TechCorp International');
 
       // Create second profile with same name but different company

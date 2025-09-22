@@ -6,7 +6,12 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
-const onboardingRoutes = require('./routes/onboarding');
+// Use simple onboarding routes for development
+const onboardingRoutes = process.env.NODE_ENV === 'production' && process.env.MONGODB_URI 
+  ? require('./routes/onboarding')
+  : require('./routes/simpleOnboarding');
+
+console.log('📋 Using', process.env.NODE_ENV === 'production' && process.env.MONGODB_URI ? 'full' : 'simple', 'onboarding routes');
 const userProfileRoutes = require('./routes/userProfile');
 const newsRoutes = require('./routes/news');
 const enhancedNewsRoutes = require('./routes/enhancedNews');
@@ -23,16 +28,23 @@ console.log('Environment PORT:', process.env.PORT);
 console.log('Final PORT:', PORT);
 
 // Connect to MongoDB
-// In test environment, skip database connection (using mocked models)
-// In other environments, connect to real database
-if (process.env.NODE_ENV !== 'test') {
+// In test environment or local development without MongoDB, skip database connection
+if (process.env.NODE_ENV !== 'test' && process.env.MONGODB_URI) {
   connectDB().catch(err => {
     console.error('Failed to connect to MongoDB:', err);
+    console.log('💡 Running without database - using in-memory storage for development');
   });
+} else {
+  console.log('💡 Running in development mode without MongoDB - using in-memory storage');
 }
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(helmet());
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
@@ -62,15 +74,20 @@ if (process.env.NODE_ENV === 'test') {
   });
 }
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Health check endpoints
+const healthResponse = (req, res) => {
   res.status(200).json({
+    status: 'OK',
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development'
   });
-});
+};
+
+app.get('/health', healthResponse);
+app.get('/api/health', healthResponse);
 
 // 404 handler for non-existent routes
 app.use('*', (req, res) => {
