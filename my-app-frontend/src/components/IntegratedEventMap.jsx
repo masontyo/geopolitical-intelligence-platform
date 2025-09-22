@@ -94,8 +94,9 @@ export default function IntegratedEventMap({
           setEvents(getSampleEvents());
         }
       } catch (apiError) {
-        console.warn('API not available, using sample data:', apiError);
+        console.warn('API not available, using sample data:', apiError.message || apiError);
         setEvents(getSampleEvents());
+        // Don't set error for API failures - sample data is acceptable
       }
     } catch (error) {
       console.error('Error loading events:', error);

@@ -5,6 +5,18 @@ const notificationService = require('./notificationService');
 
 class EnhancedNewsService {
   constructor() {
+    // Rate limiting tracking
+    this.lastFetchTimes = {
+      gnews: 0,
+      twitter: 0,
+      newsapi: 0
+    };
+    this.rateLimits = {
+      gnews: 60000, // 1 minute
+      twitter: 300000, // 5 minutes
+      newsapi: 60000 // 1 minute
+    };
+
     // Traditional News Sources
     this.newsSources = {
       newsapi: {
@@ -198,23 +210,42 @@ class EnhancedNewsService {
    */
   async fetchFromTwitter() {
     try {
+      // Check if Twitter credentials are available
+      if (!this.socialSources.twitter.bearerToken) {
+        console.warn('Twitter Bearer Token not configured, skipping Twitter fetch');
+        return [];
+      }
+
+      // Rate limiting check (Twitter has strict limits)
+      const now = Date.now();
+      if (now - this.lastFetchTimes.twitter < this.rateLimits.twitter) {
+        console.log('Twitter rate limited, skipping fetch');
+        return [];
+      }
+
       const query = this.buildTwitterQuery();
       
       const response = await axios.get(`${this.socialSources.twitter.baseUrl}/tweets/search/recent`, {
         params: {
           query: query,
-          max_results: 100,
-          'tweet.fields': 'created_at,author_id,public_metrics,context_annotations',
-          'user.fields': 'name,username,verified',
+          max_results: 10, // Reduced from 100 to avoid rate limits
+          'tweet.fields': 'created_at,author_id,public_metrics',
+          'user.fields': 'name,username',
           expansions: 'author_id'
         },
         headers: {
           'Authorization': `Bearer ${this.socialSources.twitter.bearerToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 10000 // 10 second timeout
       });
 
-      return response.data.data?.map(tweet => ({
+      if (!response.data || !response.data.data) {
+        console.warn('Twitter returned no data');
+        return [];
+      }
+
+      const tweets = response.data.data.map(tweet => ({
         id: tweet.id,
         title: tweet.text.substring(0, 200) + (tweet.text.length > 200 ? '...' : ''),
         description: tweet.text,
@@ -234,10 +265,23 @@ class EnhancedNewsService {
         },
         platform: 'twitter',
         type: 'social_media'
-      })) || [];
+      }));
+
+      // Update last fetch time
+      this.lastFetchTimes.twitter = now;
+      
+      return tweets;
 
     } catch (error) {
-      console.error('Error fetching from Twitter:', error.message);
+      if (error.response?.status === 401) {
+        console.error('Twitter API Error (401): Invalid Bearer Token');
+      } else if (error.response?.status === 429) {
+        console.error('Twitter API Error (429): Rate limit exceeded - Twitter has strict rate limits');
+      } else if (error.response?.status === 400) {
+        console.error('Twitter API Error (400): Invalid request parameters');
+      } else {
+        console.error('Error fetching from Twitter:', error.message);
+      }
       return [];
     }
   }
@@ -592,17 +636,36 @@ class EnhancedNewsService {
    */
   async fetchFromGNews() {
     try {
+      // Check if API key is available
+      if (!this.newsSources.gnews.apiKey) {
+        console.warn('GNews API key not configured, skipping GNews fetch');
+        return [];
+      }
+
+      // Rate limiting check
+      const now = Date.now();
+      if (now - this.lastFetchTimes.gnews < this.rateLimits.gnews) {
+        console.log('GNews rate limited, skipping fetch');
+        return [];
+      }
+
       const response = await axios.get(`${this.newsSources.gnews.baseUrl}/search`, {
         params: {
-          q: this.geopoliticalKeywords.join(' OR '),
+          q: this.geopoliticalKeywords.slice(0, 5).join(' OR '), // Limit keywords to avoid long URLs
           lang: 'en',
           country: 'us',
-          max: 50,
+          max: 20, // Reduced from 50 to avoid rate limits
           apikey: this.newsSources.gnews.apiKey
-        }
+        },
+        timeout: 10000 // 10 second timeout
       });
       
-      return response.data.articles.map(article => ({
+      if (!response.data || !response.data.articles) {
+        console.warn('GNews returned invalid response structure');
+        return [];
+      }
+      
+      const articles = response.data.articles.map(article => ({
         title: article.title,
         description: article.description,
         content: article.content,
@@ -615,9 +678,22 @@ class EnhancedNewsService {
         publishedAt: article.publishedAt,
         author: article.author
       }));
+
+      // Update last fetch time
+      this.lastFetchTimes.gnews = now;
+      
+      return articles;
       
     } catch (error) {
-      console.error('Error fetching from GNews:', error.message);
+      if (error.response?.status === 400) {
+        console.error('GNews API Error (400): Invalid request parameters or API key');
+      } else if (error.response?.status === 401) {
+        console.error('GNews API Error (401): Invalid API key');
+      } else if (error.response?.status === 429) {
+        console.error('GNews API Error (429): Rate limit exceeded');
+      } else {
+        console.error('Error fetching from GNews:', error.message);
+      }
       return [];
     }
   }

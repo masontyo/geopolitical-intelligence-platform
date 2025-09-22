@@ -161,7 +161,7 @@ export const eventsAPI = {
 
   // Get all geopolitical events
   getAllEvents: async () => {
-    const requestFn = () => api.get('/api/events');
+    const requestFn = () => api.get('/api/events', { timeout: 10000 }); // 10 second timeout
     const response = await retryRequest(requestFn);
     return response.data;
   },
