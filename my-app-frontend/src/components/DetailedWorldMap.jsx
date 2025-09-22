@@ -257,6 +257,58 @@ const DetailedWorldMap = () => {
     });
   };
 
+  // Get coordinates for events
+  const getEventCoordinates = () => {
+    const eventMarkers = [];
+    
+    events.forEach(event => {
+      if (event.countries && event.countries.length > 0) {
+        event.countries.forEach(countryName => {
+          // Find the country in riskData to get coordinates
+          const countryData = riskData[countryName];
+          if (countryData) {
+            eventMarkers.push({
+              ...event,
+              coords: countryData.coords,
+              countryName: countryName
+            });
+          }
+        });
+      } else if (event.regions && event.regions.length > 0) {
+        // For regional events, use a representative country
+        event.regions.forEach(region => {
+          const regionCountries = eventMapService.regionCountries[region];
+          if (regionCountries && regionCountries.length > 0) {
+            // Use the first country in the region as a representative
+            const representativeCountry = regionCountries[0];
+            const countryData = riskData[representativeCountry];
+            if (countryData) {
+              eventMarkers.push({
+                ...event,
+                coords: countryData.coords,
+                countryName: representativeCountry,
+                region: region
+              });
+            }
+          }
+        });
+      }
+    });
+    
+    return eventMarkers;
+  };
+
+  // Get color for event severity
+  const getEventSeverityColor = (severity) => {
+    switch (severity?.toLowerCase()) {
+      case 'critical': return '#dc2626';
+      case 'high': return '#ea580c';
+      case 'medium': return '#d97706';
+      case 'low': return '#16a34a';
+      default: return '#6b7280';
+    }
+  };
+
   const handleRefresh = () => {
     setSelectedCountry(null);
   };
@@ -440,7 +492,116 @@ const DetailedWorldMap = () => {
               </Popup>
             </CircleMarker>
           ))}
+          
+          {/* Event Markers */}
+          {getEventCoordinates().map((eventMarker, index) => (
+            <CircleMarker
+              key={`event-${eventMarker.id || index}`}
+              center={eventMarker.coords}
+              radius={8}
+              fillColor={getEventSeverityColor(eventMarker.severity)}
+              color="#ffffff"
+              weight={2}
+              opacity={1}
+              fillOpacity={0.9}
+              eventHandlers={{
+                click: () => {
+                  // You can add event selection logic here if needed
+                  console.log('Event clicked:', eventMarker);
+                }
+              }}
+            >
+              <Popup>
+                <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                    📰 {eventMarker.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    <strong>Category:</strong> {eventMarker.category}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    <strong>Severity:</strong> 
+                    <Chip 
+                      label={eventMarker.severity?.toUpperCase()} 
+                      size="small" 
+                      sx={{ 
+                        ml: 1, 
+                        backgroundColor: getEventSeverityColor(eventMarker.severity),
+                        color: 'white',
+                        fontWeight: 600
+                      }} 
+                    />
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    <strong>Location:</strong> {eventMarker.countryName}
+                    {eventMarker.region && ` (${eventMarker.region})`}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Date:</strong> {eventMarker.eventDate?.toLocaleDateString()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {eventMarker.description}
+                  </Typography>
+                </Box>
+              </Popup>
+            </CircleMarker>
+          ))}
         </MapContainer>
+      </Box>
+
+      {/* Map Legend */}
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+          Map Legend
+        </Typography>
+        
+        {/* Risk Level Legend */}
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Risk Levels (Large Circles)
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+          {['critical', 'high', 'medium', 'low'].map(level => (
+            <Box key={level} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: '50%',
+                  backgroundColor: getRiskColor(level),
+                  border: '2px solid #ffffff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                }}
+              />
+              <Typography variant="body2">
+                {level.toUpperCase()} ({riskStats[level] || 0})
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+        
+        {/* Event Markers Legend */}
+        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+          Events (Small Circles)
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+          {['critical', 'high', 'medium', 'low'].map(severity => (
+            <Box key={severity} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  backgroundColor: getEventSeverityColor(severity),
+                  border: '2px solid #ffffff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                }}
+              />
+              <Typography variant="body2">
+                {severity.toUpperCase()} Events
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       </Box>
 
       {/* Selected Country Details */}
