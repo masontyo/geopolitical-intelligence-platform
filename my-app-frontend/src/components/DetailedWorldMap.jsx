@@ -345,38 +345,66 @@ const DetailedWorldMap = () => {
         </Box>
       </Box>
 
-      {/* Risk Level Legend */}
-      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <Chip
-          icon={<Error fontSize="small" />}
-          label={`${getUIText('critical', userLanguage)} (${riskStats.critical})`}
-          size="small"
-          sx={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}
-        />
-        <Chip
-          icon={<Warning fontSize="small" />}
-          label={`${getUIText('high', userLanguage)} (${riskStats.high})`}
-          size="small"
-          sx={{ backgroundColor: '#fffbeb', color: '#f59e0b', border: '1px solid #fed7aa' }}
-        />
-        <Chip
-          icon={<Info fontSize="small" />}
-          label={`${getUIText('medium', userLanguage)} (${riskStats.medium})`}
-          size="small"
-          sx={{ backgroundColor: '#fefce8', color: '#eab308', border: '1px solid #fde68a' }}
-        />
-        <Chip
-          icon={<CheckCircle fontSize="small" />}
-          label={`${getUIText('low', userLanguage)} (${riskStats.low})`}
-          size="small"
-          sx={{ backgroundColor: '#f0fdf4', color: '#10b981', border: '1px solid #bbf7d0' }}
-        />
-        <Chip
-          label={`${getUIText('totalEvents', userLanguage)}: ${riskStats.totalEvents}`}
-          size="small"
-          variant="outlined"
-          sx={{ ml: 1 }}
-        />
+      {/* Compact Map Legend */}
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: 'primary.main' }}>
+          🗺️ Map Legend
+        </Typography>
+        
+        {/* Risk Levels */}
+        <Box sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+            🌍 Country Risk (Large circles)
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {['critical', 'high', 'medium', 'low'].map(level => (
+              <Box key={level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: getRiskColor(level),
+                    border: '1px solid #ffffff',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                  }}
+                />
+                <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                  {level} ({riskStats[level] || 0})
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        
+        {/* Events */}
+        <Box>
+          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
+            📰 Events (Small circles)
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {['critical', 'high', 'medium', 'low'].map(severity => {
+              const eventCount = getEventCoordinates().filter(e => e.severity?.toLowerCase() === severity).length;
+              return (
+                <Box key={severity} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: getEventSeverityColor(severity),
+                      border: '1px solid #ffffff',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                    }}
+                  />
+                  <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
+                    {severity} ({eventCount})
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
       </Box>
 
       {/* Leaflet Map */}
@@ -549,99 +577,6 @@ const DetailedWorldMap = () => {
         </MapContainer>
       </Box>
 
-      {/* Enhanced Map Legend */}
-      <Box sx={{ mt: 2, p: 2, backgroundColor: 'background.paper', borderRadius: 2, border: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>
-          🗺️ Map Legend
-        </Typography>
-        
-        {/* Risk Level Legend */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-            🌍 Country Risk Levels
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-              (Large circles - click for country details)
-            </Typography>
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1.5 }}>
-            {['critical', 'high', 'medium', 'low'].map(level => (
-              <Box key={level} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1, backgroundColor: 'background.default', borderRadius: 1 }}>
-                <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    backgroundColor: getRiskColor(level),
-                    border: '2px solid #ffffff',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }}
-                />
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                    {level}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {riskStats[level] || 0} countries
-                  </Typography>
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-        
-        {/* Event Markers Legend */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-            📰 Recent Events
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-              (Small circles - click for event details)
-            </Typography>
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1.5 }}>
-            {['critical', 'high', 'medium', 'low'].map(severity => {
-              const eventCount = getEventCoordinates().filter(e => e.severity?.toLowerCase() === severity).length;
-              return (
-                <Box key={severity} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1, backgroundColor: 'background.default', borderRadius: 1 }}>
-                  <Box
-                    sx={{
-                      width: 16,
-                      height: 16,
-                      borderRadius: '50%',
-                      backgroundColor: getEventSeverityColor(severity),
-                      border: '2px solid #ffffff',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }}
-                  />
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                      {severity}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {eventCount} events
-                    </Typography>
-                  </Box>
-                </Box>
-              );
-            })}
-          </Box>
-        </Box>
-        
-        {/* Interactive Instructions */}
-        <Box sx={{ mt: 2, p: 1.5, backgroundColor: 'primary.light', borderRadius: 1, border: 1, borderColor: 'primary.main' }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.dark', mb: 0.5 }}>
-            💡 How to Use:
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'primary.dark', display: 'block' }}>
-            • Click large circles to see country risk details and associated events
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'primary.dark', display: 'block' }}>
-            • Click small circles to see individual event information
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'primary.dark', display: 'block' }}>
-            • Use zoom and pan to explore different regions
-          </Typography>
-        </Box>
-      </Box>
 
       {/* Selected Country Details */}
       {selectedCountry && (
