@@ -3,6 +3,7 @@ services:
     name: geop-backend
     env: node
     plan: free
+    rootDir: ./my-app-backend
     buildCommand: npm install
     startCommand: npm start
     envVars:

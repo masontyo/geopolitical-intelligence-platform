@@ -133,7 +133,10 @@ const AIOnboardingFlow = () => {
 
   const loadOnboardingStatus = async () => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 
+        (window.location.hostname === 'localhost' 
+          ? 'http://localhost:3001' 
+          : 'https://geop-backend.onrender.com');
       const userId = 'demo-user'; // In real app, get from auth context
       const response = await fetch(`${API_BASE_URL}/api/onboarding/status/${userId}`);
       const data = await response.json();
@@ -179,7 +182,10 @@ const AIOnboardingFlow = () => {
     setError(null);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 
+        (window.location.hostname === 'localhost' 
+          ? 'http://localhost:3001' 
+          : 'https://geop-backend.onrender.com');
       const response = await fetch(`${API_BASE_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
@@ -214,7 +220,10 @@ const AIOnboardingFlow = () => {
     setError(null);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 
+        (window.location.hostname === 'localhost' 
+          ? 'http://localhost:3001' 
+          : 'https://geop-backend.onrender.com');
       const response = await fetch(`${API_BASE_URL}/api/onboarding/update`, {
         method: 'PUT',
         headers: {
@@ -254,7 +263,10 @@ const AIOnboardingFlow = () => {
     setError(null);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://geopolitical-intelligence-platform.onrender.com';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 
+        (window.location.hostname === 'localhost' 
+          ? 'http://localhost:3001' 
+          : 'https://geop-backend.onrender.com');
       const response = await fetch(`${API_BASE_URL}/api/onboarding/complete`, {
         method: 'POST',
         headers: {
@@ -442,7 +454,7 @@ const AIOnboardingFlow = () => {
     };
   };
 
-  const renderField = (field) => {
+  const renderField = (field, index) => {
     const value = onboardingData[field] || '';
     const config = getFieldConfig(field);
 
@@ -451,7 +463,7 @@ const AIOnboardingFlow = () => {
       case 'primaryBusiness':
       case 'headquarters':
         return (
-          <Box sx={{ mb: 2 }}>
+          <Box key={`${field}-${index}`} sx={{ mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
               {config.label} *
             </Typography>
@@ -479,7 +491,7 @@ const AIOnboardingFlow = () => {
                       alertFrequencyOptions;
 
         return (
-          <Box sx={{ mb: 2 }}>
+          <Box key={`${field}-${index}`} sx={{ mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
               {config.label} *
             </Typography>
@@ -515,9 +527,9 @@ const AIOnboardingFlow = () => {
       case 'priorityRegions':
       case 'concernAreas':
         const multiOptions = field === 'concernAreas' ? concernAreasOptions : regionOptions;
-        
+
         return (
-          <Box sx={{ mb: 2 }}>
+          <Box key={`${field}-${index}`} sx={{ mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
               {config.label} *
             </Typography>
@@ -558,7 +570,7 @@ const AIOnboardingFlow = () => {
 
       default:
         return (
-          <Box sx={{ mb: 2 }}>
+          <Box key={`${field}-${index}`} sx={{ mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
               {config.label}
             </Typography>
@@ -594,7 +606,7 @@ const AIOnboardingFlow = () => {
           }
         </Typography>
         
-        {step.fields.map(field => renderField(field))}
+        {step.fields.map((field, index) => renderField(field, index))}
         
         {/* Show helpful note about overlap reduction */}
         {stepIndex === 1 && step.fields.length > 0 && (
