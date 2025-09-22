@@ -33,7 +33,6 @@ import { userProfileAPI } from '../services/api';
 import aiService from '../services/aiService';
 import { useToast } from './ToastNotifications';
 import DetailedWorldMap from './DetailedWorldMap';
-import IntegratedEventMap from './IntegratedEventMap';
 
 export default function EnterpriseDashboard({ profileId }) {
   const theme = useTheme();
@@ -49,7 +48,6 @@ export default function EnterpriseDashboard({ profileId }) {
   const [aiRecommendations, setAiRecommendations] = useState([]);
 
   const [actionSteps, setActionSteps] = useState([]);
-  const [showIntegratedMap, setShowIntegratedMap] = useState(false);
 
   // Fallback to localStorage if profileId is not provided
   const effectiveProfileId = profileId || localStorage.getItem('currentProfileId');
@@ -481,10 +479,9 @@ export default function EnterpriseDashboard({ profileId }) {
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Chip
-              label={showIntegratedMap ? "Event Map" : "Risk Map"}
-              color={showIntegratedMap ? "primary" : "default"}
-              onClick={() => setShowIntegratedMap(!showIntegratedMap)}
-              clickable
+              label="Interactive Risk Map"
+              color="primary"
+              variant="outlined"
             />
           </Box>
         </Box>
@@ -494,19 +491,7 @@ export default function EnterpriseDashboard({ profileId }) {
           borderRadius: 2,
           overflow: 'hidden'
         }}>
-          {showIntegratedMap ? (
-            <IntegratedEventMap 
-              height="100%"
-              showMapView={true}
-              showEventList={true}
-              onEventSelect={(event) => {
-                // Handle event selection if needed
-                console.log('Selected event:', event);
-              }}
-            />
-          ) : (
-            <DetailedWorldMap />
-          )}
+          <DetailedWorldMap />
         </Box>
       </Box>
 

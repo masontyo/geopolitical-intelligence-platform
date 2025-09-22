@@ -28,6 +28,8 @@ import {
   getUIText, 
   getRecommendedTileProvider 
 } from '../utils/mapLanguageConfig';
+import { eventsAPI } from '../services/api';
+import eventMapService from '../services/eventMapService';
 
 // Detailed risk data with real geographic coordinates (lat, lng)
 const riskData = {
@@ -171,6 +173,8 @@ const DetailedWorldMap = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [userLanguage] = useState(getUserLanguage());
   const [tileProvider] = useState(getRecommendedTileProvider(userLanguage));
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Calculate risk statistics
   const riskStats = Object.values(riskData).reduce((acc, risk) => {
@@ -178,6 +182,80 @@ const DetailedWorldMap = () => {
     acc.totalEvents += risk.events;
     return acc;
   }, { critical: 0, high: 0, medium: 0, low: 0, totalEvents: 0 });
+
+  // Load events when component mounts
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      const apiEvents = await eventsAPI.getAllEvents();
+      if (apiEvents && apiEvents.length > 0) {
+        setEvents(apiEvents);
+      } else {
+        // Fallback to sample data
+        setEvents(getSampleEvents());
+      }
+    } catch (error) {
+      console.warn('API not available, using sample data:', error.message);
+      setEvents(getSampleEvents());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sample events data
+  const getSampleEvents = () => [
+    {
+      id: 1,
+      title: "Supply Chain Disruption in Asia Pacific",
+      description: "Major port closures and shipping delays affecting key trade routes.",
+      category: "Supply Chain Risk",
+      severity: "high",
+      countries: ["China", "Japan", "South Korea", "Singapore"],
+      eventDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      relevanceScore: 0.85
+    },
+    {
+      id: 2,
+      title: "New Regulatory Requirements in Europe",
+      description: "Updated GDPR compliance requirements for data processing.",
+      category: "Regulatory Risk",
+      severity: "medium",
+      countries: ["Germany", "France", "Italy", "Spain"],
+      eventDate: new Date(Date.now() - 6 * 60 * 60 * 1000),
+      relevanceScore: 0.72
+    },
+    {
+      id: 3,
+      title: "Cybersecurity Threat Detection",
+      description: "Advanced persistent threat targeting financial institutions.",
+      category: "Cybersecurity Risk",
+      severity: "high",
+      countries: ["United States", "Canada"],
+      eventDate: new Date(Date.now() - 1 * 60 * 60 * 1000),
+      relevanceScore: 0.91
+    }
+  ];
+
+  // Get events for a specific country
+  const getEventsForCountry = (countryName) => {
+    return events.filter(event => {
+      if (event.countries && event.countries.includes(countryName)) {
+        return true;
+      }
+      // Also check regions
+      if (event.regions) {
+        return event.regions.some(region => {
+          const regionCountries = eventMapService.regionCountries[region];
+          return regionCountries && regionCountries.includes(countryName);
+        });
+      }
+      return false;
+    });
+  };
 
   const handleRefresh = () => {
     setSelectedCountry(null);
@@ -292,7 +370,7 @@ const DetailedWorldMap = () => {
               }}
             >
               <Popup>
-                <Box sx={{ minWidth: 200 }}>
+                <Box sx={{ minWidth: 300, maxWidth: 400 }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                     {getCountryName(countryName, userLanguage)}
                   </Typography>
@@ -305,9 +383,59 @@ const DetailedWorldMap = () => {
                   <Typography variant="body2" sx={{ mb: 1 }}>
                     <strong>{getUIText('activeEvents', userLanguage)}:</strong> {data.events}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {data.description}
                   </Typography>
+                  
+                  {/* Associated Events */}
+                  {(() => {
+                    const countryEvents = getEventsForCountry(countryName);
+                    if (countryEvents.length > 0) {
+                      return (
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'primary.main' }}>
+                            📰 Associated Events ({countryEvents.length})
+                          </Typography>
+                          <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                            {countryEvents.slice(0, 3).map((event, index) => (
+                              <Box 
+                                key={event.id || index}
+                                sx={{ 
+                                  p: 1, 
+                                  mb: 1, 
+                                  border: 1, 
+                                  borderColor: 'divider', 
+                                  borderRadius: 1,
+                                  backgroundColor: 'background.paper'
+                                }}
+                              >
+                                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                  {event.title}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+                                  {event.category} • {event.severity?.toUpperCase()}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                  {event.description?.substring(0, 100)}
+                                  {event.description?.length > 100 ? '...' : ''}
+                                </Typography>
+                              </Box>
+                            ))}
+                            {countryEvents.length > 3 && (
+                              <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                +{countryEvents.length - 3} more events
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      );
+                    }
+                    return (
+                      <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                        No recent events for this location
+                      </Typography>
+                    );
+                  })()}
                 </Box>
               </Popup>
             </CircleMarker>
