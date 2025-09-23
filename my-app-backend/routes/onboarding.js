@@ -82,13 +82,22 @@ router.get('/status/:userId', async (req, res) => {
 // POST /api/onboarding/start - Start onboarding process
 router.post('/start', async (req, res) => {
   try {
-    const { userId, companyName, industry, primaryBusiness, headquarters } = req.body;
+    const { userId, companyName, industry, primaryBusiness, headquarters, type = 'legacy' } = req.body;
 
-    // Validate required fields
-    if (!userId || !companyName || !industry || !primaryBusiness || !headquarters) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: userId, companyName, industry, primaryBusiness, headquarters' 
-      });
+    // For supply chain onboarding, only userId is required
+    if (type === 'supply_chain') {
+      if (!userId) {
+        return res.status(400).json({ 
+          error: 'Missing required field: userId' 
+        });
+      }
+    } else {
+      // For legacy onboarding, validate all required fields
+      if (!userId || !companyName || !industry || !primaryBusiness || !headquarters) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: userId, companyName, industry, primaryBusiness, headquarters' 
+        });
+      }
     }
 
     // Check if onboarding already exists
@@ -98,29 +107,47 @@ router.post('/start', async (req, res) => {
       return res.json({
         message: 'Onboarding already exists',
         onboarding,
-        progress: onboarding.getOnboardingProgress(),
-        recommendations: onboarding.getNextRecommendedFields()
+        progress: onboarding.getOnboardingProgress ? onboarding.getOnboardingProgress() : { phase1: { completed: 0, total: 1 } },
+        recommendations: onboarding.getNextRecommendedFields ? onboarding.getNextRecommendedFields() : []
       });
     }
 
-    // Create new onboarding
-    onboarding = new UserOnboarding({
-      userId,
-      companyName,
-      industry,
-      primaryBusiness,
-      headquarters,
-      onboardingStatus: 'in_progress'
-    });
+    // Create new onboarding based on type
+    let onboardingData;
+    if (type === 'supply_chain') {
+      onboardingData = {
+        userId,
+        onboardingStatus: 'in_progress',
+        onboardingType: 'supply_chain',
+        onboardingData: {
+          userInfo: { name: '', company: '', email: '', role: '' },
+          suppliers: [],
+          portsAndRoutes: { ports: [], warehouses: [], shippingRoutes: [] },
+          backupSuppliers: [],
+          timelines: { supplierSwitchTime: '', shipmentFrequency: '', leadTimes: {} },
+          riskThresholds: { critical: 8, high: 6, medium: 4, low: 2 }
+        }
+      };
+    } else {
+      onboardingData = {
+        userId,
+        companyName,
+        industry,
+        primaryBusiness,
+        headquarters,
+        onboardingStatus: 'in_progress'
+      };
+    }
 
+    onboarding = new UserOnboarding(onboardingData);
     await onboarding.save();
 
     res.status(201).json({
       message: 'Onboarding started successfully',
       onboarding,
-      progress: onboarding.getOnboardingProgress(),
-      recommendations: onboarding.getNextRecommendedFields(),
-      insights: onboarding.getAIInsights()
+      progress: onboarding.getOnboardingProgress ? onboarding.getOnboardingProgress() : { phase1: { completed: 0, total: 1 } },
+      recommendations: onboarding.getNextRecommendedFields ? onboarding.getNextRecommendedFields() : [],
+      insights: onboarding.getAIInsights ? onboarding.getAIInsights() : []
     });
 
   } catch (error) {
@@ -186,7 +213,7 @@ router.put('/update', async (req, res) => {
 // POST /api/onboarding/complete - Complete onboarding
 router.post('/complete', async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, onboardingData, type } = req.body;
 
     if (!userId) {
       return res.status(400).json({ error: 'Missing userId' });
@@ -194,17 +221,52 @@ router.post('/complete', async (req, res) => {
 
     let onboarding = await UserOnboarding.findOne({ userId });
     
+    // If onboarding doesn't exist, create it with the new data
     if (!onboarding) {
-      return res.status(404).json({ error: 'Onboarding not found' });
+      if (type === 'supply_chain' && onboardingData) {
+        // Create new onboarding with supply chain data
+        onboarding = new UserOnboarding({
+          userId,
+          onboardingData,
+          onboardingType: 'supply_chain',
+          onboardingStatus: 'in_progress',
+          completionPercentage: 0,
+          lastUpdated: new Date()
+        });
+      } else {
+        return res.status(404).json({ error: 'Onboarding not found and no data provided' });
+      }
+    } else if (type === 'supply_chain' && onboardingData) {
+      // Update existing onboarding with new supply chain data
+      onboarding.onboardingData = onboardingData;
+      onboarding.onboardingType = 'supply_chain';
     }
 
-    // Validate required fields
-    const errors = onboarding.validateRequiredFields();
-    if (errors.length > 0) {
-      return res.status(400).json({ 
-        error: 'Cannot complete onboarding. Missing required fields:',
-        missingFields: errors
-      });
+    // For supply chain onboarding, validate required fields
+    if (type === 'supply_chain') {
+      const requiredFields = [];
+      if (!onboardingData?.userInfo?.name) requiredFields.push('name');
+      if (!onboardingData?.userInfo?.company) requiredFields.push('company');
+      if (!onboardingData?.userInfo?.email) requiredFields.push('email');
+      if (!onboardingData?.suppliers || onboardingData.suppliers.length === 0) {
+        requiredFields.push('at least one supplier');
+      }
+      
+      if (requiredFields.length > 0) {
+        return res.status(400).json({ 
+          error: 'Cannot complete onboarding. Missing required fields:',
+          missingFields: requiredFields
+        });
+      }
+    } else {
+      // Validate required fields for legacy onboarding
+      const errors = onboarding.validateRequiredFields();
+      if (errors.length > 0) {
+        return res.status(400).json({ 
+          error: 'Cannot complete onboarding. Missing required fields:',
+          missingFields: errors
+        });
+      }
     }
 
     // Mark as completed
@@ -219,8 +281,8 @@ router.post('/complete', async (req, res) => {
     res.json({
       message: 'Onboarding completed successfully',
       onboarding,
-      progress: onboarding.getOnboardingProgress(),
-      insights: onboarding.getAIInsights()
+      progress: onboarding.getOnboardingProgress ? onboarding.getOnboardingProgress() : { phase1: { completed: 1, total: 1 } },
+      insights: onboarding.getAIInsights ? onboarding.getAIInsights() : []
     });
 
   } catch (error) {

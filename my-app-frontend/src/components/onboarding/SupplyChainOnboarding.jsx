@@ -74,6 +74,46 @@ const SupplyChainOnboarding = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Start onboarding when component mounts
+  useEffect(() => {
+    startOnboarding();
+  }, []);
+
+  const startOnboarding = async () => {
+    try {
+      setLoading(true);
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 
+        (window.location.hostname === 'localhost' 
+          ? 'http://localhost:3001' 
+          : 'https://geop-backend.onrender.com');
+      
+      const response = await fetch(`${API_BASE_URL}/api/onboarding/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: 'demo-user',
+          type: 'supply_chain'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Onboarding started successfully
+        console.log('Supply chain onboarding started:', data);
+      } else {
+        console.warn('Failed to start onboarding:', data.error);
+      }
+    } catch (error) {
+      console.warn('Error starting onboarding:', error);
+      // Don't show error to user, just log it
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const steps = [
     {
       title: 'Basic Information',
