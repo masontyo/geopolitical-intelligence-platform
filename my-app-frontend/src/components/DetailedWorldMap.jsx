@@ -226,6 +226,7 @@ const DetailedWorldMap = ({
         alertCount: 1
       }
     ];
+    console.log('Loading suppliers:', mockSuppliers);
     setSuppliers(mockSuppliers);
   };
 
@@ -442,7 +443,7 @@ const DetailedWorldMap = ({
       <Box sx={{ 
         flexGrow: 1, 
         position: 'relative', 
-        minHeight: '300px',
+        height: height,
         borderRadius: 2,
         overflow: 'hidden',
         '& .leaflet-container': {
@@ -479,7 +480,10 @@ const DetailedWorldMap = ({
               opacity={1}
               fillOpacity={0.8}
               eventHandlers={{
-                click: () => setSelectedCountry({ name: countryName, ...data })
+                click: () => {
+                  // Country clicked - could show country details in sidebar if needed
+                  console.log('Country clicked:', countryName, data);
+                }
               }}
             >
               <Popup>
@@ -555,10 +559,12 @@ const DetailedWorldMap = ({
           ))}
           
           {/* Supplier Markers */}
-          {activeFilters.suppliers && suppliers.map((supplier, index) => {
+          {activeFilters.suppliers && suppliers.length > 0 && suppliers.map((supplier, index) => {
             const alertCount = getSupplierAlertCount(supplier.id);
             const markerColor = getSupplierMarkerColor(supplier.id);
             const mostCriticalAlert = getSupplierMostCriticalAlert(supplier.id);
+            
+            console.log('Rendering supplier marker:', supplier, 'alertCount:', alertCount, 'markerColor:', markerColor);
             
             return (
               <CircleMarker
@@ -677,45 +683,6 @@ const DetailedWorldMap = ({
       </Box>
 
 
-      {/* Selected Country Details */}
-      {selectedCountry && (
-        <Card sx={{ mt: 2 }}>
-          <CardContent sx={{ py: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              {getRiskIcon(selectedCountry.level)}
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {getCountryName(selectedCountry.name, userLanguage)}
-              </Typography>
-              <Chip
-                label={getUIText(selectedCountry.level, userLanguage).toUpperCase()}
-                size="small"
-                color={selectedCountry.level === 'critical' ? 'error' : 
-                       selectedCountry.level === 'high' ? 'warning' :
-                       selectedCountry.level === 'medium' ? 'info' : 'success'}
-              />
-            </Box>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <Typography variant="body2" color="text.secondary">{getUIText('riskScore', userLanguage)}</Typography>
-                <Typography variant="h6">{selectedCountry.score}/10</Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography variant="body2" color="text.secondary">{getUIText('activeEvents', userLanguage)}</Typography>
-                <Typography variant="h6">{selectedCountry.events}</Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography variant="body2" color="text.secondary">{getUIText('coordinates', userLanguage)}</Typography>
-                <Typography variant="body2">
-                  {selectedCountry.coords[0].toFixed(2)}, {selectedCountry.coords[1].toFixed(2)}
-                </Typography>
-              </Grid>
-            </Grid>
-            <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-              {selectedCountry.description}
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
     </Paper>
   );
 };

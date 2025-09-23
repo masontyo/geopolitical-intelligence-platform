@@ -159,6 +159,13 @@ const MapCentricDashboard = () => {
                 </Typography>
               </Paper>
             ))}
+          <Button 
+            variant="outlined" 
+            onClick={() => setSelectedSupplier(null)}
+            sx={{ mt: 2 }}
+          >
+            Back to Map Controls
+          </Button>
         </Box>
       )}
 
@@ -167,9 +174,16 @@ const MapCentricDashboard = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Event Details
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ mb: 2 }}>
             Event information would go here...
           </Typography>
+          <Button 
+            variant="outlined" 
+            onClick={() => setSelectedEvent(null)}
+            sx={{ mb: 2 }}
+          >
+            Back to Map Controls
+          </Button>
         </Box>
       )}
 
@@ -272,9 +286,6 @@ const MapCentricDashboard = () => {
         backgroundColor: 'background.paper'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={toggleSidebar}>
-            <Menu />
-          </IconButton>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Supply Chain Risk Monitor
           </Typography>
@@ -291,6 +302,9 @@ const MapCentricDashboard = () => {
             color="error"
             size="small"
           />
+          <IconButton onClick={toggleSidebar}>
+            <Menu />
+          </IconButton>
         </Box>
       </Box>
 
