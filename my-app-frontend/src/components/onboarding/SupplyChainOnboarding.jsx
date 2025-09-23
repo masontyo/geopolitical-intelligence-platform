@@ -387,10 +387,11 @@ const SupplyChainOnboarding = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Supplier Name"
+                      label="Internal Supplier Name"
                       value={supplier.name}
                       onChange={(e) => updateSupplier(index, 'name', e.target.value)}
-                      placeholder="Enter supplier name"
+                      placeholder="e.g., 'Shanghai Metal Works'"
+                      helperText="Your internal/colloquial name for this supplier"
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -399,7 +400,8 @@ const SupplyChainOnboarding = () => {
                       label="Official Company Name"
                       value={supplier.officialName}
                       onChange={(e) => updateSupplier(index, 'officialName', e.target.value)}
-                      placeholder="Official registered name"
+                      placeholder="e.g., 'Shanghai Metal Works Co., Ltd.'"
+                      helperText="Legal/registered business name"
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -433,7 +435,7 @@ const SupplyChainOnboarding = () => {
                       placeholder="e.g., Asia-Pacific, Europe"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <Autocomplete
                       multiple
                       freeSolo
@@ -450,6 +452,7 @@ const SupplyChainOnboarding = () => {
                           {...params}
                           label="Products/Services"
                           placeholder="Add products this supplier provides"
+                          helperText="Press Enter to add each product"
                         />
                       )}
                     />
@@ -482,7 +485,7 @@ const SupplyChainOnboarding = () => {
                           </IconButton>
                         </Box>
                         <Grid container spacing={2}>
-                          <Grid item xs={12} sm={6}>
+                          <Grid item xs={12} sm={4}>
                             <TextField
                               fullWidth
                               size="small"
@@ -492,7 +495,7 @@ const SupplyChainOnboarding = () => {
                               placeholder="e.g., Shanghai Factory"
                             />
                           </Grid>
-                          <Grid item xs={12} sm={6}>
+                          <Grid item xs={12} sm={4}>
                             <TextField
                               fullWidth
                               size="small"
@@ -502,7 +505,7 @@ const SupplyChainOnboarding = () => {
                               placeholder="Full address"
                             />
                           </Grid>
-                          <Grid item xs={12} sm={6}>
+                          <Grid item xs={12} sm={4}>
                             <TextField
                               fullWidth
                               size="small"
@@ -922,7 +925,7 @@ const SupplyChainOnboarding = () => {
                       helperText="How long it takes to switch to this backup"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <Autocomplete
                       multiple
                       freeSolo
@@ -939,6 +942,7 @@ const SupplyChainOnboarding = () => {
                           {...params}
                           label="Products/Services"
                           placeholder="Add products this backup provides"
+                          helperText="Press Enter to add each product"
                         />
                       )}
                     />
