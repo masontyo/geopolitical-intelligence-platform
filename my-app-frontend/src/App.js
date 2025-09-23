@@ -18,7 +18,7 @@ import CompanyProfile from './components/settings/CompanyProfile';
 import AccountSettings from './components/settings/AccountSettings';
 import DataPrivacy from './components/settings/DataPrivacy';
 import HelpSupport from './components/settings/HelpSupport';
-import AIOnboardingFlow from './components/onboarding/AIOnboardingFlow';
+import SupplyChainOnboarding from './components/onboarding/SupplyChainOnboarding';
 import { ToastProvider } from './components/ToastNotifications';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -142,7 +142,7 @@ function App() {
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
-                <Route path="/onboarding" element={<AIOnboardingFlow />} />
+                <Route path="/onboarding" element={<SupplyChainOnboarding />} />
                 
                 {/* Protected routes - require authentication */}
                 <Route path="/" element={
