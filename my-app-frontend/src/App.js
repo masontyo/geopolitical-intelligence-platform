@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './components/Login';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
+import MapCentricDashboard from './components/MapCentricDashboard';
 import EventDetails from './components/EventDetails';
 import EventsList from './components/EventsList';
 import TasksPage from './components/TasksPage';
@@ -153,9 +154,7 @@ function App() {
                 
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
-                    <DashboardLayout>
-                      <EnterpriseDashboard />
-                    </DashboardLayout>
+                    <MapCentricDashboard />
                   </ProtectedRoute>
                 } />
                 

@@ -169,12 +169,20 @@ const getRiskIcon = (level) => {
   }
 };
 
-const DetailedWorldMap = () => {
+const DetailedWorldMap = ({ 
+  height = '500px',
+  onSupplierClick,
+  onEventClick,
+  showRelationships = false,
+  activeFilters = { suppliers: true, events: true, ports: true, routes: false }
+}) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [userLanguage] = useState(getUserLanguage());
   const [tileProvider] = useState(getRecommendedTileProvider(userLanguage));
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [suppliers, setSuppliers] = useState([]);
+  const [alerts, setAlerts] = useState([]);
 
   // Calculate risk statistics
   const riskStats = Object.values(riskData).reduce((acc, risk) => {
@@ -186,7 +194,51 @@ const DetailedWorldMap = () => {
   // Load events when component mounts
   useEffect(() => {
     loadEvents();
+    loadSuppliers();
+    loadAlerts();
   }, []);
+
+  const loadSuppliers = () => {
+    // Mock supplier data - in real app, this would come from API
+    const mockSuppliers = [
+      {
+        id: 'supplier-1',
+        name: 'Shanghai Metal Works',
+        country: 'China',
+        coords: [31.2304, 121.4737], // Shanghai
+        tier: 'Tier 1',
+        alertCount: 2
+      },
+      {
+        id: 'supplier-2', 
+        name: 'German Electronics Ltd',
+        country: 'Germany',
+        coords: [52.5200, 13.4050], // Berlin
+        tier: 'Tier 1',
+        alertCount: 1
+      },
+      {
+        id: 'supplier-3',
+        name: 'Thai Components Inc',
+        country: 'Thailand',
+        coords: [13.7563, 100.5018], // Bangkok
+        tier: 'Tier 2',
+        alertCount: 1
+      }
+    ];
+    setSuppliers(mockSuppliers);
+  };
+
+  const loadAlerts = () => {
+    // Mock alert data
+    const mockAlerts = [
+      { id: 1, supplierId: 'supplier-1', severity: 'critical', message: 'Port closure in Shanghai', new: true },
+      { id: 2, supplierId: 'supplier-1', severity: 'high', message: 'Shipping delays expected', new: true },
+      { id: 3, supplierId: 'supplier-2', severity: 'medium', message: 'Weather warning in region', new: false },
+      { id: 4, supplierId: 'supplier-3', severity: 'critical', message: 'Supplier facility damaged', new: true }
+    ];
+    setAlerts(mockAlerts);
+  };
 
   const loadEvents = async () => {
     try {
@@ -307,6 +359,29 @@ const DetailedWorldMap = () => {
       case 'low': return '#16a34a';
       default: return '#6b7280';
     }
+  };
+
+  // Get supplier alert count
+  const getSupplierAlertCount = (supplierId) => {
+    return alerts.filter(alert => alert.supplierId === supplierId && alert.new).length;
+  };
+
+  // Get supplier most critical alert severity
+  const getSupplierMostCriticalAlert = (supplierId) => {
+    const supplierAlerts = alerts.filter(alert => alert.supplierId === supplierId);
+    if (supplierAlerts.length === 0) return null;
+    
+    const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+    return supplierAlerts.reduce((mostCritical, alert) => 
+      severityOrder[alert.severity] > severityOrder[mostCritical.severity] ? alert : mostCritical
+    );
+  };
+
+  // Get supplier marker color based on most critical alert
+  const getSupplierMarkerColor = (supplierId) => {
+    const mostCriticalAlert = getSupplierMostCriticalAlert(supplierId);
+    if (!mostCriticalAlert) return '#6b7280'; // Default gray if no alerts
+    return getEventSeverityColor(mostCriticalAlert.severity);
   };
 
   const handleRefresh = () => {
@@ -479,8 +554,72 @@ const DetailedWorldMap = () => {
             </CircleMarker>
           ))}
           
+          {/* Supplier Markers */}
+          {activeFilters.suppliers && suppliers.map((supplier, index) => {
+            const alertCount = getSupplierAlertCount(supplier.id);
+            const markerColor = getSupplierMarkerColor(supplier.id);
+            const mostCriticalAlert = getSupplierMostCriticalAlert(supplier.id);
+            
+            return (
+              <CircleMarker
+                key={`supplier-${supplier.id}`}
+                center={supplier.coords}
+                radius={alertCount > 0 ? 15 : 12}
+                fillColor={markerColor}
+                color="#ffffff"
+                weight={3}
+                opacity={1}
+                fillOpacity={0.8}
+                eventHandlers={{
+                  click: () => {
+                    if (onSupplierClick) {
+                      onSupplierClick(supplier);
+                    }
+                    console.log('Supplier clicked:', supplier);
+                  }
+                }}
+              >
+                <Popup>
+                  <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                      🏭 {supplier.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Country:</strong> {supplier.country}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Tier:</strong> {supplier.tier}
+                    </Typography>
+                    {alertCount > 0 && (
+                      <Typography variant="body2" sx={{ mb: 0.5 }}>
+                        <strong>Active Alerts:</strong> {alertCount}
+                        {mostCriticalAlert && (
+                          <Chip 
+                            label={mostCriticalAlert.severity.toUpperCase()} 
+                            size="small" 
+                            sx={{ 
+                              ml: 1, 
+                              backgroundColor: getEventSeverityColor(mostCriticalAlert.severity),
+                              color: 'white',
+                              fontWeight: 600
+                            }} 
+                          />
+                        )}
+                      </Typography>
+                    )}
+                    {alertCount === 0 && (
+                      <Typography variant="body2" color="success.main">
+                        ✓ No active alerts
+                      </Typography>
+                    )}
+                  </Box>
+                </Popup>
+              </CircleMarker>
+            );
+          })}
+
           {/* Event Markers */}
-          {getEventCoordinates().map((eventMarker, index) => (
+          {activeFilters.events && getEventCoordinates().map((eventMarker, index) => (
             <CircleMarker
               key={`event-${eventMarker.id || index}`}
               center={eventMarker.coords}
@@ -492,7 +631,9 @@ const DetailedWorldMap = () => {
               fillOpacity={0.9}
               eventHandlers={{
                 click: () => {
-                  // You can add event selection logic here if needed
+                  if (onEventClick) {
+                    onEventClick(eventMarker);
+                  }
                   console.log('Event clicked:', eventMarker);
                 }
               }}
