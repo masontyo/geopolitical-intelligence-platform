@@ -345,66 +345,22 @@ const DetailedWorldMap = () => {
         </Box>
       </Box>
 
-      {/* Compact Map Legend */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: 'primary.main' }}>
-          🗺️ Map Legend
+      {/* Minimal Legend */}
+      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+          Legend:
         </Typography>
-        
-        {/* Risk Levels */}
-        <Box sx={{ mb: 1.5 }}>
-          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
-            🌍 Country Risk (Large circles)
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {['critical', 'high', 'medium', 'low'].map(level => (
-              <Box key={level} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    backgroundColor: getRiskColor(level),
-                    border: '1px solid #ffffff',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                  }}
-                />
-                <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                  {level} ({riskStats[level] || 0})
-                </Typography>
-              </Box>
-            ))}
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getRiskColor('critical'), border: '1px solid #fff' }} />
+          <Typography variant="caption">Risk</Typography>
         </Box>
-        
-        {/* Events */}
-        <Box>
-          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>
-            📰 Events (Small circles)
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {['critical', 'high', 'medium', 'low'].map(severity => {
-              const eventCount = getEventCoordinates().filter(e => e.severity?.toLowerCase() === severity).length;
-              return (
-                <Box key={severity} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      backgroundColor: getEventSeverityColor(severity),
-                      border: '1px solid #ffffff',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                    }}
-                  />
-                  <Typography variant="caption" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                    {severity} ({eventCount})
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: getEventSeverityColor('critical'), border: '1px solid #fff' }} />
+          <Typography variant="caption">Events</Typography>
         </Box>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          Click markers for details
+        </Typography>
       </Box>
 
       {/* Leaflet Map */}
