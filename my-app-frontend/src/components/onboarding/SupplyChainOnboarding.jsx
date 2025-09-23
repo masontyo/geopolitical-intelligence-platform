@@ -475,11 +475,17 @@ const SupplyChainOnboarding = () => {
                     </Box>
                     
                     {supplier.locations.map((location, locIndex) => (
-                      <Paper key={location.id} sx={{ p: 2, mb: 2, backgroundColor: 'grey.50' }}>
+                      <Paper key={location.id} sx={{ p: 2, mb: 2, backgroundColor: 'grey.50', border: 1, borderColor: 'primary.light' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            Location {locIndex + 1}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CheckCircle sx={{ color: 'success.main', fontSize: 16 }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {location.name || `Location ${locIndex + 1}`}
+                            </Typography>
+                            {location.name && location.address && location.country && (
+                              <Chip label="Complete" size="small" color="success" variant="outlined" />
+                            )}
+                          </Box>
                           <IconButton size="small" onClick={() => removeSupplierLocation(index, locIndex)} color="error">
                             <Delete />
                           </IconButton>
@@ -493,6 +499,7 @@ const SupplyChainOnboarding = () => {
                               value={location.name}
                               onChange={(e) => updateSupplierLocation(index, locIndex, 'name', e.target.value)}
                               placeholder="e.g., Shanghai Factory"
+                              required
                             />
                           </Grid>
                           <Grid item xs={12} sm={4}>
@@ -503,6 +510,7 @@ const SupplyChainOnboarding = () => {
                               value={location.address}
                               onChange={(e) => updateSupplierLocation(index, locIndex, 'address', e.target.value)}
                               placeholder="Full address"
+                              required
                             />
                           </Grid>
                           <Grid item xs={12} sm={4}>
@@ -513,12 +521,37 @@ const SupplyChainOnboarding = () => {
                               value={location.country}
                               onChange={(e) => updateSupplierLocation(index, locIndex, 'country', e.target.value)}
                               placeholder="Country"
+                              required
                             />
                           </Grid>
                         </Grid>
+                        {location.name && location.address && location.country && (
+                          <Box sx={{ mt: 1, p: 1, backgroundColor: 'success.light', borderRadius: 1 }}>
+                            <Typography variant="caption" sx={{ color: 'success.dark', fontWeight: 600 }}>
+                              ✓ Location saved for {supplier.name || 'this supplier'}
+                            </Typography>
+                          </Box>
+                        )}
                       </Paper>
                     ))}
+                    
+                    {supplier.locations.length === 0 && (
+                      <Paper sx={{ p: 3, textAlign: 'center', backgroundColor: 'grey.50', border: 2, borderStyle: 'dashed', borderColor: 'grey.300' }}>
+                        <Typography variant="body2" color="text.secondary">
+                          No locations added yet. Click "Add Location" to add supplier locations.
+                        </Typography>
+                      </Paper>
+                    )}
                   </Grid>
+                  
+                  {/* Supplier Summary */}
+                  {supplier.locations.length > 0 && (
+                    <Box sx={{ mt: 2, p: 2, backgroundColor: 'primary.light', borderRadius: 1 }}>
+                      <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 600 }}>
+                        📍 {supplier.locations.length} location{supplier.locations.length !== 1 ? 's' : ''} saved for {supplier.name || 'this supplier'}
+                      </Typography>
+                    </Box>
+                  )}
                 </Grid>
               </Card>
             ))}
