@@ -119,157 +119,6 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
   );
 };
 
-// Clustered Marker Component
-const ClusteredMarker = ({ cluster, onSupplierClick, onEventClick, onPortClick }) => {
-  if (cluster.length === 1) {
-    // Single marker - render normally
-    const marker = cluster[0];
-    if (marker.type === 'supplier') {
-      const supplier = marker.data;
-      const alertCount = getSupplierAlertCount(supplier.id);
-      const markerColor = getSupplierMarkerColor(supplier.id);
-      return (
-        <SupplierMarker
-          supplier={supplier}
-          alertCount={alertCount}
-          markerColor={markerColor}
-          onSupplierClick={onSupplierClick}
-        />
-      );
-    } else if (marker.type === 'port') {
-      const port = marker.data;
-      return (
-        <PortMarker
-          port={port}
-          alertCount={port.alertCount}
-          onPortClick={onPortClick}
-        />
-      );
-    } else if (marker.type === 'event') {
-      const event = marker.data;
-      return (
-        <CircleMarker
-          center={event.coords}
-          radius={8}
-          fillColor={getEventSeverityColor(event.severity)}
-          color="#ffffff"
-          weight={2}
-          opacity={1}
-          fillOpacity={0.9}
-          eventHandlers={{ click: () => onEventClick(event) }}
-        >
-          <Popup>
-            <Box sx={{ minWidth: 250, maxWidth: 350 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                📰 {event.title}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Category:</strong> {event.category}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Severity:</strong> 
-                <Chip 
-                  label={event.severity?.toUpperCase()} 
-                  size="small" 
-                  sx={{ 
-                    ml: 1, 
-                    backgroundColor: getEventSeverityColor(event.severity),
-                    color: 'white',
-                    fontWeight: 600
-                  }} 
-                />
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Location:</strong> {event.countryName}
-                {event.region && ` (${event.region})`}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Date:</strong> {event.eventDate?.toLocaleDateString()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {event.description}
-              </Typography>
-            </Box>
-          </Popup>
-        </CircleMarker>
-      );
-    }
-  }
-
-  // Multiple markers - create cluster
-  const centerCoords = [
-    cluster.reduce((sum, marker) => sum + marker.coords[0], 0) / cluster.length,
-    cluster.reduce((sum, marker) => sum + marker.coords[1], 0) / cluster.length
-  ];
-
-  const clusterIcon = L.divIcon({
-    className: 'custom-cluster-marker',
-    html: `<div style="
-      width: 30px;
-      height: 30px;
-      background-color: #1976d2;
-      border: 3px solid white;
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      font-size: 12px;
-    ">${cluster.length}</div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
-  });
-
-  return (
-    <Marker position={centerCoords} icon={clusterIcon}>
-      <Popup>
-        <Box sx={{ minWidth: 300, maxWidth: 400 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-            📍 Multiple Items ({cluster.length})
-          </Typography>
-          <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
-            {cluster.map((marker, index) => (
-              <Box key={marker.id} sx={{ p: 1, mb: 1, border: 1, borderColor: 'divider', borderRadius: 1, backgroundColor: 'background.paper', cursor: 'pointer' }}>
-                {marker.type === 'supplier' && (
-                  <Box onClick={() => onSupplierClick(marker.data)}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      🏭 {marker.data.name}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {marker.data.country} • {marker.data.tier}
-                    </Typography>
-                  </Box>
-                )}
-                {marker.type === 'port' && (
-                  <Box onClick={() => onPortClick(marker.data)}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      ⚓ {marker.data.name}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {marker.data.country} • {marker.data.status}
-                    </Typography>
-                  </Box>
-                )}
-                {marker.type === 'event' && (
-                  <Box onClick={() => onEventClick(marker.data)}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      📰 {marker.data.title}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {marker.data.category} • {marker.data.severity?.toUpperCase()}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      </Popup>
-    </Marker>
-  );
-};
 
 // Detailed risk data with real geographic coordinates (lat, lng)
 const riskData = {
@@ -774,6 +623,158 @@ const DetailedWorldMap = ({
 
   const handleRefresh = () => {
     setSelectedCountry(null);
+  };
+
+  // Clustered Marker Component (defined inside component to access helper functions)
+  const ClusteredMarker = ({ cluster, onSupplierClick, onEventClick, onPortClick }) => {
+    if (cluster.length === 1) {
+      // Single marker - render normally
+      const marker = cluster[0];
+      if (marker.type === 'supplier') {
+        const supplier = marker.data;
+        const alertCount = getSupplierAlertCount(supplier.id);
+        const markerColor = getSupplierMarkerColor(supplier.id);
+        return (
+          <SupplierMarker
+            supplier={supplier}
+            alertCount={alertCount}
+            markerColor={markerColor}
+            onSupplierClick={onSupplierClick}
+          />
+        );
+      } else if (marker.type === 'port') {
+        const port = marker.data;
+        return (
+          <PortMarker
+            port={port}
+            alertCount={port.alertCount}
+            onPortClick={onPortClick}
+          />
+        );
+      } else if (marker.type === 'event') {
+        const event = marker.data;
+        return (
+          <CircleMarker
+            center={event.coords}
+            radius={8}
+            fillColor={getEventSeverityColor(event.severity)}
+            color="#ffffff"
+            weight={2}
+            opacity={1}
+            fillOpacity={0.9}
+            eventHandlers={{ click: () => onEventClick(event) }}
+          >
+            <Popup>
+              <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                  📰 {event.title}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  <strong>Category:</strong> {event.category}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  <strong>Severity:</strong> 
+                  <Chip 
+                    label={event.severity?.toUpperCase()} 
+                    size="small" 
+                    sx={{ 
+                      ml: 1, 
+                      backgroundColor: getEventSeverityColor(event.severity),
+                      color: 'white',
+                      fontWeight: 600
+                    }} 
+                  />
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                  <strong>Location:</strong> {event.countryName}
+                  {event.region && ` (${event.region})`}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>Date:</strong> {event.eventDate?.toLocaleDateString()}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {event.description}
+                </Typography>
+              </Box>
+            </Popup>
+          </CircleMarker>
+        );
+      }
+    }
+
+    // Multiple markers - create cluster
+    const centerCoords = [
+      cluster.reduce((sum, marker) => sum + marker.coords[0], 0) / cluster.length,
+      cluster.reduce((sum, marker) => sum + marker.coords[1], 0) / cluster.length
+    ];
+
+    const clusterIcon = L.divIcon({
+      className: 'custom-cluster-marker',
+      html: `<div style="
+        width: 30px;
+        height: 30px;
+        background-color: #1976d2;
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 12px;
+      ">${cluster.length}</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+
+    return (
+      <Marker position={centerCoords} icon={clusterIcon}>
+        <Popup>
+          <Box sx={{ minWidth: 300, maxWidth: 400 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+              📍 Multiple Items ({cluster.length})
+            </Typography>
+            <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
+              {cluster.map((marker, index) => (
+                <Box key={marker.id} sx={{ p: 1, mb: 1, border: 1, borderColor: 'divider', borderRadius: 1, backgroundColor: 'background.paper', cursor: 'pointer' }}>
+                  {marker.type === 'supplier' && (
+                    <Box onClick={() => onSupplierClick(marker.data)}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        🏭 {marker.data.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {marker.data.country} • {marker.data.tier}
+                      </Typography>
+                    </Box>
+                  )}
+                  {marker.type === 'port' && (
+                    <Box onClick={() => onPortClick(marker.data)}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        ⚓ {marker.data.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {marker.data.country} • {marker.data.status}
+                      </Typography>
+                    </Box>
+                  )}
+                  {marker.type === 'event' && (
+                    <Box onClick={() => onEventClick(marker.data)}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        📰 {marker.data.title}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {marker.data.category} • {marker.data.severity?.toUpperCase()}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Popup>
+      </Marker>
+    );
   };
 
   return (
