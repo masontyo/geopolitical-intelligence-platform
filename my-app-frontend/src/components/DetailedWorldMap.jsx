@@ -119,6 +119,158 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
   );
 };
 
+// Clustered Marker Component
+const ClusteredMarker = ({ cluster, onSupplierClick, onEventClick, onPortClick }) => {
+  if (cluster.length === 1) {
+    // Single marker - render normally
+    const marker = cluster[0];
+    if (marker.type === 'supplier') {
+      const supplier = marker.data;
+      const alertCount = getSupplierAlertCount(supplier.id);
+      const markerColor = getSupplierMarkerColor(supplier.id);
+      return (
+        <SupplierMarker
+          supplier={supplier}
+          alertCount={alertCount}
+          markerColor={markerColor}
+          onSupplierClick={onSupplierClick}
+        />
+      );
+    } else if (marker.type === 'port') {
+      const port = marker.data;
+      return (
+        <PortMarker
+          port={port}
+          alertCount={port.alertCount}
+          onPortClick={onPortClick}
+        />
+      );
+    } else if (marker.type === 'event') {
+      const event = marker.data;
+      return (
+        <CircleMarker
+          center={event.coords}
+          radius={8}
+          fillColor={getEventSeverityColor(event.severity)}
+          color="#ffffff"
+          weight={2}
+          opacity={1}
+          fillOpacity={0.9}
+          eventHandlers={{ click: () => onEventClick(event) }}
+        >
+          <Popup>
+            <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                📰 {event.title}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5 }}>
+                <strong>Category:</strong> {event.category}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5 }}>
+                <strong>Severity:</strong> 
+                <Chip 
+                  label={event.severity?.toUpperCase()} 
+                  size="small" 
+                  sx={{ 
+                    ml: 1, 
+                    backgroundColor: getEventSeverityColor(event.severity),
+                    color: 'white',
+                    fontWeight: 600
+                  }} 
+                />
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5 }}>
+                <strong>Location:</strong> {event.countryName}
+                {event.region && ` (${event.region})`}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>Date:</strong> {event.eventDate?.toLocaleDateString()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {event.description}
+              </Typography>
+            </Box>
+          </Popup>
+        </CircleMarker>
+      );
+    }
+  }
+
+  // Multiple markers - create cluster
+  const centerCoords = [
+    cluster.reduce((sum, marker) => sum + marker.coords[0], 0) / cluster.length,
+    cluster.reduce((sum, marker) => sum + marker.coords[1], 0) / cluster.length
+  ];
+
+  const clusterIcon = L.divIcon({
+    className: 'custom-cluster-marker',
+    html: `<div style="
+      width: 30px;
+      height: 30px;
+      background-color: #1976d2;
+      border: 3px solid white;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 12px;
+    ">${cluster.length}</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+
+  return (
+    <Marker position={centerCoords} icon={clusterIcon}>
+      <Popup>
+        <Box sx={{ minWidth: 300, maxWidth: 400 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+            📍 Multiple Items ({cluster.length})
+          </Typography>
+          <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
+            {cluster.map((marker, index) => (
+              <Box key={marker.id} sx={{ p: 1, mb: 1, border: 1, borderColor: 'divider', borderRadius: 1, backgroundColor: 'background.paper', cursor: 'pointer' }}>
+                {marker.type === 'supplier' && (
+                  <Box onClick={() => onSupplierClick(marker.data)}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      🏭 {marker.data.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {marker.data.country} • {marker.data.tier}
+                    </Typography>
+                  </Box>
+                )}
+                {marker.type === 'port' && (
+                  <Box onClick={() => onPortClick(marker.data)}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      ⚓ {marker.data.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {marker.data.country} • {marker.data.status}
+                    </Typography>
+                  </Box>
+                )}
+                {marker.type === 'event' && (
+                  <Box onClick={() => onEventClick(marker.data)}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      📰 {marker.data.title}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {marker.data.category} • {marker.data.severity?.toUpperCase()}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Popup>
+    </Marker>
+  );
+};
+
 // Detailed risk data with real geographic coordinates (lat, lng)
 const riskData = {
   'United States': { 
@@ -542,6 +694,84 @@ const DetailedWorldMap = ({
     return getEventSeverityColor(mostCriticalAlert.severity);
   };
 
+  // Clustering logic - group nearby markers
+  const clusterMarkers = (markers, clusterDistance = 0.5) => {
+    const clusters = [];
+    const processed = new Set();
+
+    markers.forEach((marker, index) => {
+      if (processed.has(index)) return;
+
+      const cluster = [marker];
+      processed.add(index);
+
+      // Find nearby markers
+      markers.forEach((otherMarker, otherIndex) => {
+        if (processed.has(otherIndex) || index === otherIndex) return;
+
+        const distance = Math.sqrt(
+          Math.pow(marker.coords[0] - otherMarker.coords[0], 2) +
+          Math.pow(marker.coords[1] - otherMarker.coords[1], 2)
+        );
+
+        if (distance < clusterDistance) {
+          cluster.push(otherMarker);
+          processed.add(otherIndex);
+        }
+      });
+
+      clusters.push(cluster);
+    });
+
+    return clusters;
+  };
+
+  // Get all markers for clustering
+  const getAllMarkers = () => {
+    const allMarkers = [];
+
+    // Add suppliers
+    if (activeFilters.suppliers && suppliers.length > 0) {
+      suppliers.forEach(supplier => {
+        allMarkers.push({
+          id: supplier.id,
+          type: 'supplier',
+          coords: supplier.coords,
+          data: supplier,
+          priority: 1 // Highest priority
+        });
+      });
+    }
+
+    // Add ports
+    if (activeFilters.ports && ports.length > 0) {
+      ports.forEach(port => {
+        allMarkers.push({
+          id: port.id,
+          type: 'port',
+          coords: port.coords,
+          data: port,
+          priority: 2
+        });
+      });
+    }
+
+    // Add events
+    if (activeFilters.events && events.length > 0) {
+      getEventCoordinates().forEach(event => {
+        allMarkers.push({
+          id: event.id || `event-${event.title}`,
+          type: 'event',
+          coords: event.coords,
+          data: event,
+          priority: 3
+        });
+      });
+    }
+
+    return allMarkers;
+  };
+
   const handleRefresh = () => {
     setSelectedCountry(null);
   };
@@ -626,6 +856,26 @@ const DetailedWorldMap = ({
           <Typography variant="caption">Routes</Typography>
         </Box>
         
+        {/* Clusters - Circle with number */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ 
+            width: 16, 
+            height: 16, 
+            backgroundColor: '#1976d2',
+            border: '2px solid white',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '10px',
+            fontWeight: 'bold',
+            color: 'white'
+          }}>
+            3
+          </Box>
+          <Typography variant="caption">Clusters</Typography>
+        </Box>
+        
         <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
           Click for details
         </Typography>
@@ -663,43 +913,31 @@ const DetailedWorldMap = ({
           {/* Risk Markers */}
           {/* Countries are now clickable via background - no individual markers needed */}
           
-          {/* Supplier Markers - Square Shape */}
-          {activeFilters.suppliers && suppliers.length > 0 && suppliers.map((supplier, index) => {
-            const alertCount = getSupplierAlertCount(supplier.id);
-            const markerColor = getSupplierMarkerColor(supplier.id);
-            const mostCriticalAlert = getSupplierMostCriticalAlert(supplier.id);
+          {/* Clustered Markers */}
+          {(() => {
+            const allMarkers = getAllMarkers();
+            const clusters = clusterMarkers(allMarkers);
             
-            console.log('Rendering supplier marker:', supplier, 'alertCount:', alertCount, 'markerColor:', markerColor);
-            
-            return (
-              <SupplierMarker
-                key={`supplier-${supplier.id}`}
-                supplier={supplier}
-                alertCount={alertCount}
-                markerColor={markerColor}
+            return clusters.map((cluster, index) => (
+              <ClusteredMarker
+                key={`cluster-${index}`}
+                cluster={cluster}
                 onSupplierClick={(supplier) => {
                   if (onSupplierClick) {
                     onSupplierClick(supplier);
                   }
                 }}
-              />
-            );
-          })}
-
-          {/* Port Markers - Triangle Shape */}
-          {activeFilters.ports && ports.length > 0 && ports.map((port, index) => {
-            return (
-              <PortMarker
-                key={`port-${port.id}`}
-                port={port}
-                alertCount={port.alertCount}
+                onEventClick={(event) => {
+                  if (onEventClick) {
+                    onEventClick(event);
+                  }
+                }}
                 onPortClick={(port) => {
                   console.log('Port clicked:', port);
-                  // Could add onPortClick callback if needed
                 }}
               />
-            );
-          })}
+            ));
+          })()}
 
           {/* Shipping Routes - Lines */}
           {activeFilters.routes && routes.length > 0 && routes.map((route, index) => {
@@ -722,62 +960,6 @@ const DetailedWorldMap = ({
               />
             );
           })}
-
-          {/* Event Markers */}
-          {activeFilters.events && getEventCoordinates().map((eventMarker, index) => (
-            <CircleMarker
-              key={`event-${eventMarker.id || index}`}
-              center={eventMarker.coords}
-              radius={8}
-              fillColor={getEventSeverityColor(eventMarker.severity)}
-              color="#ffffff"
-              weight={2}
-              opacity={1}
-              fillOpacity={0.9}
-              eventHandlers={{
-                click: () => {
-                  if (onEventClick) {
-                    onEventClick(eventMarker);
-                  }
-                  console.log('Event clicked:', eventMarker);
-                }
-              }}
-            >
-              <Popup>
-                <Box sx={{ minWidth: 250, maxWidth: 350 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                    📰 {eventMarker.title}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Category:</strong> {eventMarker.category}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Severity:</strong> 
-                    <Chip 
-                      label={eventMarker.severity?.toUpperCase()} 
-                      size="small" 
-                      sx={{ 
-                        ml: 1, 
-                        backgroundColor: getEventSeverityColor(eventMarker.severity),
-                        color: 'white',
-                        fontWeight: 600
-                      }} 
-                    />
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Location:</strong> {eventMarker.countryName}
-                    {eventMarker.region && ` (${eventMarker.region})`}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Date:</strong> {eventMarker.eventDate?.toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {eventMarker.description}
-                  </Typography>
-                </Box>
-              </Popup>
-            </CircleMarker>
-          ))}
         </MapContainer>
       </Box>
 

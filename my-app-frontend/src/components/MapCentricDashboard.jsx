@@ -125,9 +125,6 @@ const MapCentricDashboard = () => {
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {selectedSupplier ? 'Supplier Details' : selectedEvent ? 'Event Details' : 'Dashboard'}
         </Typography>
-        <IconButton onClick={toggleSidebar} size="small">
-          <Close />
-        </IconButton>
       </Box>
 
       {selectedSupplier && (
