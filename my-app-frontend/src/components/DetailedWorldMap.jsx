@@ -31,6 +31,57 @@ import {
 import { eventsAPI } from '../services/api';
 import eventMapService from '../services/eventMapService';
 
+// Custom Marker Components
+const SupplierMarker = ({ supplier, alertCount, markerColor, onSupplierClick }) => {
+  const divIcon = L.divIcon({
+    className: 'custom-supplier-marker',
+    html: `<div style="
+      width: ${alertCount > 0 ? '20px' : '16px'};
+      height: ${alertCount > 0 ? '20px' : '16px'};
+      background-color: ${markerColor};
+      border: 3px solid white;
+      border-radius: 3px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 10px;
+    ">${alertCount > 0 ? alertCount : '🏭'}</div>`,
+    iconSize: [alertCount > 0 ? 20 : 16, alertCount > 0 ? 20 : 16],
+    iconAnchor: [alertCount > 0 ? 10 : 8, alertCount > 0 ? 10 : 8]
+  });
+
+  return <Marker position={supplier.coords} icon={divIcon} eventHandlers={{ click: () => onSupplierClick(supplier) }} />;
+};
+
+const PortMarker = ({ port, alertCount, onPortClick }) => {
+  const portColor = port.status === 'delayed' ? '#dc2626' : port.status === 'active' ? '#16a34a' : '#6b7280';
+  
+  const divIcon = L.divIcon({
+    className: 'custom-port-marker',
+    html: `<div style="
+      width: ${alertCount > 0 ? '16px' : '12px'};
+      height: ${alertCount > 0 ? '16px' : '12px'};
+      background-color: ${portColor};
+      border: 2px solid white;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 8px;
+    ">${alertCount > 0 ? alertCount : '⚓'}</div>`,
+    iconSize: [alertCount > 0 ? 16 : 12, alertCount > 0 ? 16 : 12],
+    iconAnchor: [alertCount > 0 ? 8 : 6, alertCount > 0 ? 12 : 10]
+  });
+
+  return <Marker position={port.coords} icon={divIcon} eventHandlers={{ click: () => onPortClick(port) }} />;
+};
+
 // Detailed risk data with real geographic coordinates (lat, lng)
 const riskData = {
   'United States': { 
@@ -183,6 +234,7 @@ const DetailedWorldMap = ({
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [ports, setPorts] = useState([]);
 
   // Calculate risk statistics
   const riskStats = Object.values(riskData).reduce((acc, risk) => {
@@ -196,6 +248,7 @@ const DetailedWorldMap = ({
     loadEvents();
     loadSuppliers();
     loadAlerts();
+    loadPorts();
   }, []);
 
   const loadSuppliers = () => {
@@ -239,6 +292,37 @@ const DetailedWorldMap = ({
       { id: 4, supplierId: 'supplier-3', severity: 'critical', message: 'Supplier facility damaged', new: true }
     ];
     setAlerts(mockAlerts);
+  };
+
+  const loadPorts = () => {
+    // Mock port data
+    const mockPorts = [
+      {
+        id: 'port-1',
+        name: 'Port of Shanghai',
+        country: 'China',
+        coords: [31.2397, 121.4994], // Shanghai port
+        status: 'active',
+        alertCount: 1
+      },
+      {
+        id: 'port-2',
+        name: 'Port of Hamburg',
+        country: 'Germany', 
+        coords: [53.5511, 9.9937], // Hamburg
+        status: 'active',
+        alertCount: 0
+      },
+      {
+        id: 'port-3',
+        name: 'Port of Los Angeles',
+        country: 'USA',
+        coords: [33.7175, -118.2708], // LA port
+        status: 'delayed',
+        alertCount: 2
+      }
+    ];
+    setPorts(mockPorts);
   };
 
   const loadEvents = async () => {
@@ -421,21 +505,45 @@ const DetailedWorldMap = ({
         </Box>
       </Box>
 
-      {/* Minimal Legend */}
+      {/* Comprehensive Legend */}
       <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
         <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
           Legend:
         </Typography>
+        
+        {/* Country Risk */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getRiskColor('critical'), border: '1px solid #fff' }} />
-          <Typography variant="caption">Risk</Typography>
+          <Typography variant="caption">Country Risk</Typography>
         </Box>
+        
+        {/* Suppliers - Square */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: getEventSeverityColor('critical'), border: '1px solid #fff' }} />
+          <Box sx={{ width: 12, height: 12, backgroundColor: getEventSeverityColor('critical'), border: '2px solid #fff', borderRadius: '2px' }} />
+          <Typography variant="caption">Suppliers</Typography>
+        </Box>
+        
+        {/* Events - Circle */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getEventSeverityColor('high'), border: '1px solid #fff' }} />
           <Typography variant="caption">Events</Typography>
         </Box>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          Click markers for details
+        
+        {/* Ports - Triangle */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ 
+            width: 0, 
+            height: 0, 
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderBottom: `10px solid ${getEventSeverityColor('medium')}`,
+            border: '1px solid #fff'
+          }} />
+          <Typography variant="caption">Ports</Typography>
+        </Box>
+        
+        <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
+          Click for details
         </Typography>
       </Box>
 
@@ -469,96 +577,9 @@ const DetailedWorldMap = ({
           />
           
           {/* Risk Markers */}
-          {Object.entries(riskData).map(([countryName, data]) => (
-            <CircleMarker
-              key={countryName}
-              center={data.coords}
-              radius={getMarkerSize(data.level)}
-              fillColor={getRiskColor(data.level)}
-              color="#ffffff"
-              weight={2}
-              opacity={1}
-              fillOpacity={0.8}
-              eventHandlers={{
-                click: () => {
-                  // Country clicked - could show country details in sidebar if needed
-                  console.log('Country clicked:', countryName, data);
-                }
-              }}
-            >
-              <Popup>
-                <Box sx={{ minWidth: 300, maxWidth: 400 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                    {getCountryName(countryName, userLanguage)}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>{getUIText('riskLevel', userLanguage)}:</strong> {getUIText(data.level, userLanguage).toUpperCase()}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>{getUIText('riskScore', userLanguage)}:</strong> {data.score}/10
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>{getUIText('activeEvents', userLanguage)}:</strong> {data.events}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {data.description}
-                  </Typography>
-                  
-                  {/* Associated Events */}
-                  {(() => {
-                    const countryEvents = getEventsForCountry(countryName);
-                    if (countryEvents.length > 0) {
-                      return (
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'primary.main' }}>
-                            📰 Associated Events ({countryEvents.length})
-                          </Typography>
-                          <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
-                            {countryEvents.slice(0, 3).map((event, index) => (
-                              <Box 
-                                key={event.id || index}
-                                sx={{ 
-                                  p: 1, 
-                                  mb: 1, 
-                                  border: 1, 
-                                  borderColor: 'divider', 
-                                  borderRadius: 1,
-                                  backgroundColor: 'background.paper'
-                                }}
-                              >
-                                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                  {event.title}
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
-                                  {event.category} • {event.severity?.toUpperCase()}
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                  {event.description?.substring(0, 100)}
-                                  {event.description?.length > 100 ? '...' : ''}
-                                </Typography>
-                              </Box>
-                            ))}
-                            {countryEvents.length > 3 && (
-                              <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                +{countryEvents.length - 3} more events
-                              </Typography>
-                            )}
-                          </Box>
-                        </Box>
-                      );
-                    }
-                    return (
-                      <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                        No recent events for this location
-                      </Typography>
-                    );
-                  })()}
-                </Box>
-              </Popup>
-            </CircleMarker>
-          ))}
+          {/* Countries are now clickable via background - no individual markers needed */}
           
-          {/* Supplier Markers */}
+          {/* Supplier Markers - Square Shape */}
           {activeFilters.suppliers && suppliers.length > 0 && suppliers.map((supplier, index) => {
             const alertCount = getSupplierAlertCount(supplier.id);
             const markerColor = getSupplierMarkerColor(supplier.id);
@@ -567,60 +588,32 @@ const DetailedWorldMap = ({
             console.log('Rendering supplier marker:', supplier, 'alertCount:', alertCount, 'markerColor:', markerColor);
             
             return (
-              <CircleMarker
+              <SupplierMarker
                 key={`supplier-${supplier.id}`}
-                center={supplier.coords}
-                radius={alertCount > 0 ? 15 : 12}
-                fillColor={markerColor}
-                color="#ffffff"
-                weight={3}
-                opacity={1}
-                fillOpacity={0.8}
-                eventHandlers={{
-                  click: () => {
-                    if (onSupplierClick) {
-                      onSupplierClick(supplier);
-                    }
-                    console.log('Supplier clicked:', supplier);
+                supplier={supplier}
+                alertCount={alertCount}
+                markerColor={markerColor}
+                onSupplierClick={(supplier) => {
+                  if (onSupplierClick) {
+                    onSupplierClick(supplier);
                   }
                 }}
-              >
-                <Popup>
-                  <Box sx={{ minWidth: 250, maxWidth: 350 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                      🏭 {supplier.name}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 0.5 }}>
-                      <strong>Country:</strong> {supplier.country}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 0.5 }}>
-                      <strong>Tier:</strong> {supplier.tier}
-                    </Typography>
-                    {alertCount > 0 && (
-                      <Typography variant="body2" sx={{ mb: 0.5 }}>
-                        <strong>Active Alerts:</strong> {alertCount}
-                        {mostCriticalAlert && (
-                          <Chip 
-                            label={mostCriticalAlert.severity.toUpperCase()} 
-                            size="small" 
-                            sx={{ 
-                              ml: 1, 
-                              backgroundColor: getEventSeverityColor(mostCriticalAlert.severity),
-                              color: 'white',
-                              fontWeight: 600
-                            }} 
-                          />
-                        )}
-                      </Typography>
-                    )}
-                    {alertCount === 0 && (
-                      <Typography variant="body2" color="success.main">
-                        ✓ No active alerts
-                      </Typography>
-                    )}
-                  </Box>
-                </Popup>
-              </CircleMarker>
+              />
+            );
+          })}
+
+          {/* Port Markers - Triangle Shape */}
+          {activeFilters.ports && ports.length > 0 && ports.map((port, index) => {
+            return (
+              <PortMarker
+                key={`port-${port.id}`}
+                port={port}
+                alertCount={port.alertCount}
+                onPortClick={(port) => {
+                  console.log('Port clicked:', port);
+                  // Could add onPortClick callback if needed
+                }}
+              />
             );
           })}
 
