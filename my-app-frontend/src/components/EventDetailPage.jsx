@@ -10,12 +10,6 @@ import {
   CardContent,
   Grid,
   Alert,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
   List,
   ListItem,
   ListItemText,
@@ -23,6 +17,14 @@ import {
   IconButton,
   Avatar
 } from '@mui/material';
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot
+} from '@mui/lab';
 import {
   ArrowBack,
   Warning,
