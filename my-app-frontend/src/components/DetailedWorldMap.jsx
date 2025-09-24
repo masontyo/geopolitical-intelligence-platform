@@ -639,7 +639,9 @@ const DetailedWorldMap = ({
             supplier={supplier}
             alertCount={alertCount}
             markerColor={markerColor}
-            onSupplierClick={onSupplierClick}
+            onSupplierClick={(supplier) => {
+              window.open(`/supplier/${supplier.id}`, '_blank');
+            }}
           />
         );
       } else if (marker.type === 'port') {
@@ -648,7 +650,9 @@ const DetailedWorldMap = ({
           <PortMarker
             port={port}
             alertCount={port.alertCount}
-            onPortClick={onPortClick}
+            onPortClick={(port) => {
+              window.open(`/port/${port.id}`, '_blank');
+            }}
           />
         );
       } else if (marker.type === 'event') {
@@ -662,7 +666,9 @@ const DetailedWorldMap = ({
             weight={2}
             opacity={1}
             fillOpacity={0.9}
-            eventHandlers={{ click: () => onEventClick(event) }}
+            eventHandlers={{ click: () => {
+              window.open(`/event/${event.id || event.title}`, '_blank');
+            }}}
           >
             <Popup>
               <Box sx={{ minWidth: 250, maxWidth: 350 }}>
@@ -692,9 +698,17 @@ const DetailedWorldMap = ({
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   <strong>Date:</strong> {event.eventDate?.toLocaleDateString()}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   {event.description}
                 </Typography>
+                <Button 
+                  variant="contained" 
+                  size="small" 
+                  fullWidth
+                  onClick={() => window.open(`/event/${event.id || event.title}`, '_blank')}
+                >
+                  View Details
+                </Button>
               </Box>
             </Popup>
           </CircleMarker>
@@ -739,33 +753,57 @@ const DetailedWorldMap = ({
               {cluster.map((marker, index) => (
                 <Box key={marker.id} sx={{ p: 1, mb: 1, border: 1, borderColor: 'divider', borderRadius: 1, backgroundColor: 'background.paper', cursor: 'pointer' }}>
                   {marker.type === 'supplier' && (
-                    <Box onClick={() => onSupplierClick(marker.data)}>
+                    <Box>
                       <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                         🏭 {marker.data.name}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
                         {marker.data.country} • {marker.data.tier}
                       </Typography>
+                      <Button 
+                        variant="outlined" 
+                        size="small" 
+                        fullWidth
+                        onClick={() => window.open(`/supplier/${marker.data.id}`, '_blank')}
+                      >
+                        View Details
+                      </Button>
                     </Box>
                   )}
                   {marker.type === 'port' && (
-                    <Box onClick={() => onPortClick(marker.data)}>
+                    <Box>
                       <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                         ⚓ {marker.data.name}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
                         {marker.data.country} • {marker.data.status}
                       </Typography>
+                      <Button 
+                        variant="outlined" 
+                        size="small" 
+                        fullWidth
+                        onClick={() => window.open(`/port/${marker.data.id}`, '_blank')}
+                      >
+                        View Details
+                      </Button>
                     </Box>
                   )}
                   {marker.type === 'event' && (
-                    <Box onClick={() => onEventClick(marker.data)}>
+                    <Box>
                       <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                         📰 {marker.data.title}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
                         {marker.data.category} • {marker.data.severity?.toUpperCase()}
                       </Typography>
+                      <Button 
+                        variant="outlined" 
+                        size="small" 
+                        fullWidth
+                        onClick={() => window.open(`/event/${marker.data.id || marker.data.title}`, '_blank')}
+                      >
+                        View Details
+                      </Button>
                     </Box>
                   )}
                 </Box>

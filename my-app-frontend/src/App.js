@@ -9,6 +9,9 @@ import Login from './components/Login';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
 import MapCentricDashboard from './components/MapCentricDashboard';
+import SupplierDetailPage from './components/SupplierDetailPage';
+import PortDetailPage from './components/PortDetailPage';
+import EventDetailPage from './components/EventDetailPage';
 import EventDetails from './components/EventDetails';
 import EventsList from './components/EventsList';
 import TasksPage from './components/TasksPage';
@@ -155,6 +158,24 @@ function App() {
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <MapCentricDashboard />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/supplier/:supplierId" element={
+                  <ProtectedRoute>
+                    <SupplierDetailPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/port/:portId" element={
+                  <ProtectedRoute>
+                    <PortDetailPage />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/event/:eventId" element={
+                  <ProtectedRoute>
+                    <EventDetailPage />
                   </ProtectedRoute>
                 } />
                 
