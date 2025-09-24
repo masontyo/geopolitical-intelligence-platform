@@ -20,7 +20,7 @@ import {
   ZoomOut,
   Language
 } from '@mui/icons-material';
-import { MapContainer, TileLayer, CircleMarker, Popup, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, Marker, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -80,7 +80,43 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
     iconAnchor: [alertCount > 0 ? 8 : 6, alertCount > 0 ? 12 : 10]
   });
 
-  return <Marker position={port.coords} icon={divIcon} eventHandlers={{ click: () => onPortClick(port) }} />;
+  return (
+    <Marker position={port.coords} icon={divIcon} eventHandlers={{ click: () => onPortClick(port) }}>
+      <Popup>
+        <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+            ⚓ {port.name}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            <strong>Country:</strong> {port.country}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            <strong>Status:</strong> 
+            <Chip 
+              label={port.status.toUpperCase()} 
+              size="small" 
+              sx={{ 
+                ml: 1, 
+                backgroundColor: port.status === 'active' ? '#16a34a' : port.status === 'delayed' ? '#dc2626' : '#6b7280',
+                color: 'white',
+                fontWeight: 600
+              }} 
+            />
+          </Typography>
+          {port.alertCount > 0 && (
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <strong>Active Alerts:</strong> {port.alertCount}
+            </Typography>
+          )}
+          {port.alertCount === 0 && (
+            <Typography variant="body2" color="success.main">
+              ✓ No active alerts
+            </Typography>
+          )}
+        </Box>
+      </Popup>
+    </Marker>
+  );
 };
 
 // Detailed risk data with real geographic coordinates (lat, lng)
@@ -236,6 +272,7 @@ const DetailedWorldMap = ({
   const [suppliers, setSuppliers] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [ports, setPorts] = useState([]);
+  const [routes, setRoutes] = useState([]);
 
   // Calculate risk statistics
   const riskStats = Object.values(riskData).reduce((acc, risk) => {
@@ -250,6 +287,7 @@ const DetailedWorldMap = ({
     loadSuppliers();
     loadAlerts();
     loadPorts();
+    loadRoutes();
   }, []);
 
   const loadSuppliers = () => {
@@ -324,6 +362,40 @@ const DetailedWorldMap = ({
       }
     ];
     setPorts(mockPorts);
+  };
+
+  const loadRoutes = () => {
+    // Mock shipping route data
+    const mockRoutes = [
+      {
+        id: 'route-1',
+        name: 'Shanghai to Los Angeles',
+        from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
+        to: { name: 'Port of Los Angeles', coords: [33.7175, -118.2708] },
+        status: 'active',
+        frequency: 'weekly',
+        alertCount: 1
+      },
+      {
+        id: 'route-2', 
+        name: 'Hamburg to New York',
+        from: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
+        to: { name: 'Port of New York', coords: [40.6892, -74.0445] },
+        status: 'delayed',
+        frequency: 'bi-weekly',
+        alertCount: 2
+      },
+      {
+        id: 'route-3',
+        name: 'Shanghai to Hamburg',
+        from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
+        to: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
+        status: 'active',
+        frequency: 'weekly',
+        alertCount: 0
+      }
+    ];
+    setRoutes(mockRoutes);
   };
 
   const loadEvents = async () => {
@@ -543,6 +615,17 @@ const DetailedWorldMap = ({
           <Typography variant="caption">Ports</Typography>
         </Box>
         
+        {/* Routes - Line */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ 
+            width: 20, 
+            height: 2, 
+            backgroundColor: getEventSeverityColor('high'),
+            borderRadius: 1
+          }} />
+          <Typography variant="caption">Routes</Typography>
+        </Box>
+        
         <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
           Click for details
         </Typography>
@@ -613,6 +696,28 @@ const DetailedWorldMap = ({
                 onPortClick={(port) => {
                   console.log('Port clicked:', port);
                   // Could add onPortClick callback if needed
+                }}
+              />
+            );
+          })}
+
+          {/* Shipping Routes - Lines */}
+          {activeFilters.routes && routes.length > 0 && routes.map((route, index) => {
+            const routeColor = route.status === 'active' ? '#16a34a' : route.status === 'delayed' ? '#dc2626' : '#6b7280';
+            const routeWeight = route.alertCount > 0 ? 4 : 2;
+            
+            return (
+              <Polyline
+                key={`route-${route.id}`}
+                positions={[route.from.coords, route.to.coords]}
+                color={routeColor}
+                weight={routeWeight}
+                opacity={0.8}
+                dashArray={route.status === 'delayed' ? '10, 10' : undefined}
+                eventHandlers={{
+                  click: () => {
+                    console.log('Route clicked:', route);
+                  }
                 }}
               />
             );
