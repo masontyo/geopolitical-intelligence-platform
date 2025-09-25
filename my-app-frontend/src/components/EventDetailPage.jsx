@@ -34,8 +34,6 @@ import {
   NewReleases,
   LocationOn,
   Schedule,
-  TrendingUp,
-  TrendingDown,
   Timeline as TimelineIcon,
   Assessment,
   Lightbulb,
@@ -50,129 +48,123 @@ const EventDetailPage = () => {
   // Mock data - in real app, this would come from API
   const eventData = {
     id: eventId,
-    title: 'Trade Dispute Escalation',
-    category: 'Trade Policy',
+    title: 'Shanghai Port Closure Due to Severe Weather',
+    category: 'Infrastructure',
     severity: 'high',
-    date: '5 days ago',
-    location: 'China-US',
+    location: 'Shanghai, China',
+    date: '2024-01-15',
+    description: 'Severe weather conditions have forced the closure of Shanghai Port, one of the world\'s busiest container ports. The closure is expected to last 3-5 days and will significantly impact global supply chains.',
+    impact: 'Major disruption to shipping routes and supply chains',
     status: 'ongoing',
-    impact: 'Medium',
-    source: 'Reuters'
+    source: 'Maritime News Agency',
+    confidence: 'high'
   };
 
   const eventTimeline = [
     {
-      date: '5 days ago',
-      title: 'Initial Tariff Announcement',
-      description: 'US announces new tariffs on Chinese electronics imports',
-      impact: 'Low'
+      title: 'Weather Alert Issued',
+      date: 'Jan 15, 2024 06:00',
+      impact: 'Low',
+      description: 'National Weather Service issued severe weather warning for Shanghai region'
     },
     {
-      date: '3 days ago',
-      title: 'Chinese Response',
-      description: 'China announces retaliatory tariffs on US agricultural products',
-      impact: 'Medium'
+      title: 'Port Closure Announced',
+      date: 'Jan 15, 2024 08:30',
+      impact: 'High',
+      description: 'Shanghai Port Authority officially closed all operations due to safety concerns'
     },
     {
-      date: '1 day ago',
-      title: 'Escalation',
-      description: 'US threatens additional tariffs, China warns of further retaliation',
-      impact: 'High'
+      title: 'Shipping Lines Diverted',
+      date: 'Jan 15, 2024 10:15',
+      impact: 'Critical',
+      description: 'Major shipping lines begin diverting vessels to alternative ports in Asia'
     },
     {
-      date: 'Today',
-      title: 'Current Status',
-      description: 'Negotiations ongoing, market volatility increasing',
-      impact: 'High'
+      title: 'Supply Chain Impact Assessment',
+      date: 'Jan 15, 2024 14:00',
+      impact: 'High',
+      description: 'Industry analysts estimate 3-5 day delay for all affected shipments'
     }
   ];
 
   const affectedEntities = [
     {
-      type: 'supplier',
       name: 'Shanghai Metal Works',
+      type: 'Supplier',
       impact: 'High',
-      description: 'Direct supplier affected by new tariffs',
-      action: 'Consider alternative suppliers in Southeast Asia'
+      status: 'Affected',
+      description: 'Primary supplier, shipments delayed 4-6 days'
     },
     {
-      type: 'port',
       name: 'Port of Shanghai',
-      impact: 'Medium',
-      description: 'Expected decrease in US-bound shipments',
-      action: 'Monitor shipping volumes and adjust capacity'
+      type: 'Infrastructure',
+      impact: 'Critical',
+      status: 'Closed',
+      description: 'Complete operational shutdown due to weather'
     },
     {
-      type: 'route',
-      name: 'Shanghai to Los Angeles',
+      name: 'CMA CGM Shipping',
+      type: 'Carrier',
       impact: 'High',
-      description: 'Route most affected by trade dispute',
-      action: 'Consider alternative routes or suppliers'
+      status: 'Diverted',
+      description: 'Vessels redirected to Busan and Singapore'
+    },
+    {
+      name: 'Maersk Line',
+      type: 'Carrier',
+      impact: 'High',
+      status: 'Diverted',
+      description: 'Multiple vessels affected, delays expected'
     }
   ];
 
-  const mitigationStrategies = [
+  const mitigationOptions = [
     {
-      title: 'Diversify Supply Base',
-      description: 'Add suppliers from Southeast Asia to reduce China dependency',
+      title: 'Activate Alternative Ports',
+      description: 'Switch to Busan, Singapore, or Hong Kong for immediate shipments',
       priority: 'High',
-      timeframe: '1-2 months',
+      timeframe: 'Immediate',
       cost: 'Medium',
       effectiveness: 'High'
     },
     {
-      title: 'Stockpile Inventory',
-      description: 'Increase inventory levels to buffer against supply disruptions',
-      priority: 'Medium',
-      timeframe: 'Immediate',
+      title: 'Air Freight for Critical Items',
+      description: 'Use air cargo for time-sensitive components',
+      priority: 'High',
+      timeframe: '24 hours',
       cost: 'High',
-      effectiveness: 'Medium'
+      effectiveness: 'Very High'
     },
     {
-      title: 'Negotiate Price Protection',
-      description: 'Lock in current prices with existing suppliers',
-      priority: 'High',
-      timeframe: '1 week',
+      title: 'Inventory Buffer Activation',
+      description: 'Use safety stock to maintain production',
+      priority: 'Medium',
+      timeframe: 'Immediate',
       cost: 'Low',
       effectiveness: 'Medium'
     },
     {
-      title: 'Alternative Sourcing',
-      description: 'Identify and qualify alternative suppliers in unaffected regions',
-      priority: 'Medium',
-      timeframe: '2-3 months',
-      cost: 'Medium',
+      title: 'Supplier Diversification',
+      description: 'Activate backup suppliers in unaffected regions',
+      priority: 'Low',
+      timeframe: '1 week',
+      cost: 'High',
       effectiveness: 'High'
     }
   ];
 
-  const relatedEvents = [
-    {
-      title: 'EU-China Trade Tensions',
-      date: '2 weeks ago',
-      severity: 'medium',
-      connection: 'Similar trade policy developments'
-    },
-    {
-      title: 'Supply Chain Disruptions in Electronics',
-      date: '1 month ago',
-      severity: 'low',
-      connection: 'Related supply chain impacts'
-    }
-  ];
-
-  const getSeverityColor = (severity) => {
-    switch (severity) {
+  const getImpactColor = (impact) => {
+    switch (impact?.toLowerCase()) {
       case 'critical': return 'error';
       case 'high': return 'warning';
       case 'medium': return 'info';
       case 'low': return 'success';
-      default: return 'default';
+      default: return 'info';
     }
   };
 
   const getSeverityIcon = (severity) => {
-    switch (severity) {
+    switch (severity?.toLowerCase()) {
       case 'critical': return <Error />;
       case 'high': return <Warning />;
       case 'medium': return <Info />;
@@ -181,303 +173,255 @@ const EventDetailPage = () => {
     }
   };
 
-  const getImpactColor = (impact) => {
-    switch (impact) {
-      case 'High': return 'error';
-      case 'Medium': return 'warning';
-      case 'Low': return 'success';
-      default: return 'default';
-    }
-  };
-
-  const getEntityIcon = (type) => {
-    switch (type) {
-      case 'supplier': return <Business />;
-      case 'port': return <Public />;
-      case 'route': return <Schedule />;
-      default: return <Info />;
-    }
-  };
-
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-          <ArrowBack />
-        </IconButton>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>
-          Event Intelligence
-        </Typography>
-      </Box>
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
+      {/* Sidebar */}
+      <Paper elevation={3} sx={{ width: 300, p: 3, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', overflowY: 'auto' }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+            <ArrowBack />
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Event Details
+          </Typography>
+        </Box>
 
-      <Grid container spacing={3}>
-        {/* Sidebar */}
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2, mb: 2 }}>
+        {/* Event Info */}
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <NewReleases sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {eventData.title}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <LocationOn sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+              <Typography variant="body2">
+                {eventData.location}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Schedule sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+              <Typography variant="body2">
+                {eventData.date}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Assessment sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+              <Typography variant="body2">
+                Category: {eventData.category}
+              </Typography>
+            </Box>
+            
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <NewReleases sx={{ mr: 1, color: 'primary.main' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {eventData.title}
-              </Typography>
-            </Box>
-            
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <LocationOn sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-                <Typography variant="body2">
-                  {eventData.location}
-                </Typography>
-              </Box>
-              
-              <Box sx={{ mb: 1 }}>
-                <Chip 
-                  label={eventData.category} 
-                  size="small" 
-                  color="primary"
-                  sx={{ mr: 1 }}
-                />
-                <Chip 
-                  label={eventData.severity.toUpperCase()} 
-                  size="small" 
-                  color={getSeverityColor(eventData.severity)}
-                />
-              </Box>
-
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Date: {eventData.date}
-              </Typography>
-              
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Source: {eventData.source}
-              </Typography>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-              Impact Assessment
-            </Typography>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Overall Impact
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                Severity:
               </Typography>
               <Chip 
-                label={eventData.impact} 
-                color={getImpactColor(eventData.impact)}
-                sx={{ fontWeight: 600 }}
+                label={eventData.severity?.toUpperCase()} 
+                size="small" 
+                color={getImpactColor(eventData.severity)} 
               />
             </Box>
+          </Box>
 
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Status
-              </Typography>
-              <Chip 
-                label={eventData.status} 
-                color={eventData.status === 'ongoing' ? 'warning' : 'success'}
-                sx={{ fontWeight: 600 }}
-              />
-            </Box>
+          <Divider sx={{ my: 2 }} />
 
-            <Button variant="outlined" fullWidth sx={{ mb: 1 }}>
-              Set Up Alerts
-            </Button>
-            <Button variant="outlined" fullWidth>
-              Share Intelligence
-            </Button>
-          </Paper>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            Event Description
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {eventData.description}
+          </Typography>
 
-          {/* Related Events */}
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-              Related Events
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            Impact Assessment
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {eventData.impact}
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Typography variant="body2" sx={{ mr: 1 }}>
+              Status:
             </Typography>
-            
-            {relatedEvents.map((event, index) => (
-              <Box key={index} sx={{ mb: 2, p: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                  {event.title}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                  {event.date}
-                </Typography>
-                <Typography variant="caption" sx={{ mb: 1, display: 'block' }}>
-                  {event.connection}
-                </Typography>
-                <Chip 
-                  label={event.severity} 
-                  size="small"
-                  color={getSeverityColor(event.severity)}
-                />
-              </Box>
-            ))}
-          </Paper>
-        </Grid>
+            <Chip 
+              label={eventData.status} 
+              size="small" 
+              color={eventData.status === 'ongoing' ? 'warning' : 'success'} 
+            />
+          </Box>
 
-        {/* Main Content */}
-        <Grid item xs={12} md={9}>
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            Source & Confidence
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Source:</strong> {eventData.source}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            <strong>Confidence:</strong> {eventData.confidence}
+          </Typography>
+        </Paper>
+      </Paper>
+
+      {/* Main Content */}
+      <Box sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
+          Event Intelligence Dashboard
+        </Typography>
+        
+        <Grid container spacing={3}>
           {/* Event Timeline */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
-              <TimelineIcon sx={{ mr: 1 }} />
-              Event Timeline
-            </Typography>
-            
-            <Timeline>
-              {eventTimeline.map((item, index) => (
-                <TimelineItem key={index}>
-                  <TimelineSeparator>
-                    <TimelineDot color={getImpactColor(item.impact)}>
-                      {getSeverityIcon(item.impact.toLowerCase())}
-                    </TimelineDot>
-                    {index < eventTimeline.length - 1 && <TimelineConnector />}
-                  </TimelineSeparator>
-                  <TimelineContent>
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
-                          {item.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {item.date}
-                        </Typography>
-                      </Box>
-                      
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {item.description}
-                      </Typography>
-                      
-                      <Chip 
-                        label={`Impact: ${item.impact}`} 
-                        size="small"
-                        color={getImpactColor(item.impact)}
-                      />
-                    </Box>
-                  </TimelineContent>
-                </TimelineItem>
-              ))}
-            </Timeline>
-          </Paper>
-
-          {/* Affected Entities */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
-              <Assessment sx={{ mr: 1 }} />
-              Affected Supply Chain Entities
-            </Typography>
-            
-            <Grid container spacing={2}>
-              {affectedEntities.map((entity, index) => (
-                <Grid item xs={12} md={4} key={index}>
-                  <Card>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-                          {getEntityIcon(entity.type)}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                            {entity.name}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <TimelineIcon sx={{ mr: 1 }} />
+                Event Timeline
+              </Typography>
+              
+              <Timeline>
+                {eventTimeline.map((item, index) => (
+                  <TimelineItem key={index}>
+                    <TimelineSeparator>
+                      <TimelineDot color={getImpactColor(item.impact)}>
+                        {getSeverityIcon(item.impact.toLowerCase())}
+                      </TimelineDot>
+                      {index < eventTimeline.length - 1 && <TimelineConnector />}
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <Box sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
+                            {item.title}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {entity.type.charAt(0).toUpperCase() + entity.type.slice(1)}
+                            {item.date}
                           </Typography>
                         </Box>
-                      </Box>
-                      
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {entity.description}
-                      </Typography>
-                      
-                      <Alert severity={getImpactColor(entity.impact)} sx={{ mb: 2 }}>
-                        <Typography variant="body2">
-                          <strong>Recommended Action:</strong> {entity.action}
+                        
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          {item.description}
                         </Typography>
-                      </Alert>
-                      
-                      <Chip 
-                        label={`Impact: ${entity.impact}`} 
-                        size="small"
-                        color={getImpactColor(entity.impact)}
-                      />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
+                        
+                        <Chip 
+                          label={`Impact: ${item.impact}`} 
+                          size="small"
+                          color={getImpactColor(item.impact)}
+                        />
+                      </Box>
+                    </TimelineContent>
+                  </TimelineItem>
+                ))}
+              </Timeline>
+            </Paper>
+          </Grid>
 
-          {/* Mitigation Strategies */}
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
-              <Lightbulb sx={{ mr: 1 }} />
-              Recommended Mitigation Strategies
-            </Typography>
-            
-            <Grid container spacing={2}>
-              {mitigationStrategies.map((strategy, index) => (
-                <Grid item xs={12} md={6} key={index}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                        {strategy.title}
-                      </Typography>
-                      
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {strategy.description}
-                      </Typography>
-                      
-                      <Grid container spacing={1} sx={{ mb: 2 }}>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="text.secondary">
-                            Priority:
+          {/* Affected Entities */}
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <Business sx={{ mr: 1 }} />
+                Affected Entities
+              </Typography>
+              
+              <List>
+                {affectedEntities.map((entity, index) => (
+                  <ListItem key={index} sx={{ px: 0, py: 1 }}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
+                            {entity.name}
                           </Typography>
                           <Chip 
-                            label={strategy.priority} 
-                            size="small"
-                            color={strategy.priority === 'High' ? 'error' : strategy.priority === 'Medium' ? 'warning' : 'success'}
-                            sx={{ ml: 1 }}
+                            label={entity.status} 
+                            size="small" 
+                            color={entity.status === 'Affected' ? 'warning' : entity.status === 'Closed' ? 'error' : 'info'}
                           />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="text.secondary">
-                            Timeframe:
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>Type:</strong> {entity.type} • <strong>Impact:</strong> {entity.impact}
                           </Typography>
-                          <Typography variant="caption" sx={{ ml: 1, fontWeight: 600 }}>
-                            {strategy.timeframe}
+                          <Typography variant="body2" color="text.secondary">
+                            {entity.description}
                           </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="text.secondary">
-                            Cost:
-                          </Typography>
-                          <Typography variant="caption" sx={{ ml: 1, fontWeight: 600 }}>
-                            {strategy.cost}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption" color="text.secondary">
-                            Effectiveness:
-                          </Typography>
-                          <Typography variant="caption" sx={{ ml: 1, fontWeight: 600 }}>
-                            {strategy.effectiveness}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      
-                      <Button variant="contained" fullWidth size="small">
-                        Implement Strategy
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
+                        </Box>
+                      }
+                    />
+                    {index < affectedEntities.length - 1 && <Divider />}
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
+          {/* Mitigation Options */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <Lightbulb sx={{ mr: 1 }} />
+                Recommended Mitigation Actions
+              </Typography>
+              
+              <Grid container spacing={2}>
+                {mitigationOptions.map((option, index) => (
+                  <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Card sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1rem' }}>
+                          {option.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 2 }}>
+                          {option.description}
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Chip 
+                            label={`Priority: ${option.priority}`} 
+                            size="small" 
+                            color={option.priority === 'High' ? 'error' : option.priority === 'Medium' ? 'warning' : 'success'}
+                            sx={{ mr: 0.5, mb: 0.5 }}
+                          />
+                          <Chip 
+                            label={`Time: ${option.timeframe}`} 
+                            size="small" 
+                            color="primary"
+                            sx={{ mr: 0.5, mb: 0.5 }}
+                          />
+                          <Chip 
+                            label={`Cost: ${option.cost}`} 
+                            size="small" 
+                            color="info"
+                            sx={{ mr: 0.5, mb: 0.5 }}
+                          />
+                          <Chip 
+                            label={`Effect: ${option.effectiveness}`} 
+                            size="small" 
+                            color="secondary"
+                            sx={{ mb: 0.5 }}
+                          />
+                        </Box>
+                        <Button variant="contained" size="small" fullWidth>
+                          Take Action
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 };
