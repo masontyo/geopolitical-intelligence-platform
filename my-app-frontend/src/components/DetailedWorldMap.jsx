@@ -31,6 +31,7 @@ import {
   getRecommendedTileProvider 
 } from '../utils/mapLanguageConfig';
 import { eventsAPI } from '../services/api';
+import { supplyChainAPI } from '../services/supplyChainService';
 import eventMapService from '../services/eventMapService';
 
 // Custom Marker Components
@@ -285,43 +286,68 @@ const DetailedWorldMap = ({
 
   // Load events when component mounts
   useEffect(() => {
-    loadEvents();
-    loadSuppliers();
-    loadAlerts();
-    loadPorts();
-    loadRoutes();
+    const loadAllData = async () => {
+      await Promise.all([
+        loadEvents(),
+        loadSuppliers(),
+        loadPorts(),
+        loadRoutes()
+      ]);
+      loadAlerts(); // Keep alerts synchronous for now
+    };
+    
+    loadAllData();
   }, []);
 
-  const loadSuppliers = () => {
-    // Mock supplier data - in real app, this would come from API
-    const mockSuppliers = [
-      {
-        id: 'supplier-1',
-        name: 'Shanghai Metal Works',
-        country: 'China',
-        coords: [31.2304, 121.4737], // Shanghai
-        tier: 'Tier 1',
-        alertCount: 2
-      },
-      {
-        id: 'supplier-2', 
-        name: 'German Electronics Ltd',
-        country: 'Germany',
-        coords: [52.5200, 13.4050], // Berlin
-        tier: 'Tier 1',
-        alertCount: 1
-      },
-      {
-        id: 'supplier-3',
-        name: 'Thai Components Inc',
-        country: 'Thailand',
-        coords: [13.7563, 100.5018], // Bangkok
-        tier: 'Tier 2',
-        alertCount: 1
+  const loadSuppliers = async () => {
+    try {
+      console.log('Loading suppliers from API...');
+      const response = await supplyChainAPI.getSuppliers('demo-user');
+      
+      if (response.success && response.suppliers) {
+        console.log('Loaded suppliers:', response.suppliers);
+        setSuppliers(response.suppliers);
+      } else {
+        console.log('No suppliers found, using fallback data');
+        // Fallback to mock data if no real data
+        const fallbackSuppliers = [
+          {
+            id: 'supplier-1',
+            name: 'Shanghai Metal Works',
+            country: 'China',
+            coords: [31.2304, 121.4737], // Shanghai
+            tier: 'Tier 1',
+            alertCount: 2,
+            status: 'active'
+          },
+          {
+            id: 'supplier-2', 
+            name: 'German Electronics Ltd',
+            country: 'Germany',
+            coords: [52.5200, 13.4050], // Berlin
+            tier: 'Tier 1',
+            alertCount: 1,
+            status: 'active'
+          }
+        ];
+        setSuppliers(fallbackSuppliers);
       }
-    ];
-    console.log('Loading suppliers:', mockSuppliers);
-    setSuppliers(mockSuppliers);
+    } catch (error) {
+      console.error('Error loading suppliers:', error);
+      // Fallback to mock data on error
+      const fallbackSuppliers = [
+        {
+          id: 'supplier-1',
+          name: 'Shanghai Metal Works',
+          country: 'China',
+          coords: [31.2304, 121.4737],
+          tier: 'Tier 1',
+          alertCount: 2,
+          status: 'active'
+        }
+      ];
+      setSuppliers(fallbackSuppliers);
+    }
   };
 
   const loadAlerts = () => {
@@ -335,69 +361,106 @@ const DetailedWorldMap = ({
     setAlerts(mockAlerts);
   };
 
-  const loadPorts = () => {
-    // Mock port data
-    const mockPorts = [
-      {
-        id: 'port-1',
-        name: 'Port of Shanghai',
-        country: 'China',
-        coords: [31.2397, 121.4994], // Shanghai port
-        status: 'active',
-        alertCount: 1
-      },
-      {
-        id: 'port-2',
-        name: 'Port of Hamburg',
-        country: 'Germany', 
-        coords: [53.5511, 9.9937], // Hamburg
-        status: 'active',
-        alertCount: 0
-      },
-      {
-        id: 'port-3',
-        name: 'Port of Los Angeles',
-        country: 'USA',
-        coords: [33.7175, -118.2708], // LA port
-        status: 'delayed',
-        alertCount: 2
+  const loadPorts = async () => {
+    try {
+      console.log('Loading ports from API...');
+      const response = await supplyChainAPI.getPorts('demo-user');
+      
+      if (response.success && response.ports) {
+        console.log('Loaded ports:', response.ports);
+        setPorts(response.ports);
+      } else {
+        console.log('No ports found, using fallback data');
+        // Fallback to mock data if no real data
+        const fallbackPorts = [
+          {
+            id: 'port-1',
+            name: 'Port of Shanghai',
+            country: 'China',
+            coords: [31.2397, 121.4994], // Shanghai port
+            status: 'active',
+            alertCount: 1,
+            type: 'container'
+          },
+          {
+            id: 'port-2',
+            name: 'Port of Hamburg',
+            country: 'Germany', 
+            coords: [53.5511, 9.9937], // Hamburg
+            status: 'active',
+            alertCount: 0,
+            type: 'container'
+          }
+        ];
+        setPorts(fallbackPorts);
       }
-    ];
-    setPorts(mockPorts);
+    } catch (error) {
+      console.error('Error loading ports:', error);
+      // Fallback to mock data on error
+      const fallbackPorts = [
+        {
+          id: 'port-1',
+          name: 'Port of Shanghai',
+          country: 'China',
+          coords: [31.2397, 121.4994],
+          status: 'active',
+          alertCount: 1,
+          type: 'container'
+        }
+      ];
+      setPorts(fallbackPorts);
+    }
   };
 
-  const loadRoutes = () => {
-    // Mock shipping route data
-    const mockRoutes = [
-      {
-        id: 'route-1',
-        name: 'Shanghai to Los Angeles',
-        from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
-        to: { name: 'Port of Los Angeles', coords: [33.7175, -118.2708] },
-        status: 'active',
-        frequency: 'weekly',
-        alertCount: 1
-      },
-      {
-        id: 'route-2', 
-        name: 'Hamburg to New York',
-        from: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
-        to: { name: 'Port of New York', coords: [40.6892, -74.0445] },
-        status: 'delayed',
-        frequency: 'bi-weekly',
-        alertCount: 2
-      },
-      {
-        id: 'route-3',
-        name: 'Shanghai to Hamburg',
-        from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
-        to: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
-        status: 'active',
-        frequency: 'weekly',
-        alertCount: 0
+  const loadRoutes = async () => {
+    try {
+      console.log('Loading routes from API...');
+      const response = await supplyChainAPI.getRoutes('demo-user');
+      
+      if (response.success && response.routes) {
+        console.log('Loaded routes:', response.routes);
+        setRoutes(response.routes);
+      } else {
+        console.log('No routes found, using fallback data');
+        // Fallback to mock data if no real data
+        const fallbackRoutes = [
+          {
+            id: 'route-1',
+            name: 'Shanghai to Los Angeles',
+            from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
+            to: { name: 'Port of Los Angeles', coords: [33.7175, -118.2708] },
+            status: 'active',
+            frequency: 'weekly',
+            alertCount: 1
+          },
+          {
+            id: 'route-2', 
+            name: 'Hamburg to New York',
+            from: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
+            to: { name: 'Port of New York', coords: [40.6892, -74.0445] },
+            status: 'delayed',
+            frequency: 'bi-weekly',
+            alertCount: 2
+          }
+        ];
+        setRoutes(fallbackRoutes);
       }
-    ];
-    setRoutes(mockRoutes);
+    } catch (error) {
+      console.error('Error loading routes:', error);
+      // Fallback to mock data on error
+      const fallbackRoutes = [
+        {
+          id: 'route-1',
+          name: 'Shanghai to Los Angeles',
+          from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
+          to: { name: 'Port of Los Angeles', coords: [33.7175, -118.2708] },
+          status: 'active',
+          frequency: 'weekly',
+          alertCount: 1
+        }
+      ];
+      setRoutes(fallbackRoutes);
+    }
   };
 
   const loadEvents = async () => {

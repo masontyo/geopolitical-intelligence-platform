@@ -19,6 +19,7 @@ const linkedinAuthRoutes = require('./routes/linkedinAuth');
 const crisisCommunicationRoutes = require('./routes/crisisCommunication');
 const crisisRoomsRoutes = require('./routes/crisisRooms');
 const eventsRoutes = require('./routes/events');
+const supplyChainRoutes = require('./routes/supplyChain');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -58,6 +59,7 @@ app.use('/api/enhanced-news', enhancedNewsRoutes);
 app.use('/api/linkedin', linkedinAuthRoutes);
 app.use('/api/crisis-communication', crisisCommunicationRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/supply-chain', supplyChainRoutes);
 
 // Crisis rooms direct access (for backward compatibility and cleaner API)
 app.use('/api/crisis-rooms', crisisRoomsRoutes);

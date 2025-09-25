@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -41,13 +41,43 @@ import {
   TrendingUp,
   TrendingDown
 } from '@mui/icons-material';
+import { supplyChainAPI } from '../services/supplyChainService';
 
 const SupplierDetailPage = () => {
   const { supplierId } = useParams();
   const navigate = useNavigate();
+  const [supplierData, setSupplierData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - in real app, this would come from API
-  const supplierData = {
+  useEffect(() => {
+    const fetchSupplierData = async () => {
+      try {
+        setLoading(true);
+        const response = await supplyChainAPI.getSuppliers('demo-user');
+        
+        if (response.success && response.suppliers) {
+          const supplier = response.suppliers.find(s => s.id === supplierId);
+          if (supplier) {
+            setSupplierData(supplier);
+          } else {
+            // Fallback to mock data if supplier not found
+            setSupplierData(getMockSupplierData());
+          }
+        } else {
+          setSupplierData(getMockSupplierData());
+        }
+      } catch (error) {
+        console.error('Error fetching supplier data:', error);
+        setSupplierData(getMockSupplierData());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSupplierData();
+  }, [supplierId]);
+
+  const getMockSupplierData = () => ({
     id: supplierId,
     name: 'Shanghai Metal Works',
     country: 'China',
@@ -149,16 +179,34 @@ const SupplierDetailPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography variant="h6">Loading supplier details...</Typography>
+      </Box>
+    );
+  }
+
+  if (!supplierData) {
+    return (
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography variant="h6">Supplier not found</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-          <ArrowBack />
-        </IconButton>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>
-          Supplier Intelligence
-        </Typography>
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
+      {/* Sidebar */}
+      <Paper elevation={3} sx={{ width: 300, p: 3, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', overflowY: 'auto' }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+            <ArrowBack />
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {supplierData.name}
+          </Typography>
       </Box>
 
       <Grid container spacing={3}>
