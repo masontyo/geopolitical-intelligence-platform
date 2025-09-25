@@ -181,7 +181,7 @@ const EventDetailPage = () => {
       <Paper 
         elevation={3} 
         sx={{ 
-          width: sidebarExpanded ? 400 : 60, 
+          width: sidebarExpanded ? 500 : 60, 
           transition: 'width 0.3s ease',
           p: sidebarExpanded ? 3 : 1, 
           bgcolor: 'background.paper', 
@@ -189,11 +189,12 @@ const EventDetailPage = () => {
           borderColor: 'divider', 
           overflowY: 'auto',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          position: 'relative'
         }}
       >
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: sidebarExpanded ? 3 : 1 }}>
+        {/* Header - Always visible */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: sidebarExpanded ? 3 : 1, minHeight: 40 }}>
           <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: sidebarExpanded ? 2 : 0 }}>
             <ArrowBack />
           </IconButton>
@@ -204,7 +205,7 @@ const EventDetailPage = () => {
           )}
           <IconButton 
             onClick={() => setSidebarExpanded(!sidebarExpanded)}
-            sx={{ ml: 'auto' }}
+            sx={{ ml: 'auto', position: 'absolute', right: sidebarExpanded ? 12 : 4, top: 4 }}
           >
             <Menu />
           </IconButton>
@@ -212,38 +213,38 @@ const EventDetailPage = () => {
 
         {/* Event Info */}
         {sidebarExpanded && (
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <NewReleases sx={{ mr: 1, color: 'primary.main' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <NewReleases sx={{ mr: 2, color: 'primary.main', fontSize: 28 }} />
+              <Typography variant="h5" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
                 {eventData.title}
               </Typography>
             </Box>
           
-          <Box sx={{ mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <LocationOn sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2">
+          <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <LocationOn sx={{ mr: 2, fontSize: 20, color: 'text.secondary' }} />
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {eventData.location}
               </Typography>
             </Box>
             
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Schedule sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2">
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Schedule sx={{ mr: 2, fontSize: 20, color: 'text.secondary' }} />
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {eventData.date}
               </Typography>
             </Box>
             
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Assessment sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2">
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Assessment sx={{ mr: 2, fontSize: 20, color: 'text.secondary' }} />
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 Category: {eventData.category}
               </Typography>
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Typography variant="body2" sx={{ mr: 1 }}>
+              <Typography variant="body1" sx={{ mr: 2, fontWeight: 500 }}>
                 Severity:
               </Typography>
               <Chip 
@@ -254,42 +255,42 @@ const EventDetailPage = () => {
             </Box>
           </Box>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 3 }} />
 
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Event Description
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.6 }}>
             {eventData.description}
           </Typography>
 
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Impact Assessment
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.6 }}>
             {eventData.impact}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Typography variant="body2" sx={{ mr: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <Typography variant="body1" sx={{ mr: 2, fontWeight: 500 }}>
               Status:
             </Typography>
             <Chip 
               label={eventData.status} 
-              size="small" 
+              size="medium" 
               color={eventData.status === 'ongoing' ? 'warning' : 'success'} 
             />
           </Box>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 3 }} />
 
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             Source & Confidence
           </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
+          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
             <strong>Source:</strong> {eventData.source}
           </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
             <strong>Confidence:</strong> {eventData.confidence}
           </Typography>
           </Paper>
@@ -304,7 +305,7 @@ const EventDetailPage = () => {
         
         <Grid container spacing={3}>
           {/* Event Timeline */}
-          <Grid item xs={12} lg={8}>
+          <Grid item xs={12} lg={9}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
                 <TimelineIcon sx={{ mr: 1 }} />
@@ -349,7 +350,7 @@ const EventDetailPage = () => {
           </Grid>
 
           {/* Affected Entities */}
-          <Grid item xs={12} lg={4}>
+          <Grid item xs={12} lg={3}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
                 <Business sx={{ mr: 1 }} />
