@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -38,12 +38,14 @@ import {
   Assessment,
   Lightbulb,
   Public,
-  Business
+  Business,
+  Menu
 } from '@mui/icons-material';
 
 const PortDetailPage = () => {
   const { portId } = useParams();
   const navigate = useNavigate();
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   // Mock data - in real app, this would come from API
   const portData = {
@@ -190,20 +192,42 @@ const PortDetailPage = () => {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
-      {/* Sidebar */}
-      <Paper elevation={3} sx={{ width: 300, p: 3, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', overflowY: 'auto' }}>
+      {/* Collapsible Sidebar */}
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          width: sidebarExpanded ? 400 : 60, 
+          transition: 'width 0.3s ease',
+          p: sidebarExpanded ? 3 : 1, 
+          bgcolor: 'background.paper', 
+          borderRight: 1, 
+          borderColor: 'divider', 
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: sidebarExpanded ? 3 : 1 }}>
+          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: sidebarExpanded ? 2 : 0 }}>
             <ArrowBack />
           </IconButton>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Port Details
-          </Typography>
+          {sidebarExpanded && (
+            <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
+              Port Details
+            </Typography>
+          )}
+          <IconButton 
+            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            sx={{ ml: 'auto' }}
+          >
+            <Menu />
+          </IconButton>
         </Box>
 
         {/* Port Info */}
-        <Paper sx={{ p: 2, mb: 2 }}>
+        {sidebarExpanded && (
+          <Paper sx={{ p: 2, mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <LocalShipping sx={{ mr: 1, color: 'primary.main' }} />
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -294,7 +318,8 @@ const PortDetailPage = () => {
           <Typography variant="body2" sx={{ mb: 2 }}>
             {portData.shippingLines.join(', ')}
           </Typography>
-        </Paper>
+          </Paper>
+        )}
       </Paper>
 
       {/* Main Content */}
@@ -305,7 +330,7 @@ const PortDetailPage = () => {
         
         <Grid container spacing={3}>
           {/* Current Developments */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} lg={8}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
                 <TimelineIcon sx={{ mr: 1 }} />
@@ -359,7 +384,7 @@ const PortDetailPage = () => {
           </Grid>
 
           {/* Alternative Ports */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} lg={4}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
                 <Public sx={{ mr: 1 }} />

@@ -37,7 +37,8 @@ import {
   Email,
   Timeline as TimelineIcon,
   Assessment,
-  Lightbulb
+  Lightbulb,
+  Menu
 } from '@mui/icons-material';
 import { supplyChainAPI } from '../services/supplyChainService';
 
@@ -46,6 +47,7 @@ const SupplierDetailPage = () => {
   const navigate = useNavigate();
   const [supplierData, setSupplierData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
     const fetchSupplierData = async () => {
@@ -184,26 +186,48 @@ const SupplierDetailPage = () => {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
-      {/* Sidebar */}
-      <Paper elevation={3} sx={{ width: 300, p: 3, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', overflowY: 'auto' }}>
+      {/* Collapsible Sidebar */}
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          width: sidebarExpanded ? 400 : 60, 
+          transition: 'width 0.3s ease',
+          p: sidebarExpanded ? 3 : 1, 
+          bgcolor: 'background.paper', 
+          borderRight: 1, 
+          borderColor: 'divider', 
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: sidebarExpanded ? 3 : 1 }}>
+          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: sidebarExpanded ? 2 : 0 }}>
             <ArrowBack />
           </IconButton>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {supplierData.name}
-          </Typography>
+          {sidebarExpanded && (
+            <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
+              {supplierData.name}
+            </Typography>
+          )}
+          <IconButton 
+            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            sx={{ ml: 'auto' }}
+          >
+            <Menu />
+          </IconButton>
         </Box>
 
         {/* Supplier Info */}
-        <Paper sx={{ p: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Business sx={{ mr: 1, color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {supplierData.name}
-            </Typography>
-          </Box>
+        {sidebarExpanded && (
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Business sx={{ mr: 1, color: 'primary.main' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {supplierData.name}
+              </Typography>
+            </Box>
           
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -271,7 +295,8 @@ const SupplierDetailPage = () => {
               />
             </Box>
           )) || <Typography variant="body2" color="text.secondary">No locations available</Typography>}
-        </Paper>
+          </Paper>
+        )}
       </Paper>
 
       {/* Main Content */}
@@ -280,12 +305,14 @@ const SupplierDetailPage = () => {
           {supplierData.name} - Intelligence Dashboard
         </Typography>
         
-        {/* Current Developments */}
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
-            <TimelineIcon sx={{ mr: 1 }} />
-            Current Developments
-          </Typography>
+        <Grid container spacing={3}>
+          {/* Current Developments */}
+          <Grid item xs={12} lg={8}>
+            <Paper sx={{ p: 3, mb: 3, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <TimelineIcon sx={{ mr: 1 }} />
+                Current Developments
+              </Typography>
           
           <Timeline>
             {currentDevelopments.map((development, index) => (
@@ -329,56 +356,56 @@ const SupplierDetailPage = () => {
                 </TimelineContent>
               </TimelineItem>
             ))}
-          </Timeline>
-        </Paper>
+              </Timeline>
+            </Paper>
+          </Grid>
 
-        {/* Mitigation Options */}
-        <Paper sx={{ p: 3, mb: 3 }}>
+          {/* Mitigation Options */}
+          <Grid item xs={12} lg={4}>
+            <Paper sx={{ p: 3, mb: 3, height: '100%' }}>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
             <Lightbulb sx={{ mr: 1 }} />
             Recommended Actions
           </Typography>
           
-          <Grid container spacing={2}>
-            {mitigationOptions.map((option, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                      {option.title}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 2 }}>
-                      {option.description}
-                    </Typography>
-                    <Box sx={{ mb: 2 }}>
+              <List>
+                {mitigationOptions.map((option, index) => (
+                  <ListItem key={index} sx={{ px: 0, py: 1, flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
+                        {option.title}
+                      </Typography>
                       <Chip 
-                        label={`Priority: ${option.priority}`} 
+                        label={option.priority} 
                         size="small" 
                         color={option.priority === 'High' ? 'error' : option.priority === 'Medium' ? 'warning' : 'success'}
-                        sx={{ mr: 1, mb: 1 }}
                       />
+                    </Box>
+                    <Typography variant="body2" sx={{ mb: 1, width: '100%' }}>
+                      {option.description}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, mb: 1, width: '100%' }}>
                       <Chip 
                         label={`Time: ${option.timeframe}`} 
                         size="small" 
                         color="primary"
-                        sx={{ mr: 1, mb: 1 }}
                       />
                       <Chip 
                         label={`Cost: ${option.cost}`} 
                         size="small" 
                         color="info"
-                        sx={{ mb: 1 }}
                       />
                     </Box>
                     <Button variant="contained" size="small" fullWidth>
                       Take Action
                     </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+                    {index < mitigationOptions.length - 1 && <Divider sx={{ mt: 2, width: '100%' }} />}
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
           </Grid>
-        </Paper>
+        </Grid>
       </Box>
     </Box>
   );

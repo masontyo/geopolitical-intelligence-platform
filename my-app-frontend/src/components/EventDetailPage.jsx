@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -38,12 +38,14 @@ import {
   Assessment,
   Lightbulb,
   Public,
-  Business
+  Business,
+  Menu
 } from '@mui/icons-material';
 
 const EventDetailPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   // Mock data - in real app, this would come from API
   const eventData = {
@@ -175,26 +177,48 @@ const EventDetailPage = () => {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
-      {/* Sidebar */}
-      <Paper elevation={3} sx={{ width: 300, p: 3, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', overflowY: 'auto' }}>
+      {/* Collapsible Sidebar */}
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          width: sidebarExpanded ? 400 : 60, 
+          transition: 'width 0.3s ease',
+          p: sidebarExpanded ? 3 : 1, 
+          bgcolor: 'background.paper', 
+          borderRight: 1, 
+          borderColor: 'divider', 
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: sidebarExpanded ? 3 : 1 }}>
+          <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: sidebarExpanded ? 2 : 0 }}>
             <ArrowBack />
           </IconButton>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Event Details
-          </Typography>
+          {sidebarExpanded && (
+            <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
+              Event Details
+            </Typography>
+          )}
+          <IconButton 
+            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            sx={{ ml: 'auto' }}
+          >
+            <Menu />
+          </IconButton>
         </Box>
 
         {/* Event Info */}
-        <Paper sx={{ p: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <NewReleases sx={{ mr: 1, color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {eventData.title}
-            </Typography>
-          </Box>
+        {sidebarExpanded && (
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <NewReleases sx={{ mr: 1, color: 'primary.main' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {eventData.title}
+              </Typography>
+            </Box>
           
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -268,7 +292,8 @@ const EventDetailPage = () => {
           <Typography variant="body2" sx={{ mb: 2 }}>
             <strong>Confidence:</strong> {eventData.confidence}
           </Typography>
-        </Paper>
+          </Paper>
+        )}
       </Paper>
 
       {/* Main Content */}
@@ -279,7 +304,7 @@ const EventDetailPage = () => {
         
         <Grid container spacing={3}>
           {/* Event Timeline */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} lg={8}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
                 <TimelineIcon sx={{ mr: 1 }} />
@@ -324,7 +349,7 @@ const EventDetailPage = () => {
           </Grid>
 
           {/* Affected Entities */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} lg={4}>
             <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
                 <Business sx={{ mr: 1 }} />
