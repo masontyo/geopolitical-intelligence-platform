@@ -24,7 +24,7 @@ import {
   TimelineConnector,
   TimelineContent,
   TimelineDot
-} from '@mui/lab';
+} from './common/CustomTimeline';
 import {
   ArrowBack,
   Warning,
