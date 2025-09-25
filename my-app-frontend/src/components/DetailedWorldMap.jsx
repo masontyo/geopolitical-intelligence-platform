@@ -301,14 +301,11 @@ const DetailedWorldMap = ({
 
   const loadSuppliers = async () => {
     try {
-      console.log('Loading suppliers from API...');
       const response = await supplyChainAPI.getSuppliers('demo-user');
       
-      if (response.success && response.suppliers) {
-        console.log('Loaded suppliers:', response.suppliers);
+      if (response.success && response.suppliers && response.suppliers.length > 0) {
         setSuppliers(response.suppliers);
       } else {
-        console.log('No suppliers found, using fallback data');
         // Fallback to mock data if no real data
         const fallbackSuppliers = [
           {
@@ -330,7 +327,6 @@ const DetailedWorldMap = ({
             status: 'active'
           }
         ];
-        console.log('Setting fallback suppliers:', fallbackSuppliers);
         setSuppliers(fallbackSuppliers);
       }
     } catch (error) {
@@ -347,7 +343,6 @@ const DetailedWorldMap = ({
           status: 'active'
         }
       ];
-      console.log('Setting error fallback suppliers:', fallbackSuppliers);
       setSuppliers(fallbackSuppliers);
     }
   };
@@ -365,14 +360,11 @@ const DetailedWorldMap = ({
 
   const loadPorts = async () => {
     try {
-      console.log('Loading ports from API...');
       const response = await supplyChainAPI.getPorts('demo-user');
       
-      if (response.success && response.ports) {
-        console.log('Loaded ports:', response.ports);
+      if (response.success && response.ports && response.ports.length > 0) {
         setPorts(response.ports);
       } else {
-        console.log('No ports found, using fallback data');
         // Fallback to mock data if no real data
         const fallbackPorts = [
           {
@@ -394,7 +386,6 @@ const DetailedWorldMap = ({
             type: 'container'
           }
         ];
-        console.log('Setting fallback ports:', fallbackPorts);
         setPorts(fallbackPorts);
       }
     } catch (error) {
@@ -471,18 +462,15 @@ const DetailedWorldMap = ({
       setLoading(true);
       const apiEvents = await eventsAPI.getAllEvents();
       if (apiEvents && apiEvents.length > 0) {
-        console.log('Loaded events from API:', apiEvents);
         setEvents(apiEvents);
       } else {
         // Fallback to sample data
         const sampleEvents = getSampleEvents();
-        console.log('Using sample events:', sampleEvents);
         setEvents(sampleEvents);
       }
     } catch (error) {
       console.warn('API not available, using sample data:', error.message);
       const sampleEvents = getSampleEvents();
-      console.log('Using error fallback sample events:', sampleEvents);
       setEvents(sampleEvents);
     } finally {
       setLoading(false);
@@ -1027,13 +1015,7 @@ const DetailedWorldMap = ({
           {/* Clustered Markers */}
           {(() => {
             const allMarkers = getAllMarkers();
-            console.log('All markers:', allMarkers);
-            console.log('Suppliers:', suppliers);
-            console.log('Ports:', ports);
-            console.log('Events:', events);
-            console.log('Active filters:', activeFilters);
             const clusters = clusterMarkers(allMarkers);
-            console.log('Clusters:', clusters);
             
             return clusters.map((cluster, index) => (
               <ClusteredMarker
