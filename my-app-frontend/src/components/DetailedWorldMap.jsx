@@ -56,7 +56,41 @@ const SupplierMarker = ({ supplier, alertCount, markerColor, onSupplierClick }) 
     iconAnchor: [alertCount > 0 ? 10 : 8, alertCount > 0 ? 10 : 8]
   });
 
-  return <Marker position={supplier.coords} icon={divIcon} eventHandlers={{ click: () => onSupplierClick(supplier) }} />;
+  return (
+    <Marker position={supplier.coords} icon={divIcon}>
+      <Popup>
+        <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+            🏭 {supplier.name}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            <strong>Country:</strong> {supplier.country}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            <strong>Tier:</strong> {supplier.tier}
+          </Typography>
+          {alertCount > 0 && (
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <strong>Active Alerts:</strong> {alertCount}
+            </Typography>
+          )}
+          {alertCount === 0 && (
+            <Typography variant="body2" color="success.main" sx={{ mb: 2 }}>
+              ✓ No active alerts
+            </Typography>
+          )}
+          <Button 
+            variant="contained" 
+            size="small" 
+            fullWidth
+            onClick={() => window.location.href = `/supplier/${supplier.id}`}
+          >
+            View Details
+          </Button>
+        </Box>
+      </Popup>
+    </Marker>
+  );
 };
 
 const PortMarker = ({ port, alertCount, onPortClick }) => {
@@ -83,7 +117,7 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
   });
 
   return (
-    <Marker position={port.coords} icon={divIcon} eventHandlers={{ click: () => onPortClick(port) }}>
+    <Marker position={port.coords} icon={divIcon}>
       <Popup>
         <Box sx={{ minWidth: 250, maxWidth: 350 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
@@ -111,10 +145,18 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
             </Typography>
           )}
           {port.alertCount === 0 && (
-            <Typography variant="body2" color="success.main">
+            <Typography variant="body2" color="success.main" sx={{ mb: 2 }}>
               ✓ No active alerts
             </Typography>
           )}
+          <Button 
+            variant="contained" 
+            size="small" 
+            fullWidth
+            onClick={() => window.location.href = `/port/${port.id}`}
+          >
+            View Details
+          </Button>
         </Box>
       </Popup>
     </Marker>
@@ -699,9 +741,7 @@ const DetailedWorldMap = ({
             supplier={supplier}
             alertCount={alertCount}
             markerColor={markerColor}
-            onSupplierClick={(supplier) => {
-              window.open(`/supplier/${supplier.id}`, '_blank');
-            }}
+            onSupplierClick={() => {}} // No auto-redirect
           />
         );
       } else if (marker.type === 'port') {
@@ -710,9 +750,7 @@ const DetailedWorldMap = ({
           <PortMarker
             port={port}
             alertCount={port.alertCount}
-            onPortClick={(port) => {
-              window.open(`/port/${port.id}`, '_blank');
-            }}
+            onPortClick={() => {}} // No auto-redirect
           />
         );
       } else if (marker.type === 'event') {
@@ -726,9 +764,6 @@ const DetailedWorldMap = ({
             weight={2}
             opacity={1}
             fillOpacity={0.9}
-            eventHandlers={{ click: () => {
-              window.open(`/event/${event.id || event.title}`, '_blank');
-            }}}
           >
             <Popup>
               <Box sx={{ minWidth: 250, maxWidth: 350 }}>
@@ -765,7 +800,7 @@ const DetailedWorldMap = ({
                   variant="contained" 
                   size="small" 
                   fullWidth
-                  onClick={() => window.open(`/event/${event.id || event.title}`, '_blank')}
+                  onClick={() => window.location.href = `/event/${event.id || event.title}`}
                 >
                   View Details
                 </Button>
@@ -824,7 +859,7 @@ const DetailedWorldMap = ({
                         variant="outlined" 
                         size="small" 
                         fullWidth
-                        onClick={() => window.open(`/supplier/${marker.data.id}`, '_blank')}
+                        onClick={() => window.location.href = `/supplier/${marker.data.id}`}
                       >
                         View Details
                       </Button>
@@ -842,7 +877,7 @@ const DetailedWorldMap = ({
                         variant="outlined" 
                         size="small" 
                         fullWidth
-                        onClick={() => window.open(`/port/${marker.data.id}`, '_blank')}
+                        onClick={() => window.location.href = `/port/${marker.data.id}`}
                       >
                         View Details
                       </Button>
@@ -860,7 +895,7 @@ const DetailedWorldMap = ({
                         variant="outlined" 
                         size="small" 
                         fullWidth
-                        onClick={() => window.open(`/event/${marker.data.id || marker.data.title}`, '_blank')}
+                        onClick={() => window.location.href = `/event/${marker.data.id || marker.data.title}`}
                       >
                         View Details
                       </Button>
