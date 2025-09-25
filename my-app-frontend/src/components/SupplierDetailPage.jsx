@@ -37,9 +37,7 @@ import {
   Email,
   Timeline as TimelineIcon,
   Assessment,
-  Lightbulb,
-  TrendingUp,
-  TrendingDown
+  Lightbulb
 } from '@mui/icons-material';
 import { supplyChainAPI } from '../services/supplyChainService';
 
@@ -60,7 +58,6 @@ const SupplierDetailPage = () => {
           if (supplier) {
             setSupplierData(supplier);
           } else {
-            // Fallback to mock data if supplier not found
             setSupplierData(getMockSupplierData());
           }
         } else {
@@ -93,7 +90,7 @@ const SupplierDetailPage = () => {
       { name: 'Main Facility', address: 'Shanghai Industrial Zone', status: 'operational' },
       { name: 'Warehouse', address: 'Pudong District', status: 'operational' }
     ]
-  };
+  });
 
   const currentDevelopments = [
     {
@@ -142,35 +139,25 @@ const SupplierDetailPage = () => {
     },
     {
       title: 'Diversify Supply Base',
-      description: 'Add 2 additional suppliers in Southeast Asia',
-      priority: 'High',
+      description: 'Add 2 new suppliers in different regions',
+      priority: 'Low',
       timeframe: '1 month',
       cost: 'High'
     }
   ];
 
-  const riskAssessment = {
-    overall: 'Medium',
-    factors: [
-      { factor: 'Geographic Concentration', risk: 'High', description: 'Single location in Shanghai' },
-      { factor: 'Port Dependency', risk: 'High', description: 'Relies heavily on Shanghai Port' },
-      { factor: 'Financial Stability', risk: 'Low', description: 'Strong financial position' },
-      { factor: 'Quality Performance', risk: 'Low', description: 'Excellent quality record' }
-    ]
-  };
-
   const getSeverityColor = (severity) => {
-    switch (severity) {
+    switch (severity?.toLowerCase()) {
       case 'critical': return 'error';
       case 'high': return 'warning';
       case 'medium': return 'info';
       case 'low': return 'success';
-      default: return 'default';
+      default: return 'info';
     }
   };
 
   const getSeverityIcon = (severity) => {
-    switch (severity) {
+    switch (severity?.toLowerCase()) {
       case 'critical': return <Error />;
       case 'high': return <Warning />;
       case 'medium': return <Info />;
@@ -207,252 +194,192 @@ const SupplierDetailPage = () => {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {supplierData.name}
           </Typography>
-      </Box>
+        </Box>
 
-      <Grid container spacing={3}>
-        {/* Sidebar */}
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Business sx={{ mr: 1, color: 'primary.main' }} />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {supplierData.name}
+        {/* Supplier Info */}
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Business sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {supplierData.name}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <LocationOn sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+              <Typography variant="body2">
+                {supplierData.city}, {supplierData.country}
               </Typography>
             </Box>
             
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <LocationOn sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-                <Typography variant="body2">
-                  {supplierData.city}, {supplierData.country}
-                </Typography>
-              </Box>
-              
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Assessment sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+              <Typography variant="body2">
+                {supplierData.tier}
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Typography variant="body2" sx={{ mr: 1 }}>
+                Status:
+              </Typography>
               <Chip 
-                label={supplierData.tier} 
+                label={supplierData.status} 
+                size="small" 
+                color={supplierData.status === 'active' ? 'success' : 'warning'} 
+              />
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            Contact Information
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <Phone sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="body2">
+              {supplierData.contact?.phone || 'Not available'}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Email sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="body2">
+              {supplierData.contact?.email || 'Not available'}
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            Locations
+          </Typography>
+          {supplierData.locations?.map((location, index) => (
+            <Box key={index} sx={{ mb: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {location.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {location.address}
+              </Typography>
+              <Chip 
+                label={location.status} 
                 size="small" 
                 color="primary" 
-                sx={{ mb: 1 }}
-              />
-              
-              <Chip 
-                label={`${supplierData.alertCount} Active Alerts`} 
-                size="small" 
-                color={supplierData.alertCount > 0 ? 'error' : 'success'}
                 sx={{ ml: 1 }}
               />
             </Box>
+          )) || <Typography variant="body2" color="text.secondary">No locations available</Typography>}
+        </Paper>
+      </Paper>
 
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-              Contact Information
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Phone sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2">{supplierData.contact.phone}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Email sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2">{supplierData.contact.email}</Typography>
-            </Box>
-
-            <Button variant="outlined" fullWidth sx={{ mb: 2 }}>
-              View Documents
-            </Button>
-            <Button variant="outlined" fullWidth>
-              Contact Supplier
-            </Button>
-          </Paper>
-
-          {/* Risk Assessment Summary */}
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center' }}>
-              <Assessment sx={{ mr: 1 }} />
-              Risk Assessment
-            </Typography>
-            
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Overall Risk Level
-              </Typography>
-              <Chip 
-                label={riskAssessment.overall} 
-                color={riskAssessment.overall === 'High' ? 'error' : riskAssessment.overall === 'Medium' ? 'warning' : 'success'}
-                sx={{ fontWeight: 600 }}
-              />
-            </Box>
-
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Key Risk Factors
-            </Typography>
-            {riskAssessment.factors.map((factor, index) => (
-              <Box key={index} sx={{ mb: 1 }}>
-                <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                  {factor.factor}
-                </Typography>
-                <Chip 
-                  label={factor.risk} 
-                  size="small"
-                  color={factor.risk === 'High' ? 'error' : factor.risk === 'Medium' ? 'warning' : 'success'}
-                  sx={{ ml: 1 }}
-                />
-              </Box>
-            ))}
-          </Paper>
-        </Grid>
-
-        {/* Main Content */}
-        <Grid item xs={12} md={9}>
-          {/* Current Developments */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
-              <TimelineIcon sx={{ mr: 1 }} />
-              Current Developments
-            </Typography>
-            
-            <Timeline>
-              {currentDevelopments.map((development, index) => (
-                <TimelineItem key={development.id}>
-                  <TimelineSeparator>
-                    <TimelineDot color={getSeverityColor(development.severity)}>
-                      {getSeverityIcon(development.severity)}
-                    </TimelineDot>
-                    {index < currentDevelopments.length - 1 && <TimelineConnector />}
-                  </TimelineSeparator>
-                  <TimelineContent>
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
-                          {development.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {development.date}
-                        </Typography>
-                      </Box>
-                      
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        {development.description}
+      {/* Main Content */}
+      <Box sx={{ flexGrow: 1, p: 3, overflowY: 'auto' }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
+          {supplierData.name} - Intelligence Dashboard
+        </Typography>
+        
+        {/* Current Developments */}
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+            <TimelineIcon sx={{ mr: 1 }} />
+            Current Developments
+          </Typography>
+          
+          <Timeline>
+            {currentDevelopments.map((development, index) => (
+              <TimelineItem key={development.id}>
+                <TimelineSeparator>
+                  <TimelineDot color={getSeverityColor(development.severity)}>
+                    {getSeverityIcon(development.severity)}
+                  </TimelineDot>
+                  {index < currentDevelopments.length - 1 && <TimelineConnector />}
+                </TimelineSeparator>
+                <TimelineContent>
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, flex: 1 }}>
+                        {development.title}
                       </Typography>
-                      
-                      <Alert 
-                        severity={getSeverityColor(development.severity)} 
-                        sx={{ mb: 1 }}
-                      >
-                        <Typography variant="body2">
-                          <strong>Impact:</strong> {development.impact}
-                        </Typography>
-                      </Alert>
-                      
+                      <Typography variant="caption" color="text.secondary">
+                        {development.date}
+                      </Typography>
+                    </Box>
+                    
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      {development.description}
+                    </Typography>
+                    
+                    <Alert 
+                      severity={getSeverityColor(development.severity)} 
+                      sx={{ mb: 1 }}
+                    >
+                      <Typography variant="body2">
+                        <strong>Impact:</strong> {development.impact}
+                      </Typography>
+                    </Alert>
+                    
+                    <Chip 
+                      label={development.status} 
+                      size="small"
+                      color={development.status === 'resolved' ? 'success' : 'warning'}
+                    />
+                  </Box>
+                </TimelineContent>
+              </TimelineItem>
+            ))}
+          </Timeline>
+        </Paper>
+
+        {/* Mitigation Options */}
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+            <Lightbulb sx={{ mr: 1 }} />
+            Recommended Actions
+          </Typography>
+          
+          <Grid container spacing={2}>
+            {mitigationOptions.map((option, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                      {option.title}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                      {option.description}
+                    </Typography>
+                    <Box sx={{ mb: 2 }}>
                       <Chip 
-                        label={development.status} 
-                        size="small"
-                        color={development.status === 'resolved' ? 'success' : 'warning'}
+                        label={`Priority: ${option.priority}`} 
+                        size="small" 
+                        color={option.priority === 'High' ? 'error' : option.priority === 'Medium' ? 'warning' : 'success'}
+                        sx={{ mr: 1, mb: 1 }}
+                      />
+                      <Chip 
+                        label={`Time: ${option.timeframe}`} 
+                        size="small" 
+                        color="primary"
+                        sx={{ mr: 1, mb: 1 }}
+                      />
+                      <Chip 
+                        label={`Cost: ${option.cost}`} 
+                        size="small" 
+                        color="info"
+                        sx={{ mb: 1 }}
                       />
                     </Box>
-                  </TimelineContent>
-                </TimelineItem>
-              ))}
-            </Timeline>
-          </Paper>
-
-          {/* Mitigation Options */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
-              <Lightbulb sx={{ mr: 1 }} />
-              Recommended Actions
-            </Typography>
-            
-            <Grid container spacing={2}>
-              {mitigationOptions.map((option, index) => (
-                <Grid item xs={12} md={4} key={index}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                        {option.title}
-                      </Typography>
-                      
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {option.description}
-                      </Typography>
-                      
-                      <Box sx={{ mb: 2 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="caption">Priority:</Typography>
-                          <Chip 
-                            label={option.priority} 
-                            size="small"
-                            color={option.priority === 'High' ? 'error' : option.priority === 'Medium' ? 'warning' : 'success'}
-                          />
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="caption">Timeframe:</Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                            {option.timeframe}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="caption">Cost:</Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                            {option.cost}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Button variant="contained" fullWidth size="small">
-                        Implement Action
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
-
-          {/* Alternative Suppliers */}
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-              Alternative Suppliers
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                      Vietnam Metal Co.
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Similar products, 20% lower cost, 2-day longer lead time
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Chip label="Tier 1" size="small" color="primary" />
-                      <Chip label="Available" size="small" color="success" />
-                    </Box>
+                    <Button variant="contained" size="small" fullWidth>
+                      Take Action
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
-              
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                      Thai Steel Works
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Premium quality, 15% higher cost, same lead time
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Chip label="Tier 1" size="small" color="primary" />
-                      <Chip label="Available" size="small" color="success" />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-      </Grid>
+            ))}
+          </Grid>
+        </Paper>
+      </Box>
     </Box>
   );
 };
