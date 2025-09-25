@@ -181,9 +181,9 @@ const EventDetailPage = () => {
       <Paper 
         elevation={3} 
         sx={{ 
-          width: sidebarExpanded ? 1000 : 60, 
+          width: sidebarExpanded ? 500 : 60, 
           transition: 'width 0.3s ease',
-          p: sidebarExpanded ? 4 : 1, 
+          p: sidebarExpanded ? 3 : 1, 
           bgcolor: 'background.paper', 
           borderRight: 1, 
           borderColor: 'divider', 
@@ -215,100 +215,86 @@ const EventDetailPage = () => {
         {sidebarExpanded && (
           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Header Section */}
-            <Paper sx={{ p: 4, mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                <NewReleases sx={{ mr: 3, color: 'primary.main', fontSize: 36 }} />
-                <Typography variant="h4" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <NewReleases sx={{ mr: 2, color: 'primary.main', fontSize: 28 }} />
+                <Typography variant="h5" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
                   {eventData.title}
                 </Typography>
               </Box>
           
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <LocationOn sx={{ mr: 2, fontSize: 24, color: 'text.secondary' }} />
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      {eventData.location}
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Schedule sx={{ mr: 2, fontSize: 24, color: 'text.secondary' }} />
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      {eventData.date}
-                    </Typography>
-                  </Box>
-                </Grid>
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <LocationOn sx={{ mr: 2, fontSize: 20, color: 'text.secondary' }} />
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {eventData.location}
+                  </Typography>
+                </Box>
                 
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Assessment sx={{ mr: 2, fontSize: 24, color: 'text.secondary' }} />
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      {eventData.category}
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="h6" sx={{ mr: 2, fontWeight: 500 }}>
-                      Severity:
-                    </Typography>
-                    <Chip 
-                      label={eventData.severity?.toUpperCase()} 
-                      size="large" 
-                      color={getImpactColor(eventData.severity)} 
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Divider sx={{ my: 4 }} />
-
-              <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-                    Event Description
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Schedule sx={{ mr: 2, fontSize: 20, color: 'text.secondary' }} />
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {eventData.date}
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7, fontSize: '1.1rem' }}>
-                    {eventData.description}
-                  </Typography>
-                </Grid>
+                </Box>
                 
-                <Grid item xs={12} md={6}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-                    Impact Assessment
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Assessment sx={{ mr: 2, fontSize: 20, color: 'text.secondary' }} />
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    Category: {eventData.category}
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7, fontSize: '1.1rem' }}>
-                    {eventData.impact}
-                  </Typography>
-                </Grid>
-              </Grid>
-
-              <Grid container spacing={4} sx={{ mt: 2 }}>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="h6" sx={{ mr: 2, fontWeight: 600 }}>
-                      Status:
-                    </Typography>
-                    <Chip 
-                      label={eventData.status} 
-                      size="large" 
-                      color={eventData.status === 'ongoing' ? 'warning' : 'success'} 
-                    />
-                  </Box>
-                </Grid>
+                </Box>
                 
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                    Source & Confidence
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="body1" sx={{ mr: 2, fontWeight: 500 }}>
+                    Severity:
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6, fontSize: '1.1rem' }}>
-                    <strong>Source:</strong> {eventData.source}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6, fontSize: '1.1rem' }}>
-                    <strong>Confidence:</strong> {eventData.confidence}
-                  </Typography>
-                </Grid>
-              </Grid>
+                  <Chip 
+                    label={eventData.severity?.toUpperCase()} 
+                    size="medium" 
+                    color={getImpactColor(eventData.severity)} 
+                  />
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                Event Description
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.6 }}>
+                {eventData.description}
+              </Typography>
+
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                Impact Assessment
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.6 }}>
+                {eventData.impact}
+              </Typography>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Typography variant="body1" sx={{ mr: 2, fontWeight: 500 }}>
+                  Status:
+                </Typography>
+                <Chip 
+                  label={eventData.status} 
+                  size="medium" 
+                  color={eventData.status === 'ongoing' ? 'warning' : 'success'} 
+                />
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                Source & Confidence
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>Source:</strong> {eventData.source}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                <strong>Confidence:</strong> {eventData.confidence}
+              </Typography>
             </Paper>
           </Box>
         )}
@@ -318,9 +304,7 @@ const EventDetailPage = () => {
       <Box sx={{ 
         flexGrow: 1, 
         p: 3, 
-        overflowY: 'auto',
-        width: sidebarExpanded ? 'calc(100% - 1000px)' : 'calc(100% - 60px)',
-        transition: 'width 0.3s ease'
+        overflowY: 'auto'
       }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
           Event Intelligence Dashboard
@@ -328,10 +312,10 @@ const EventDetailPage = () => {
         
         <Grid container spacing={3}>
           {/* Event Timeline */}
-          <Grid item xs={12}>
-            <Paper sx={{ p: 4, height: '100%' }}>
-              <Typography variant="h5" sx={{ fontWeight: 600, mb: 4, display: 'flex', alignItems: 'center' }}>
-                <TimelineIcon sx={{ mr: 2, fontSize: 28 }} />
+          <Grid item xs={12} lg={8}>
+            <Paper sx={{ p: 3, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <TimelineIcon sx={{ mr: 1 }} />
                 Event Timeline
               </Typography>
               
@@ -372,15 +356,57 @@ const EventDetailPage = () => {
             </Paper>
           </Grid>
 
+          {/* Affected Entities */}
+          <Grid item xs={12} lg={4}>
+            <Paper sx={{ p: 3, height: '100%' }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <Business sx={{ mr: 1 }} />
+                Affected Entities
+              </Typography>
+              
+              <List>
+                {affectedEntities.map((entity, index) => (
+                  <ListItem key={index} sx={{ px: 0, py: 1 }}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
+                            {entity.name}
+                          </Typography>
+                          <Chip 
+                            label={entity.status} 
+                            size="small" 
+                            color={entity.status === 'Affected' ? 'warning' : entity.status === 'Closed' ? 'error' : 'info'}
+                          />
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            <strong>Type:</strong> {entity.type} • <strong>Impact:</strong> {entity.impact}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {entity.description}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    {index < affectedEntities.length - 1 && <Divider />}
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+
           {/* Mitigation Options */}
           <Grid item xs={12}>
-            <Paper sx={{ p: 4 }}>
-              <Typography variant="h5" sx={{ fontWeight: 600, mb: 4, display: 'flex', alignItems: 'center' }}>
-                <Lightbulb sx={{ mr: 2, fontSize: 28 }} />
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center' }}>
+                <Lightbulb sx={{ mr: 1 }} />
                 Recommended Mitigation Actions
               </Typography>
               
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 {mitigationOptions.map((option, index) => (
                   <Grid item xs={12} sm={6} md={4} key={index}>
                     <Card sx={{ height: '100%' }}>
