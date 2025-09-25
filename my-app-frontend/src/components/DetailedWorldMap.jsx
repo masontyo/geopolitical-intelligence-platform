@@ -51,7 +51,7 @@ const SupplierMarker = ({ supplier, alertCount, markerColor, onSupplierClick }) 
       font-weight: bold;
       color: white;
       font-size: 10px;
-    ">${alertCount > 0 ? alertCount : '🏭'}</div>`,
+    ">${alertCount > 0 ? alertCount : ''}</div>`,
     iconSize: [alertCount > 0 ? 20 : 16, alertCount > 0 ? 20 : 16],
     iconAnchor: [alertCount > 0 ? 10 : 8, alertCount > 0 ? 10 : 8]
   });
@@ -61,7 +61,7 @@ const SupplierMarker = ({ supplier, alertCount, markerColor, onSupplierClick }) 
       <Popup>
         <Box sx={{ minWidth: 250, maxWidth: 350 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            🏭 {supplier.name}
+            {supplier.name}
           </Typography>
           <Typography variant="body2" sx={{ mb: 0.5 }}>
             <strong>Country:</strong> {supplier.country}
@@ -111,7 +111,7 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
       font-weight: bold;
       color: white;
       font-size: 8px;
-    ">${alertCount > 0 ? alertCount : '⚓'}</div>`,
+    ">${alertCount > 0 ? alertCount : ''}</div>`,
     iconSize: [alertCount > 0 ? 16 : 12, alertCount > 0 ? 16 : 12],
     iconAnchor: [alertCount > 0 ? 8 : 6, alertCount > 0 ? 12 : 10]
   });
@@ -121,7 +121,7 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
       <Popup>
         <Box sx={{ minWidth: 250, maxWidth: 350 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            ⚓ {port.name}
+            {port.name}
           </Typography>
           <Typography variant="body2" sx={{ mb: 0.5 }}>
             <strong>Country:</strong> {port.country}
@@ -850,7 +850,7 @@ const DetailedWorldMap = ({
                   {marker.type === 'supplier' && (
                     <Box>
                       <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        🏭 {marker.data.name}
+                        {marker.data.name}
                       </Typography>
                       <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
                         {marker.data.country} • {marker.data.tier}
@@ -868,7 +868,7 @@ const DetailedWorldMap = ({
                   {marker.type === 'port' && (
                     <Box>
                       <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        ⚓ {marker.data.name}
+                        {marker.data.name}
                       </Typography>
                       <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
                         {marker.data.country} • {marker.data.status}
