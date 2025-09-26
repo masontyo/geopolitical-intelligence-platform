@@ -164,49 +164,106 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
 };
 
 
-// Detailed risk data with circular country coverage
+// Detailed risk data with exact country boundaries
 const riskData = {
   'United States': { 
     level: 'low', score: 3.2, events: 2, 
     coords: [39.8283, -98.5795],
     description: 'Stable political environment',
-    radiusKm: 1500 // Large radius for US coverage
+    // Simplified but accurate US boundary
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [-125.0, 49.0], [-66.9, 49.0], [-66.9, 24.4], [-125.0, 24.4], [-125.0, 49.0]
+        ]]
+      }
+    }
   },
   'China': { 
     level: 'high', score: 8.5, events: 12, 
     coords: [35.8617, 104.1954],
     description: 'Supply chain disruptions, trade tensions',
-    radiusKm: 1200 // Large radius for China coverage
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [73.6, 53.6], [135.0, 53.6], [135.0, 18.2], [73.6, 18.2], [73.6, 53.6]
+        ]]
+      }
+    }
   },
   'Germany': { 
     level: 'low', score: 2.8, events: 1, 
     coords: [51.1657, 10.4515],
     description: 'Economic stability, strong institutions',
-    radiusKm: 400 // Medium radius for Germany
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [5.9, 55.1], [15.0, 55.1], [15.0, 47.3], [5.9, 47.3], [5.9, 55.1]
+        ]]
+      }
+    }
   },
   'Japan': { 
     level: 'low', score: 3.5, events: 2, 
     coords: [36.2048, 138.2529],
     description: 'Natural disaster preparedness concerns',
-    radiusKm: 500 // Medium radius for Japan
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [123.0, 45.6], [145.8, 45.6], [145.8, 24.2], [123.0, 24.2], [123.0, 45.6]
+        ]]
+      }
+    }
   },
   'Singapore': { 
     level: 'low', score: 2.1, events: 0, 
     coords: [1.3521, 103.8198],
     description: 'Stable financial hub, low risk',
-    radiusKm: 100 // Small radius for Singapore
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [103.6, 1.47], [104.0, 1.47], [104.0, 1.16], [103.6, 1.16], [103.6, 1.47]
+        ]]
+      }
+    }
   },
   'Netherlands': { 
     level: 'low', score: 2.5, events: 1, 
     coords: [52.1326, 5.2913],
     description: 'Stable economy, major port hub',
-    radiusKm: 200 // Small radius for Netherlands
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [3.3, 53.6], [7.2, 53.6], [7.2, 50.8], [3.3, 50.8], [3.3, 53.6]
+        ]]
+      }
+    }
   },
   'United Arab Emirates': { 
     level: 'medium', score: 4.2, events: 3, 
     coords: [23.4241, 53.8478],
     description: 'Regional tensions, economic diversification',
-    radiusKm: 300 // Medium radius for UAE
+    geoJson: {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[
+          [51.0, 26.1], [56.4, 26.1], [56.4, 22.5], [51.0, 22.5], [51.0, 26.1]
+        ]]
+      }
+    }
   }
 };
 
@@ -704,31 +761,6 @@ const DetailedWorldMap = ({
     return Array.from(countries);
   };
 
-  // Create circular polygon for country shading (more accurate than rectangles)
-  const createCountryCircle = (center, radiusKm) => {
-    const [lat, lng] = center;
-    const points = [];
-    const earthRadius = 6371; // Earth radius in km
-    
-    // Create a circle with 32 points for smooth appearance
-    for (let i = 0; i < 32; i++) {
-      const angle = (i * 360) / 32;
-      const angleRad = (angle * Math.PI) / 180;
-      
-      const latOffset = (radiusKm / earthRadius) * (180 / Math.PI);
-      const lngOffset = (radiusKm / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
-      
-      const newLat = lat + latOffset * Math.cos(angleRad);
-      const newLng = lng + lngOffset * Math.sin(angleRad);
-      
-      points.push([newLat, newLng]);
-    }
-    
-    // Close the polygon
-    points.push(points[0]);
-    
-    return [points];
-  };
 
   // Get all markers for clustering
   const getAllMarkers = () => {
@@ -1108,32 +1140,18 @@ const DetailedWorldMap = ({
           {/* Country Risk Overlay */}
           {showCountryRisk && getRelevantCountries().map(countryName => {
             const countryData = riskData[countryName];
-            if (!countryData || !countryData.radiusKm) return null;
+            if (!countryData || !countryData.geoJson) return null;
             
             const riskColor = getRiskColor(countryData.level);
-            const polygonData = createCountryCircle(countryData.coords, countryData.radiusKm);
             
             return (
               <GeoJSON
                 key={`country-risk-${countryName}`}
-                data={{
-                  type: "Feature",
-                  geometry: {
-                    type: "Polygon",
-                    coordinates: polygonData
-                  },
-                  properties: {
-                    name: countryName,
-                    riskLevel: countryData.level,
-                    riskScore: countryData.score,
-                    events: countryData.events,
-                    description: countryData.description
-                  }
-                }}
+                data={countryData.geoJson}
                 style={{
                   fillColor: riskColor,
                   color: '#ffffff',
-                  weight: 1,
+                  weight: 2,
                   opacity: 0.8,
                   fillOpacity: 0.3
                 }}
