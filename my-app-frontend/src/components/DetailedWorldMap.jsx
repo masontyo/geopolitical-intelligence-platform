@@ -21,7 +21,7 @@ import {
   ZoomOut,
   Language
 } from '@mui/icons-material';
-import { MapContainer, TileLayer, CircleMarker, Popup, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, Marker, Polyline, GeoJSON } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -164,107 +164,50 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
 };
 
 
-// Detailed risk data with real geographic coordinates (lat, lng)
+// Detailed risk data with simplified country boundaries for polygon shading
 const riskData = {
   'United States': { 
     level: 'low', score: 3.2, events: 2, 
-    coords: [39.8283, -98.5795], // Geographic center of US
-    description: 'Stable political environment' 
+    coords: [39.8283, -98.5795],
+    description: 'Stable political environment',
+    // Simplified US boundary (approximate)
+    bounds: [[24.3963, -125.0000], [49.3844, -66.9346]]
   },
   'China': { 
     level: 'high', score: 8.5, events: 12, 
-    coords: [35.8617, 104.1954], // Geographic center of China
-    description: 'Supply chain disruptions, trade tensions' 
-  },
-  'Russia': { 
-    level: 'high', score: 9.2, events: 18, 
-    coords: [61.5240, 105.3188], // Geographic center of Russia
-    description: 'Geopolitical tensions, sanctions impact' 
-  },
-  'Ukraine': { 
-    level: 'critical', score: 9.8, events: 25, 
-    coords: [48.3794, 31.1656], // Geographic center of Ukraine
-    description: 'Active conflict zone, infrastructure damage' 
-  },
-  'Iran': { 
-    level: 'high', score: 8.1, events: 8, 
-    coords: [32.4279, 53.6880], // Geographic center of Iran
-    description: 'Regional instability, sanctions' 
+    coords: [35.8617, 104.1954],
+    description: 'Supply chain disruptions, trade tensions',
+    bounds: [[18.1977, 73.5577], [53.5609, 135.0000]]
   },
   'Germany': { 
     level: 'low', score: 2.8, events: 1, 
-    coords: [51.1657, 10.4515], // Geographic center of Germany
-    description: 'Economic stability, strong institutions' 
+    coords: [51.1657, 10.4515],
+    description: 'Economic stability, strong institutions',
+    bounds: [[47.2701, 5.8663], [55.0815, 15.0419]]
   },
   'Japan': { 
     level: 'low', score: 3.5, events: 2, 
-    coords: [36.2048, 138.2529], // Geographic center of Japan
-    description: 'Natural disaster preparedness concerns' 
+    coords: [36.2048, 138.2529],
+    description: 'Natural disaster preparedness concerns',
+    bounds: [[24.2129, 123.0000], [45.5515, 145.8174]]
   },
-  'India': { 
-    level: 'medium', score: 5.5, events: 8, 
-    coords: [20.5937, 78.9629], // Geographic center of India
-    description: 'Border tensions, economic growth challenges' 
+  'Singapore': { 
+    level: 'low', score: 2.1, events: 0, 
+    coords: [1.3521, 103.8198],
+    description: 'Stable financial hub, low risk',
+    bounds: [[1.1648, 103.6058], [1.4706, 104.0305]]
   },
-  'Brazil': { 
-    level: 'medium', score: 6.2, events: 6, 
-    coords: [-14.2350, -51.9253], // Geographic center of Brazil
-    description: 'Political polarization, environmental concerns' 
-  },
-  'Australia': { 
+  'Netherlands': { 
     level: 'low', score: 2.5, events: 1, 
-    coords: [-25.2744, 133.7751], // Geographic center of Australia
-    description: 'Stable democracy, strong economy' 
+    coords: [52.1326, 5.2913],
+    description: 'Stable economy, major port hub',
+    bounds: [[50.7504, 3.3316], [53.5604, 7.2275]]
   },
-  'United Kingdom': { 
-    level: 'low', score: 3.8, events: 2, 
-    coords: [55.3781, -3.4360], // Geographic center of UK
-    description: 'Post-Brexit adjustments' 
-  },
-  'France': { 
-    level: 'low', score: 3.6, events: 2, 
-    coords: [46.6034, 1.8883], // Geographic center of France
-    description: 'Social tensions, economic challenges' 
-  },
-  'North Korea': { 
-    level: 'high', score: 7.9, events: 6, 
-    coords: [40.3399, 127.5101], // Geographic center of North Korea
-    description: 'Nuclear tensions, unpredictable policies' 
-  },
-  'South Africa': { 
-    level: 'medium', score: 6.9, events: 5, 
-    coords: [-30.5595, 22.9375], // Geographic center of South Africa
-    description: 'Economic challenges, social unrest' 
-  },
-  'Canada': { 
-    level: 'low', score: 2.3, events: 1, 
-    coords: [56.1304, -106.3468], // Geographic center of Canada
-    description: 'Political stability, resource security' 
-  },
-  'Mexico': { 
-    level: 'medium', score: 6.0, events: 4, 
-    coords: [23.6345, -102.5528], // Geographic center of Mexico
-    description: 'Drug cartel violence, economic challenges' 
-  },
-  'Egypt': { 
-    level: 'medium', score: 6.5, events: 7, 
-    coords: [26.0975, 30.0444], // Geographic center of Egypt
-    description: 'Political instability, economic pressures' 
-  },
-  'Turkey': { 
-    level: 'medium', score: 6.8, events: 9, 
-    coords: [38.9637, 35.2433], // Geographic center of Turkey
-    description: 'Regional conflicts, economic volatility' 
-  },
-  'Saudi Arabia': { 
-    level: 'medium', score: 5.8, events: 5, 
-    coords: [23.8859, 45.0792], // Geographic center of Saudi Arabia
-    description: 'Regional tensions, economic diversification' 
-  },
-  'Venezuela': { 
-    level: 'high', score: 8.5, events: 12, 
-    coords: [6.4238, -66.5897], // Geographic center of Venezuela
-    description: 'Economic collapse, political crisis' 
+  'United Arab Emirates': { 
+    level: 'medium', score: 4.2, events: 3, 
+    coords: [23.4241, 53.8478],
+    description: 'Regional tensions, economic diversification',
+    bounds: [[22.4969, 51.0000], [26.0554, 56.3968]]
   }
 };
 
@@ -762,6 +705,14 @@ const DetailedWorldMap = ({
     return Array.from(countries);
   };
 
+  // Create rectangular polygon for country shading
+  const createCountryPolygon = (bounds) => {
+    const [[south, west], [north, east]] = bounds;
+    return [
+      [[north, west], [north, east], [south, east], [south, west], [north, west]]
+    ];
+  };
+
   // Get all markers for clustering
   const getAllMarkers = () => {
     const allMarkers = [];
@@ -1089,15 +1040,14 @@ const DetailedWorldMap = ({
           <Typography variant="caption">Clusters</Typography>
         </Box>
         
-        {/* Country Risk - Large circle with low opacity */}
+        {/* Country Risk - Rectangle with low opacity */}
         {showCountryRisk && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box sx={{ 
               width: 20, 
-              height: 20, 
+              height: 12, 
               backgroundColor: getRiskColor('high'),
-              border: '2px solid white',
-              borderRadius: '50%',
+              border: '1px solid white',
               opacity: 0.3
             }} />
             <Typography variant="caption">Country Risk</Typography>
@@ -1141,21 +1091,35 @@ const DetailedWorldMap = ({
           {/* Country Risk Overlay */}
           {showCountryRisk && getRelevantCountries().map(countryName => {
             const countryData = riskData[countryName];
-            if (!countryData) return null;
+            if (!countryData || !countryData.bounds) return null;
             
             const riskColor = getRiskColor(countryData.level);
-            const markerSize = getMarkerSize(countryData.level);
+            const polygonData = createCountryPolygon(countryData.bounds);
             
             return (
-              <CircleMarker
+              <GeoJSON
                 key={`country-risk-${countryName}`}
-                center={countryData.coords}
-                radius={markerSize * 3} // Make country risk areas larger
-                fillColor={riskColor}
-                color="#ffffff"
-                weight={2}
-                opacity={0.3}
-                fillOpacity={0.2}
+                data={{
+                  type: "Feature",
+                  geometry: {
+                    type: "Polygon",
+                    coordinates: polygonData
+                  },
+                  properties: {
+                    name: countryName,
+                    riskLevel: countryData.level,
+                    riskScore: countryData.score,
+                    events: countryData.events,
+                    description: countryData.description
+                  }
+                }}
+                style={{
+                  fillColor: riskColor,
+                  color: '#ffffff',
+                  weight: 1,
+                  opacity: 0.8,
+                  fillOpacity: 0.3
+                }}
                 eventHandlers={{
                   click: () => {
                     setSelectedCountry({
@@ -1205,7 +1169,7 @@ const DetailedWorldMap = ({
                     </Button>
                   </Box>
                 </Popup>
-              </CircleMarker>
+              </GeoJSON>
             );
           })}
           
