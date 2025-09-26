@@ -47,6 +47,7 @@ const MapCentricDashboard = () => {
     ports: true,
     routes: true
   });
+  const [showCountryRisk, setShowCountryRisk] = useState(false);
 
   // Mock data for demonstration
   const [alerts] = useState([
@@ -243,6 +244,27 @@ const MapCentricDashboard = () => {
             </ToggleButtonGroup>
           </Box>
 
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>
+              Country Risk
+            </Typography>
+            <ToggleButtonGroup
+              value={showCountryRisk}
+              exclusive
+              onChange={() => setShowCountryRisk(!showCountryRisk)}
+              size="small"
+            >
+              <ToggleButton value={true}>
+                <Warning fontSize="small" />
+                Show Risk
+              </ToggleButton>
+              <ToggleButton value={false}>
+                <CheckCircle fontSize="small" />
+                Hide Risk
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
               Recent Alerts
@@ -319,6 +341,7 @@ const MapCentricDashboard = () => {
             onEventClick={handleEventClick}
             showRelationships={showRelationships}
             activeFilters={activeFilters}
+            showCountryRisk={showCountryRisk}
           />
         </Box>
 

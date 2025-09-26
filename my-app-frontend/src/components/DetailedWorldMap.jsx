@@ -307,7 +307,8 @@ const DetailedWorldMap = ({
   onSupplierClick,
   onEventClick,
   showRelationships = false,
-  activeFilters = { suppliers: true, events: true, ports: true, routes: false }
+  activeFilters = { suppliers: true, events: true, ports: true, routes: false },
+  showCountryRisk = false
 }) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [userLanguage] = useState(getUserLanguage());
@@ -731,6 +732,36 @@ const DetailedWorldMap = ({
     return clusters;
   };
 
+  // Get countries relevant to user's supply chain
+  const getRelevantCountries = () => {
+    const countries = new Set();
+    
+    // Add countries from suppliers
+    suppliers.forEach(supplier => {
+      if (supplier.country) countries.add(supplier.country);
+    });
+    
+    // Add countries from ports
+    ports.forEach(port => {
+      if (port.country) countries.add(port.country);
+    });
+    
+    // Add countries from routes
+    routes.forEach(route => {
+      if (route.from && route.from.country) countries.add(route.from.country);
+      if (route.to && route.to.country) countries.add(route.to.country);
+    });
+    
+    // Add countries from events
+    events.forEach(event => {
+      if (event.countries) {
+        event.countries.forEach(country => countries.add(country));
+      }
+    });
+    
+    return Array.from(countries);
+  };
+
   // Get all markers for clustering
   const getAllMarkers = () => {
     const allMarkers = [];
@@ -1058,6 +1089,21 @@ const DetailedWorldMap = ({
           <Typography variant="caption">Clusters</Typography>
         </Box>
         
+        {/* Country Risk - Large circle with low opacity */}
+        {showCountryRisk && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ 
+              width: 20, 
+              height: 20, 
+              backgroundColor: getRiskColor('high'),
+              border: '2px solid white',
+              borderRadius: '50%',
+              opacity: 0.3
+            }} />
+            <Typography variant="caption">Country Risk</Typography>
+          </Box>
+        )}
+        
         <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
           Click for details
         </Typography>
@@ -1092,8 +1138,76 @@ const DetailedWorldMap = ({
             noWrap={true}
           />
           
-          {/* Risk Markers */}
-          {/* Countries are now clickable via background - no individual markers needed */}
+          {/* Country Risk Overlay */}
+          {showCountryRisk && getRelevantCountries().map(countryName => {
+            const countryData = riskData[countryName];
+            if (!countryData) return null;
+            
+            const riskColor = getRiskColor(countryData.level);
+            const markerSize = getMarkerSize(countryData.level);
+            
+            return (
+              <CircleMarker
+                key={`country-risk-${countryName}`}
+                center={countryData.coords}
+                radius={markerSize * 3} // Make country risk areas larger
+                fillColor={riskColor}
+                color="#ffffff"
+                weight={2}
+                opacity={0.3}
+                fillOpacity={0.2}
+                eventHandlers={{
+                  click: () => {
+                    setSelectedCountry({
+                      name: countryName,
+                      ...countryData
+                    });
+                  }
+                }}
+              >
+                <Popup>
+                  <Box sx={{ minWidth: 250, maxWidth: 350 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                      {countryName} Risk Assessment
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Risk Level:</strong> 
+                      <Chip 
+                        label={countryData.level?.toUpperCase()} 
+                        size="small" 
+                        sx={{ 
+                          ml: 1, 
+                          backgroundColor: riskColor,
+                          color: 'white',
+                          fontWeight: 600
+                        }} 
+                      />
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Risk Score:</strong> {countryData.score}/10
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Active Events:</strong> {countryData.events}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                      <strong>Assessment:</strong> {countryData.description}
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      size="small" 
+                      fullWidth
+                      onClick={() => {
+                        // Future: Navigate to country risk detail page
+                        console.log('Country risk details for:', countryName);
+                      }}
+                    >
+                      View Risk Details
+                    </Button>
+                  </Box>
+                </Popup>
+              </CircleMarker>
+            );
+          })}
           
           {/* Clustered Markers */}
           {(() => {
