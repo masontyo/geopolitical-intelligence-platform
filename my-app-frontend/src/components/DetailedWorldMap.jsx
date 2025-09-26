@@ -164,50 +164,49 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
 };
 
 
-// Detailed risk data with simplified country boundaries for polygon shading
+// Detailed risk data with circular country coverage
 const riskData = {
   'United States': { 
     level: 'low', score: 3.2, events: 2, 
     coords: [39.8283, -98.5795],
     description: 'Stable political environment',
-    // Simplified US boundary (approximate)
-    bounds: [[24.3963, -125.0000], [49.3844, -66.9346]]
+    radiusKm: 1500 // Large radius for US coverage
   },
   'China': { 
     level: 'high', score: 8.5, events: 12, 
     coords: [35.8617, 104.1954],
     description: 'Supply chain disruptions, trade tensions',
-    bounds: [[18.1977, 73.5577], [53.5609, 135.0000]]
+    radiusKm: 1200 // Large radius for China coverage
   },
   'Germany': { 
     level: 'low', score: 2.8, events: 1, 
     coords: [51.1657, 10.4515],
     description: 'Economic stability, strong institutions',
-    bounds: [[47.2701, 5.8663], [55.0815, 15.0419]]
+    radiusKm: 400 // Medium radius for Germany
   },
   'Japan': { 
     level: 'low', score: 3.5, events: 2, 
     coords: [36.2048, 138.2529],
     description: 'Natural disaster preparedness concerns',
-    bounds: [[24.2129, 123.0000], [45.5515, 145.8174]]
+    radiusKm: 500 // Medium radius for Japan
   },
   'Singapore': { 
     level: 'low', score: 2.1, events: 0, 
     coords: [1.3521, 103.8198],
     description: 'Stable financial hub, low risk',
-    bounds: [[1.1648, 103.6058], [1.4706, 104.0305]]
+    radiusKm: 100 // Small radius for Singapore
   },
   'Netherlands': { 
     level: 'low', score: 2.5, events: 1, 
     coords: [52.1326, 5.2913],
     description: 'Stable economy, major port hub',
-    bounds: [[50.7504, 3.3316], [53.5604, 7.2275]]
+    radiusKm: 200 // Small radius for Netherlands
   },
   'United Arab Emirates': { 
     level: 'medium', score: 4.2, events: 3, 
     coords: [23.4241, 53.8478],
     description: 'Regional tensions, economic diversification',
-    bounds: [[22.4969, 51.0000], [26.0554, 56.3968]]
+    radiusKm: 300 // Medium radius for UAE
   }
 };
 
@@ -705,12 +704,30 @@ const DetailedWorldMap = ({
     return Array.from(countries);
   };
 
-  // Create rectangular polygon for country shading
-  const createCountryPolygon = (bounds) => {
-    const [[south, west], [north, east]] = bounds;
-    return [
-      [[north, west], [north, east], [south, east], [south, west], [north, west]]
-    ];
+  // Create circular polygon for country shading (more accurate than rectangles)
+  const createCountryCircle = (center, radiusKm) => {
+    const [lat, lng] = center;
+    const points = [];
+    const earthRadius = 6371; // Earth radius in km
+    
+    // Create a circle with 32 points for smooth appearance
+    for (let i = 0; i < 32; i++) {
+      const angle = (i * 360) / 32;
+      const angleRad = (angle * Math.PI) / 180;
+      
+      const latOffset = (radiusKm / earthRadius) * (180 / Math.PI);
+      const lngOffset = (radiusKm / earthRadius) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
+      
+      const newLat = lat + latOffset * Math.cos(angleRad);
+      const newLng = lng + lngOffset * Math.sin(angleRad);
+      
+      points.push([newLat, newLng]);
+    }
+    
+    // Close the polygon
+    points.push(points[0]);
+    
+    return [points];
   };
 
   // Get all markers for clustering
@@ -1091,10 +1108,10 @@ const DetailedWorldMap = ({
           {/* Country Risk Overlay */}
           {showCountryRisk && getRelevantCountries().map(countryName => {
             const countryData = riskData[countryName];
-            if (!countryData || !countryData.bounds) return null;
+            if (!countryData || !countryData.radiusKm) return null;
             
             const riskColor = getRiskColor(countryData.level);
-            const polygonData = createCountryPolygon(countryData.bounds);
+            const polygonData = createCountryCircle(countryData.coords, countryData.radiusKm);
             
             return (
               <GeoJSON
