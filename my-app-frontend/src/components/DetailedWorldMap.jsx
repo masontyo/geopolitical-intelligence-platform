@@ -477,6 +477,42 @@ const DetailedWorldMap = ({
             status: 'delayed',
             frequency: 'bi-weekly',
             alertCount: 2
+          },
+          {
+            id: 'route-3',
+            name: 'Singapore to Rotterdam',
+            from: { name: 'Port of Singapore', coords: [1.3521, 103.8198] },
+            to: { name: 'Port of Rotterdam', coords: [51.9225, 4.4792] },
+            status: 'active',
+            frequency: 'weekly',
+            alertCount: 0
+          },
+          {
+            id: 'route-4',
+            name: 'Dubai to Hamburg',
+            from: { name: 'Port of Dubai', coords: [25.2048, 55.2708] },
+            to: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
+            status: 'active',
+            frequency: 'bi-weekly',
+            alertCount: 1
+          },
+          {
+            id: 'route-5',
+            name: 'Los Angeles to Tokyo',
+            from: { name: 'Port of Los Angeles', coords: [33.7175, -118.2708] },
+            to: { name: 'Port of Tokyo', coords: [35.6762, 139.6503] },
+            status: 'delayed',
+            frequency: 'weekly',
+            alertCount: 3
+          },
+          {
+            id: 'route-6',
+            name: 'Antwerp to New York',
+            from: { name: 'Port of Antwerp', coords: [51.2194, 4.4025] },
+            to: { name: 'Port of New York', coords: [40.6892, -74.0445] },
+            status: 'active',
+            frequency: 'weekly',
+            alertCount: 0
           }
         ];
         setRoutes(fallbackRoutes);
@@ -493,6 +529,24 @@ const DetailedWorldMap = ({
           status: 'active',
           frequency: 'weekly',
           alertCount: 1
+        },
+        {
+          id: 'route-2',
+          name: 'Hamburg to New York',
+          from: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
+          to: { name: 'Port of New York', coords: [40.6892, -74.0445] },
+          status: 'delayed',
+          frequency: 'bi-weekly',
+          alertCount: 2
+        },
+        {
+          id: 'route-3',
+          name: 'Singapore to Rotterdam',
+          from: { name: 'Port of Singapore', coords: [1.3521, 103.8198] },
+          to: { name: 'Port of Rotterdam', coords: [51.9225, 4.4792] },
+          status: 'active',
+          frequency: 'weekly',
+          alertCount: 0
         }
       ];
       setRoutes(fallbackRoutes);
@@ -947,12 +1001,6 @@ const DetailedWorldMap = ({
         <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
           Legend:
         </Typography>
-        
-        {/* Country Risk */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getRiskColor('critical'), border: '1px solid #fff' }} />
-          <Typography variant="caption">Country Risk</Typography>
-        </Box>
         
         {/* Suppliers - Square */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

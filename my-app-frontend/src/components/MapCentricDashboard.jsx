@@ -45,7 +45,7 @@ const MapCentricDashboard = () => {
     suppliers: true,
     events: true,
     ports: true,
-    routes: false
+    routes: true
   });
 
   // Mock data for demonstration
