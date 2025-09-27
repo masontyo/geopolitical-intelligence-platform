@@ -39,12 +39,29 @@ const FitWorldBounds = () => {
   const map = useMap();
   
   useEffect(() => {
-    // Fit the map to show the entire world with minimal padding
-    const worldBounds = L.latLngBounds([-85, -180], [85, 180]);
-    map.fitBounds(worldBounds, { 
-      padding: [10, 10], // Minimal padding
-      maxZoom: 1.5 // Limit the zoom to prevent over-zooming
-    });
+    // Force the map to resize and fit bounds
+    const fitMap = () => {
+      map.invalidateSize();
+      const worldBounds = L.latLngBounds([-85, -180], [85, 180]);
+      map.fitBounds(worldBounds, { 
+        padding: [5, 5], // Very minimal padding to stretch width
+        maxZoom: 1.5 // Limit the zoom to prevent over-zooming
+      });
+    };
+    
+    // Initial fit
+    fitMap();
+    
+    // Also fit when window resizes
+    const handleResize = () => {
+      setTimeout(fitMap, 100); // Small delay to ensure container is resized
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [map]);
   
   return null;
@@ -1129,13 +1146,23 @@ const DetailedWorldMap = ({
         flexGrow: 1, 
         position: 'relative', 
         height: height,
+        width: '100%',
         borderRadius: 2,
         overflow: 'hidden',
         minHeight: '300px',
         '& .leaflet-container': {
           height: '100%',
           width: '100%',
-          borderRadius: 2
+          borderRadius: 2,
+          '& .leaflet-tile-pane': {
+            width: '100% !important'
+          },
+          '& .leaflet-map-pane': {
+            width: '100% !important'
+          },
+          '& .leaflet-tile-container': {
+            width: '100% !important'
+          }
         }
       }}>
         <MapContainer
@@ -1147,6 +1174,8 @@ const DetailedWorldMap = ({
           worldCopyJump={false}
           maxBounds={[[-85, -180], [85, 180]]}
           maxBoundsViscosity={1.0}
+          bounds={[[-85, -180], [85, 180]]}
+          boundsOptions={{ padding: [5, 5] }}
         >
           <TileLayer
             attribution={tileProvider.attribution}

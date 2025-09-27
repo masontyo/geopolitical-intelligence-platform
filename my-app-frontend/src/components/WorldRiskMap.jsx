@@ -173,11 +173,22 @@ const WorldRiskMap = () => {
       </Box>
 
       {/* Map Container */}
-      <Box sx={{ flexGrow: 1, position: 'relative', minHeight: '400px' }}>
+      <Box sx={{ 
+        flexGrow: 1, 
+        position: 'relative', 
+        minHeight: '400px',
+        width: '100%',
+        '& .leaflet-container': {
+          width: '100% !important',
+          '& .leaflet-tile-pane': {
+            width: '100% !important'
+          }
+        }
+      }}>
         <ComposableMap
           projectionConfig={{
             rotate: [-10, 0, 0],
-            scale: 147
+            scale: 160
           }}
           style={{
             width: '100%',
