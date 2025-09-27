@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -21,7 +21,7 @@ import {
   ZoomOut,
   Language
 } from '@mui/icons-material';
-import { MapContainer, TileLayer, CircleMarker, Popup, Marker, Polyline, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, Marker, Polyline, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -33,6 +33,22 @@ import {
 import { eventsAPI } from '../services/api';
 import { supplyChainAPI } from '../services/supplyChainService';
 import eventMapService from '../services/eventMapService';
+
+// Component to fit world bounds automatically
+const FitWorldBounds = () => {
+  const map = useMap();
+  
+  useEffect(() => {
+    // Fit the map to show the entire world with minimal padding
+    const worldBounds = L.latLngBounds([-85, -180], [85, 180]);
+    map.fitBounds(worldBounds, { 
+      padding: [10, 10], // Minimal padding
+      maxZoom: 1.5 // Limit the zoom to prevent over-zooming
+    });
+  }, [map]);
+  
+  return null;
+};
 
 // Custom Marker Components
 const SupplierMarker = ({ supplier, alertCount, markerColor, onSupplierClick }) => {
@@ -1123,9 +1139,9 @@ const DetailedWorldMap = ({
         }
       }}>
         <MapContainer
-          center={[20, 0]}
-          zoom={2}
-          minZoom={1}
+          center={[15, 0]}
+          zoom={1.5}
+          minZoom={1.5}
           maxZoom={8}
           style={{ height: '100%', width: '100%' }}
           worldCopyJump={false}
@@ -1137,6 +1153,9 @@ const DetailedWorldMap = ({
             url={tileProvider.url}
             noWrap={true}
           />
+          
+          {/* Auto-fit world bounds */}
+          <FitWorldBounds />
           
           {/* Country Risk Overlay */}
           {showCountryRisk && getRelevantCountries().map(countryName => {

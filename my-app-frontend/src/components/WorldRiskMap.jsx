@@ -81,8 +81,8 @@ const getRiskIcon = (level) => {
 const WorldRiskMap = () => {
   const [hoveredCountry, setHoveredCountry] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [zoom, setZoom] = useState(1);
-  const [center, setCenter] = useState([0, 20]);
+  const [zoom, setZoom] = useState(1.5);
+  const [center, setCenter] = useState([15, 0]);
 
   // Calculate risk statistics
   const riskStats = Object.values(sampleRiskData).reduce((acc, risk) => {
@@ -97,13 +97,13 @@ const WorldRiskMap = () => {
   };
 
   const handleZoomOut = () => {
-    if (zoom <= 1) return;
+    if (zoom <= 1.5) return;
     setZoom(zoom / 1.5);
   };
 
   const handleReset = () => {
-    setZoom(1);
-    setCenter([0, 20]);
+    setZoom(1.5);
+    setCenter([15, 0]);
     setSelectedCountry(null);
   };
 
@@ -129,7 +129,7 @@ const WorldRiskMap = () => {
           <IconButton size="small" onClick={handleZoomIn} disabled={zoom >= 4}>
             <ZoomIn />
           </IconButton>
-          <IconButton size="small" onClick={handleZoomOut} disabled={zoom <= 1}>
+          <IconButton size="small" onClick={handleZoomOut} disabled={zoom <= 1.5}>
             <ZoomOut />
           </IconButton>
           <IconButton size="small" onClick={handleReset}>
