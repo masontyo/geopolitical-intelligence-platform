@@ -999,7 +999,7 @@ const DetailedWorldMap = ({
     <Paper 
       elevation={2} 
       sx={{ 
-        p: 3, 
+        p: 2, 
         height: '100%', 
         display: 'flex', 
         flexDirection: 'column',
@@ -1009,7 +1009,7 @@ const DetailedWorldMap = ({
       }}
     >
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
         <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
           {getUIText('title', userLanguage)}
         </Typography>
@@ -1028,7 +1028,7 @@ const DetailedWorldMap = ({
       </Box>
 
       {/* Comprehensive Legend */}
-      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
         <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
           Legend:
         </Typography>
@@ -1115,6 +1115,7 @@ const DetailedWorldMap = ({
         height: height,
         borderRadius: 2,
         overflow: 'hidden',
+        minHeight: '300px',
         '& .leaflet-container': {
           height: '100%',
           width: '100%',

@@ -489,7 +489,8 @@ export default function EnterpriseDashboard({ profileId }) {
           height: { xs: '400px', md: '500px' },
           width: '100%',
           borderRadius: 2,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: 1
         }}>
           <DetailedWorldMap />
         </Box>
