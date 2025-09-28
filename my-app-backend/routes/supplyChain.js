@@ -129,9 +129,40 @@ router.get('/routes/:userId', async (req, res) => {
     const onboarding = await UserOnboarding.findOne({ userId });
 
     if (!onboarding || !onboarding.onboardingData?.portsAndRoutes?.shippingRoutes) {
+      // Return default routes for demonstration
+      const defaultRoutes = [
+        {
+          id: 'route-1',
+          name: 'Shanghai to Los Angeles',
+          from: { name: 'Port of Shanghai', coords: [31.2397, 121.4994] },
+          to: { name: 'Port of Los Angeles', coords: [33.7175, -118.2708] },
+          status: 'active',
+          frequency: 'weekly',
+          alertCount: 1
+        },
+        {
+          id: 'route-2', 
+          name: 'Hamburg to New York',
+          from: { name: 'Port of Hamburg', coords: [53.5511, 9.9937] },
+          to: { name: 'Port of New York', coords: [40.6892, -74.0445] },
+          status: 'delayed',
+          frequency: 'bi-weekly',
+          alertCount: 2
+        },
+        {
+          id: 'route-3',
+          name: 'Singapore to Rotterdam',
+          from: { name: 'Port of Singapore', coords: [1.3521, 103.8198] },
+          to: { name: 'Port of Rotterdam', coords: [51.9225, 4.4792] },
+          status: 'active',
+          frequency: 'weekly',
+          alertCount: 0
+        }
+      ];
+      
       return res.json({
         success: true,
-        routes: []
+        routes: defaultRoutes
       });
     }
 
