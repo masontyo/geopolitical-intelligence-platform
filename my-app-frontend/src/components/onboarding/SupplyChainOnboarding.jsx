@@ -179,6 +179,8 @@ const SupplyChainOnboarding = () => {
       const data = await response.json();
       
       if (response.ok) {
+        // Store user ID for the dashboard to use
+        localStorage.setItem('currentUserId', 'demo-user');
         navigate('/dashboard');
       } else {
         setError(data.error || 'Failed to complete onboarding');

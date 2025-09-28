@@ -340,7 +340,9 @@ const DetailedWorldMap = ({
   onEventClick,
   showRelationships = false,
   activeFilters = { suppliers: true, events: true, ports: true, routes: true },
-  showCountryRisk = false
+  showCountryRisk = false,
+  userId = 'demo-user',
+  useOnboardingData = false
 }) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [userLanguage] = useState(getUserLanguage());
@@ -376,7 +378,31 @@ const DetailedWorldMap = ({
 
   const loadSuppliers = async () => {
     try {
-      const response = await supplyChainAPI.getSuppliers('demo-user');
+      // First try to get onboarding data if enabled
+      if (useOnboardingData) {
+        const onboardingResponse = await fetch(`/api/onboarding/${userId}`);
+        if (onboardingResponse.ok) {
+          const onboardingData = await onboardingResponse.json();
+          if (onboardingData.onboarding?.onboardingData?.suppliers) {
+            const onboardingSuppliers = onboardingData.onboarding.onboardingData.suppliers.map((supplier, index) => ({
+              id: `onboarding-supplier-${index}`,
+              name: supplier.name || supplier.officialName || `Supplier ${index + 1}`,
+              country: supplier.locations?.[0]?.country || 'Unknown',
+              tier: supplier.tier || 'Tier 1',
+              status: supplier.status || 'active',
+              alertCount: Math.floor(Math.random() * 3), // Random alerts for demo
+              lastContact: new Date().toISOString().split('T')[0],
+              riskLevel: supplier.tier === 'Tier 1' ? 'medium' : 'low',
+              coordinates: supplier.locations?.[0]?.coordinates || [35.8617, 104.1954] // Default to China
+            }));
+            setSuppliers(onboardingSuppliers);
+            return;
+          }
+        }
+      }
+
+      // Fallback to API or mock data
+      const response = await supplyChainAPI.getSuppliers(userId);
       
       if (response.success && response.suppliers && response.suppliers.length > 0) {
         setSuppliers(response.suppliers);
@@ -435,7 +461,29 @@ const DetailedWorldMap = ({
 
   const loadPorts = async () => {
     try {
-      const response = await supplyChainAPI.getPorts('demo-user');
+      // First try to get onboarding data if enabled
+      if (useOnboardingData) {
+        const onboardingResponse = await fetch(`/api/onboarding/${userId}`);
+        if (onboardingResponse.ok) {
+          const onboardingData = await onboardingResponse.json();
+          if (onboardingData.onboarding?.onboardingData?.portsAndRoutes?.ports) {
+            const onboardingPorts = onboardingData.onboarding.onboardingData.portsAndRoutes.ports.map((port, index) => ({
+              id: `onboarding-port-${index}`,
+              name: port.name || `Port ${index + 1}`,
+              country: port.country || 'Unknown',
+              status: 'active',
+              alertCount: Math.floor(Math.random() * 2), // Random alerts for demo
+              coordinates: [31.2397, 121.4994], // Default coordinates
+              importance: port.importance || 'high'
+            }));
+            setPorts(onboardingPorts);
+            return;
+          }
+        }
+      }
+
+      // Fallback to API or mock data
+      const response = await supplyChainAPI.getPorts(userId);
       
       if (response.success && response.ports && response.ports.length > 0) {
         setPorts(response.ports);
@@ -483,7 +531,35 @@ const DetailedWorldMap = ({
 
   const loadRoutes = async () => {
     try {
-      const response = await supplyChainAPI.getRoutes('demo-user');
+      // First try to get onboarding data if enabled
+      if (useOnboardingData) {
+        const onboardingResponse = await fetch(`/api/onboarding/${userId}`);
+        if (onboardingResponse.ok) {
+          const onboardingData = await onboardingResponse.json();
+          if (onboardingData.onboarding?.onboardingData?.portsAndRoutes?.shippingRoutes) {
+            const onboardingRoutes = onboardingData.onboarding.onboardingData.portsAndRoutes.shippingRoutes.map((route, index) => ({
+              id: `onboarding-route-${index}`,
+              name: route.name || `Route ${index + 1}`,
+              from: { 
+                name: route.from || 'Unknown Origin', 
+                coords: [31.2397, 121.4994] // Default coordinates
+              },
+              to: { 
+                name: route.to || 'Unknown Destination', 
+                coords: [33.7175, -118.2708] // Default coordinates
+              },
+              status: 'active',
+              frequency: route.frequency || 'weekly',
+              alertCount: Math.floor(Math.random() * 2) // Random alerts for demo
+            }));
+            setRoutes(onboardingRoutes);
+            return;
+          }
+        }
+      }
+
+      // Fallback to API or mock data
+      const response = await supplyChainAPI.getRoutes(userId);
       
       if (response.success && response.routes && response.routes.length > 0) {
         setRoutes(response.routes);

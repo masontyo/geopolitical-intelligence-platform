@@ -48,6 +48,27 @@ const MapCentricDashboard = () => {
     routes: true
   });
   const [showCountryRisk, setShowCountryRisk] = useState(false);
+  const [userId, setUserId] = useState(localStorage.getItem('currentUserId') || 'demo-user');
+  const [useOnboardingData, setUseOnboardingData] = useState(false);
+
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        const response = await fetch(`/api/onboarding/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.onboarding?.onboardingStatus === 'completed') {
+            setUseOnboardingData(true);
+          }
+        }
+      } catch (error) {
+        console.log('No onboarding data found, using demo data');
+      }
+    };
+    
+    checkOnboardingStatus();
+  }, [userId]);
 
   // Mock data for demonstration
   const [alerts] = useState([
@@ -342,6 +363,8 @@ const MapCentricDashboard = () => {
             showRelationships={showRelationships}
             activeFilters={activeFilters}
             showCountryRisk={showCountryRisk}
+            userId={userId}
+            useOnboardingData={useOnboardingData}
           />
         </Box>
 
