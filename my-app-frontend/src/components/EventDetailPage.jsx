@@ -304,7 +304,9 @@ const EventDetailPage = () => {
       <Box sx={{ 
         flexGrow: 1, 
         p: 3, 
-        overflowY: 'auto'
+        overflowY: 'auto',
+        width: sidebarExpanded ? 'calc(100% - 750px)' : 'calc(100% - 60px)',
+        transition: 'width 0.3s ease'
       }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
           Event Intelligence Dashboard

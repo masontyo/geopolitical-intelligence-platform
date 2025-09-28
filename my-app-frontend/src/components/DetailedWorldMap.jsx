@@ -75,7 +75,7 @@ const SupplierMarker = ({ supplier, alertCount, markerColor, onSupplierClick }) 
       width: ${alertCount > 0 ? '20px' : '16px'};
       height: ${alertCount > 0 ? '20px' : '16px'};
       background-color: ${markerColor};
-      border: 3px solid white;
+      border: 2px solid ${markerColor};
       border-radius: 3px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       display: flex;
@@ -300,11 +300,11 @@ const riskData = {
   }
 };
 
-// Color mapping for risk levels
+// Color mapping for risk levels - Simple red/yellow/green scheme
 const getRiskColor = (level) => {
   const colors = {
     critical: '#dc2626', // Red
-    high: '#f59e0b',     // Orange  
+    high: '#dc2626',     // Red
     medium: '#eab308',   // Yellow
     low: '#10b981',      // Green
   };
@@ -698,14 +698,14 @@ const DetailedWorldMap = ({
     return eventMarkers;
   };
 
-  // Get color for event severity
+  // Get color for event severity - Simple red/yellow/green scheme
   const getEventSeverityColor = (severity) => {
     switch (severity?.toLowerCase()) {
-      case 'critical': return '#dc2626';
-      case 'high': return '#ea580c';
-      case 'medium': return '#d97706';
-      case 'low': return '#16a34a';
-      default: return '#6b7280';
+      case 'critical': return '#dc2626'; // Red
+      case 'high': return '#dc2626';     // Red
+      case 'medium': return '#eab308';   // Yellow
+      case 'low': return '#10b981';      // Green
+      default: return '#6b7280';         // Gray
     }
   };
 
@@ -1068,13 +1068,13 @@ const DetailedWorldMap = ({
         
         {/* Suppliers - Square */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 12, height: 12, backgroundColor: getEventSeverityColor('critical'), border: '2px solid #fff', borderRadius: '2px' }} />
+          <Box sx={{ width: 12, height: 12, backgroundColor: getEventSeverityColor('critical'), borderRadius: '2px' }} />
           <Typography variant="caption">Suppliers</Typography>
         </Box>
         
         {/* Events - Circle */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getEventSeverityColor('high'), border: '1px solid #fff' }} />
+          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getEventSeverityColor('high') }} />
           <Typography variant="caption">Events</Typography>
         </Box>
         
@@ -1085,8 +1085,7 @@ const DetailedWorldMap = ({
             height: 0, 
             borderLeft: '6px solid transparent',
             borderRight: '6px solid transparent',
-            borderBottom: `10px solid ${getEventSeverityColor('medium')}`,
-            border: '1px solid #fff'
+            borderBottom: `10px solid ${getEventSeverityColor('medium')}`
           }} />
           <Typography variant="caption">Ports</Typography>
         </Box>
@@ -1139,6 +1138,25 @@ const DetailedWorldMap = ({
         <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
           Click for details
         </Typography>
+        
+        {/* Color Legend */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+            Colors:
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 10, height: 10, backgroundColor: '#dc2626', borderRadius: '2px' }} />
+            <Typography variant="caption">High/Critical</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 10, height: 10, backgroundColor: '#eab308', borderRadius: '2px' }} />
+            <Typography variant="caption">Medium</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 10, height: 10, backgroundColor: '#10b981', borderRadius: '2px' }} />
+            <Typography variant="caption">Low</Typography>
+          </Box>
+        </Box>
       </Box>
 
       {/* Leaflet Map */}
