@@ -1068,13 +1068,13 @@ const DetailedWorldMap = ({
         
         {/* Suppliers - Square */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 12, height: 12, backgroundColor: getEventSeverityColor('critical'), borderRadius: '2px' }} />
+          <Box sx={{ width: 12, height: 12, backgroundColor: '#000000', borderRadius: '2px' }} />
           <Typography variant="caption">Suppliers</Typography>
         </Box>
         
         {/* Events - Circle */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getEventSeverityColor('high') }} />
+          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#000000' }} />
           <Typography variant="caption">Events</Typography>
         </Box>
         
@@ -1085,7 +1085,7 @@ const DetailedWorldMap = ({
             height: 0, 
             borderLeft: '6px solid transparent',
             borderRight: '6px solid transparent',
-            borderBottom: `10px solid ${getEventSeverityColor('medium')}`
+            borderBottom: '10px solid #000000'
           }} />
           <Typography variant="caption">Ports</Typography>
         </Box>
@@ -1095,7 +1095,7 @@ const DetailedWorldMap = ({
           <Box sx={{ 
             width: 20, 
             height: 2, 
-            backgroundColor: getEventSeverityColor('high'),
+            backgroundColor: '#000000',
             borderRadius: 1
           }} />
           <Typography variant="caption">Routes</Typography>
