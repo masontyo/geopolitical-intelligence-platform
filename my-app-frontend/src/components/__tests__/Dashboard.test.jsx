@@ -19,12 +19,7 @@ jest.mock('../../services/api', () => ({
   },
 }));
 
-// Mock the AnalyticsDashboard component
-jest.mock('../AnalyticsDashboard', () => {
-  return function MockAnalyticsDashboard() {
-    return <div data-testid="analytics-dashboard">Analytics Dashboard</div>;
-  };
-});
+// AnalyticsDashboard component has been removed
 
 describe('Dashboard', () => {
   const mockProfile = {

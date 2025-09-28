@@ -134,8 +134,7 @@ export default function OnboardingFlow() {
     showError(errorMessage);
   };
 
-  // Note: We no longer render IntegratedDashboard directly here
-  // Instead, we navigate to the dashboard route
+  // Navigate to the dashboard route after onboarding completion
   if (finalProfile) {
     console.log('Final profile data:', finalProfile);
     // The dashboard will be rendered by the router
