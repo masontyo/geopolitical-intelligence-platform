@@ -23,6 +23,7 @@ import AccountSettings from './components/settings/AccountSettings';
 import DataPrivacy from './components/settings/DataPrivacy';
 import HelpSupport from './components/settings/HelpSupport';
 import SupplyChainOnboarding from './components/onboarding/SupplyChainOnboarding';
+import LandingPage from './components/LandingPage';
 import { ToastProvider } from './components/ToastNotifications';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -145,15 +146,11 @@ function App() {
             <div className="App">
               <Routes>
                 {/* Public routes */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/onboarding" element={<SupplyChainOnboarding />} />
                 
                 {/* Protected routes - require authentication */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Navigate to="/dashboard" replace />
-                  </ProtectedRoute>
-                } />
                 
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
