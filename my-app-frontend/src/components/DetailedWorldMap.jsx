@@ -485,12 +485,13 @@ const DetailedWorldMap = ({
     try {
       console.log('Loading routes from API...');
       const response = await supplyChainAPI.getRoutes('demo-user');
+      console.log('Routes API response:', response);
       
-      if (response.success && response.routes) {
+      if (response.success && response.routes && response.routes.length > 0) {
         console.log('Loaded routes:', response.routes);
         setRoutes(response.routes);
       } else {
-        console.log('No routes found, using fallback data');
+        console.log('No routes found, using fallback data. Response:', response);
         // Fallback to mock data if no real data
         const fallbackRoutes = [
           {
@@ -1204,7 +1205,13 @@ const DetailedWorldMap = ({
           })()}
 
           {/* Shipping Routes - Lines */}
-          {activeFilters.routes && routes.length > 0 && routes.map((route, index) => {
+          {(() => {
+            console.log('Routes rendering check:', {
+              activeFiltersRoutes: activeFilters.routes,
+              routesLength: routes.length,
+              routes: routes
+            });
+            return activeFilters.routes && routes.length > 0 && routes.map((route, index) => {
             const routeColor = route.status === 'active' ? '#16a34a' : route.status === 'delayed' ? '#dc2626' : '#6b7280';
             const routeWeight = route.alertCount > 0 ? 2 : 1;
             
@@ -1223,7 +1230,8 @@ const DetailedWorldMap = ({
                 }}
               />
             );
-          })}
+          });
+          })()}
         </MapContainer>
       </Box>
       
