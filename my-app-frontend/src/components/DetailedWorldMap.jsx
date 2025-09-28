@@ -33,6 +33,7 @@ import {
 import { eventsAPI } from '../services/api';
 import { supplyChainAPI } from '../services/supplyChainService';
 import eventMapService from '../services/eventMapService';
+import { geocodeAddresses, geocodePort, geocodeAddress } from '../services/geocodingService';
 
 // Component to fit world bounds automatically
 const FitWorldBounds = () => {
@@ -384,18 +385,41 @@ const DetailedWorldMap = ({
         if (onboardingResponse.ok) {
           const onboardingData = await onboardingResponse.json();
           if (onboardingData.onboarding?.onboardingData?.suppliers) {
-            const onboardingSuppliers = onboardingData.onboarding.onboardingData.suppliers.map((supplier, index) => ({
-              id: `onboarding-supplier-${index}`,
-              name: supplier.name || supplier.officialName || `Supplier ${index + 1}`,
-              country: supplier.locations?.[0]?.country || 'Unknown',
-              tier: supplier.tier || 'Tier 1',
-              status: supplier.status || 'active',
-              alertCount: Math.floor(Math.random() * 3), // Random alerts for demo
-              lastContact: new Date().toISOString().split('T')[0],
-              riskLevel: supplier.tier === 'Tier 1' ? 'medium' : 'low',
-              coordinates: supplier.locations?.[0]?.coordinates || [35.8617, 104.1954] // Default to China
-            }));
-            setSuppliers(onboardingSuppliers);
+            // Geocode supplier locations
+            const suppliersWithCoordinates = await Promise.all(
+              onboardingData.onboarding.onboardingData.suppliers.map(async (supplier, index) => {
+                let coordinates = [35.8617, 104.1954]; // Default to China
+                let geocodedAddress = 'Unknown location';
+                
+                if (supplier.locations && supplier.locations.length > 0) {
+                  const location = supplier.locations[0];
+                  if (location.address && location.country) {
+                    try {
+                      const geocoded = await geocodeAddress(location.address, location.country);
+                      coordinates = [geocoded.lat, geocoded.lng];
+                      geocodedAddress = geocoded.address;
+                    } catch (error) {
+                      console.warn(`Failed to geocode supplier location: ${location.address}, ${location.country}`);
+                    }
+                  }
+                }
+                
+                return {
+                  id: `onboarding-supplier-${index}`,
+                  name: supplier.name || supplier.officialName || `Supplier ${index + 1}`,
+                  country: supplier.locations?.[0]?.country || 'Unknown',
+                  tier: supplier.tier || 'Tier 1',
+                  status: supplier.status || 'active',
+                  alertCount: Math.floor(Math.random() * 3), // Random alerts for demo
+                  lastContact: new Date().toISOString().split('T')[0],
+                  riskLevel: supplier.tier === 'Tier 1' ? 'medium' : 'low',
+                  coordinates: coordinates,
+                  geocodedAddress: geocodedAddress
+                };
+              })
+            );
+            
+            setSuppliers(suppliersWithCoordinates);
             return;
           }
         }
@@ -467,16 +491,36 @@ const DetailedWorldMap = ({
         if (onboardingResponse.ok) {
           const onboardingData = await onboardingResponse.json();
           if (onboardingData.onboarding?.onboardingData?.portsAndRoutes?.ports) {
-            const onboardingPorts = onboardingData.onboarding.onboardingData.portsAndRoutes.ports.map((port, index) => ({
-              id: `onboarding-port-${index}`,
-              name: port.name || `Port ${index + 1}`,
-              country: port.country || 'Unknown',
-              status: 'active',
-              alertCount: Math.floor(Math.random() * 2), // Random alerts for demo
-              coordinates: [31.2397, 121.4994], // Default coordinates
-              importance: port.importance || 'high'
-            }));
-            setPorts(onboardingPorts);
+            // Geocode port locations
+            const portsWithCoordinates = await Promise.all(
+              onboardingData.onboarding.onboardingData.portsAndRoutes.ports.map(async (port, index) => {
+                let coordinates = [31.2397, 121.4994]; // Default coordinates
+                let geocodedAddress = 'Unknown location';
+                
+                if (port.location && port.country) {
+                  try {
+                    const geocoded = await geocodePort(port.location, port.country);
+                    coordinates = [geocoded.lat, geocoded.lng];
+                    geocodedAddress = geocoded.address;
+                  } catch (error) {
+                    console.warn(`Failed to geocode port location: ${port.location}, ${port.country}`);
+                  }
+                }
+                
+                return {
+                  id: `onboarding-port-${index}`,
+                  name: port.name || `Port ${index + 1}`,
+                  country: port.country || 'Unknown',
+                  status: 'active',
+                  alertCount: Math.floor(Math.random() * 2), // Random alerts for demo
+                  coordinates: coordinates,
+                  importance: port.importance || 'high',
+                  geocodedAddress: geocodedAddress
+                };
+              })
+            );
+            
+            setPorts(portsWithCoordinates);
             return;
           }
         }
@@ -537,22 +581,57 @@ const DetailedWorldMap = ({
         if (onboardingResponse.ok) {
           const onboardingData = await onboardingResponse.json();
           if (onboardingData.onboarding?.onboardingData?.portsAndRoutes?.shippingRoutes) {
-            const onboardingRoutes = onboardingData.onboarding.onboardingData.portsAndRoutes.shippingRoutes.map((route, index) => ({
-              id: `onboarding-route-${index}`,
-              name: route.name || `Route ${index + 1}`,
-              from: { 
-                name: route.from || 'Unknown Origin', 
-                coords: [31.2397, 121.4994] // Default coordinates
-              },
-              to: { 
-                name: route.to || 'Unknown Destination', 
-                coords: [33.7175, -118.2708] // Default coordinates
-              },
-              status: 'active',
-              frequency: route.frequency || 'weekly',
-              alertCount: Math.floor(Math.random() * 2) // Random alerts for demo
-            }));
-            setRoutes(onboardingRoutes);
+            // Geocode route endpoints
+            const routesWithCoordinates = await Promise.all(
+              onboardingData.onboarding.onboardingData.portsAndRoutes.shippingRoutes.map(async (route, index) => {
+                let fromCoords = [31.2397, 121.4994]; // Default coordinates
+                let toCoords = [33.7175, -118.2708]; // Default coordinates
+                let fromAddress = 'Unknown Origin';
+                let toAddress = 'Unknown Destination';
+                
+                // Geocode origin
+                if (route.from) {
+                  try {
+                    const geocodedFrom = await geocodePort(route.from);
+                    fromCoords = [geocodedFrom.lat, geocodedFrom.lng];
+                    fromAddress = geocodedFrom.address;
+                  } catch (error) {
+                    console.warn(`Failed to geocode route origin: ${route.from}`);
+                  }
+                }
+                
+                // Geocode destination
+                if (route.to) {
+                  try {
+                    const geocodedTo = await geocodePort(route.to);
+                    toCoords = [geocodedTo.lat, geocodedTo.lng];
+                    toAddress = geocodedTo.address;
+                  } catch (error) {
+                    console.warn(`Failed to geocode route destination: ${route.to}`);
+                  }
+                }
+                
+                return {
+                  id: `onboarding-route-${index}`,
+                  name: route.name || `Route ${index + 1}`,
+                  from: { 
+                    name: route.from || 'Unknown Origin', 
+                    coords: fromCoords,
+                    address: fromAddress
+                  },
+                  to: { 
+                    name: route.to || 'Unknown Destination', 
+                    coords: toCoords,
+                    address: toAddress
+                  },
+                  status: 'active',
+                  frequency: route.frequency || 'weekly',
+                  alertCount: Math.floor(Math.random() * 2) // Random alerts for demo
+                };
+              })
+            );
+            
+            setRoutes(routesWithCoordinates);
             return;
           }
         }
