@@ -226,6 +226,18 @@ const userOnboardingSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
+  
+  // Supply Chain Onboarding Data (for new onboarding flow)
+  onboardingType: {
+    type: String,
+    enum: ['legacy', 'supply_chain'],
+    default: 'legacy'
+  },
+  onboardingData: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null
+  },
+  
   lastUpdated: {
     type: Date,
     default: Date.now
