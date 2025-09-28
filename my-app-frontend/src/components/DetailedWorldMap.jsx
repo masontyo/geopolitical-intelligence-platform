@@ -9,7 +9,8 @@ import {
   Grid,
   IconButton,
   Tooltip,
-  Button
+  Button,
+  LinearProgress
 } from '@mui/material';
 import {
   Warning,
@@ -347,7 +348,11 @@ const DetailedWorldMap = ({
 }) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [userLanguage] = useState(getUserLanguage());
-  const [tileProvider] = useState(getRecommendedTileProvider(userLanguage));
+  const [tileProvider] = useState({
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    description: "Standard map with local country names"
+  });
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState([]);
@@ -365,13 +370,19 @@ const DetailedWorldMap = ({
   // Load events when component mounts
   useEffect(() => {
     const loadAllData = async () => {
-      await Promise.all([
-        loadEvents(),
-        loadSuppliers(),
-        loadPorts(),
-        loadRoutes()
-      ]);
-      loadAlerts(); // Keep alerts synchronous for now
+      try {
+        await Promise.all([
+          loadEvents(),
+          loadSuppliers(),
+          loadPorts(),
+          loadRoutes()
+        ]);
+        loadAlerts(); // Keep alerts synchronous for now
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading map data:', error);
+        setLoading(false);
+      }
     };
     
     loadAllData();
@@ -1180,6 +1191,19 @@ const DetailedWorldMap = ({
     );
   };
 
+  if (loading) {
+    return (
+      <Paper sx={{ p: 3, height: height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Loading Map...
+          </Typography>
+          <LinearProgress sx={{ width: 200, mx: 'auto' }} />
+        </Box>
+      </Paper>
+    );
+  }
+
   return (
     <Paper 
       elevation={2} 
@@ -1253,6 +1277,9 @@ const DetailedWorldMap = ({
             attribution={tileProvider.attribution}
             url={tileProvider.url}
             noWrap={true}
+            errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+            maxZoom={18}
+            minZoom={1}
           />
           
           {/* Auto-fit world bounds */}
