@@ -135,7 +135,7 @@ const PortMarker = ({ port, alertCount, onPortClick }) => {
       width: ${alertCount > 0 ? '16px' : '12px'};
       height: ${alertCount > 0 ? '16px' : '12px'};
       background-color: ${portColor};
-      border: 2px solid white;
+      border: 2px solid ${portColor};
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       display: flex;
@@ -878,7 +878,7 @@ const DetailedWorldMap = ({
             center={event.coords}
             radius={8}
             fillColor={getEventSeverityColor(event.severity)}
-            color="#ffffff"
+            color={getEventSeverityColor(event.severity)}
             weight={2}
             opacity={1}
             fillOpacity={0.9}
