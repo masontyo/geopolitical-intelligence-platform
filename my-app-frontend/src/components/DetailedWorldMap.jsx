@@ -339,7 +339,7 @@ const DetailedWorldMap = ({
   onSupplierClick,
   onEventClick,
   showRelationships = false,
-  activeFilters = { suppliers: true, events: true, ports: true, routes: false },
+  activeFilters = { suppliers: true, events: true, ports: true, routes: true },
   showCountryRisk = false
 }) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -1060,104 +1060,6 @@ const DetailedWorldMap = ({
         </Box>
       </Box>
 
-      {/* Comprehensive Legend */}
-      <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-          Legend:
-        </Typography>
-        
-        {/* Suppliers - Square */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 12, height: 12, backgroundColor: '#000000', borderRadius: '2px' }} />
-          <Typography variant="caption">Suppliers</Typography>
-        </Box>
-        
-        {/* Events - Circle */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#000000' }} />
-          <Typography variant="caption">Events</Typography>
-        </Box>
-        
-        {/* Ports - Triangle */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ 
-            width: 0, 
-            height: 0, 
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderBottom: '10px solid #000000'
-          }} />
-          <Typography variant="caption">Ports</Typography>
-        </Box>
-        
-        {/* Routes - Line */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ 
-            width: 20, 
-            height: 2, 
-            backgroundColor: '#000000',
-            borderRadius: 1
-          }} />
-          <Typography variant="caption">Routes</Typography>
-        </Box>
-        
-        {/* Clusters - Circle with number */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ 
-            width: 16, 
-            height: 16, 
-            backgroundColor: '#1976d2',
-            border: '2px solid white',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '10px',
-            fontWeight: 'bold',
-            color: 'white'
-          }}>
-            3
-          </Box>
-          <Typography variant="caption">Clusters</Typography>
-        </Box>
-        
-        {/* Country Risk - Rectangle with low opacity */}
-        {showCountryRisk && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ 
-              width: 20, 
-              height: 12, 
-              backgroundColor: getRiskColor('high'),
-              border: '1px solid white',
-              opacity: 0.3
-            }} />
-            <Typography variant="caption">Country Risk</Typography>
-          </Box>
-        )}
-        
-        <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
-          Click for details
-        </Typography>
-        
-        {/* Color Legend */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 1 }}>
-          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-            Colors:
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 10, height: 10, backgroundColor: '#dc2626', borderRadius: '2px' }} />
-            <Typography variant="caption">High/Critical</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 10, height: 10, backgroundColor: '#eab308', borderRadius: '2px' }} />
-            <Typography variant="caption">Medium</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 10, height: 10, backgroundColor: '#10b981', borderRadius: '2px' }} />
-            <Typography variant="caption">Low</Typography>
-          </Box>
-        </Box>
-      </Box>
 
       {/* Leaflet Map */}
       <Box sx={{ 
@@ -1304,7 +1206,7 @@ const DetailedWorldMap = ({
           {/* Shipping Routes - Lines */}
           {activeFilters.routes && routes.length > 0 && routes.map((route, index) => {
             const routeColor = route.status === 'active' ? '#16a34a' : route.status === 'delayed' ? '#dc2626' : '#6b7280';
-            const routeWeight = route.alertCount > 0 ? 4 : 2;
+            const routeWeight = route.alertCount > 0 ? 2 : 1;
             
             return (
               <Polyline
@@ -1323,6 +1225,97 @@ const DetailedWorldMap = ({
             );
           })}
         </MapContainer>
+        
+        {/* Fixed Legend Overlay */}
+        <Box sx={{
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(8px)',
+          borderRadius: 2,
+          padding: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          border: '1px solid rgba(0,0,0,0.1)',
+          maxWidth: 300,
+          zIndex: 1000
+        }}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1, display: 'block' }}>
+            Legend:
+          </Typography>
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {/* Marker Types */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 12, height: 12, backgroundColor: '#000000', borderRadius: '2px' }} />
+              <Typography variant="caption">Suppliers</Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#000000' }} />
+              <Typography variant="caption">Events</Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ 
+                width: 0, 
+                height: 0, 
+                borderLeft: '6px solid transparent',
+                borderRight: '6px solid transparent',
+                borderBottom: '10px solid #000000'
+              }} />
+              <Typography variant="caption">Ports</Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ 
+                width: 20, 
+                height: 2, 
+                backgroundColor: '#000000',
+                borderRadius: 1
+              }} />
+              <Typography variant="caption">Routes</Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ 
+                width: 16, 
+                height: 16, 
+                backgroundColor: '#1976d2',
+                border: '2px solid #1976d2',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: 'white'
+              }}>
+                3
+              </Box>
+              <Typography variant="caption">Clusters</Typography>
+            </Box>
+            
+            {/* Color Legend */}
+            <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1, display: 'block' }}>
+                Severity:
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, backgroundColor: '#dc2626', borderRadius: '2px' }} />
+                <Typography variant="caption">High/Critical</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, backgroundColor: '#eab308', borderRadius: '2px' }} />
+                <Typography variant="caption">Medium</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ width: 10, height: 10, backgroundColor: '#10b981', borderRadius: '2px' }} />
+                <Typography variant="caption">Low</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       </Box>
 
 
