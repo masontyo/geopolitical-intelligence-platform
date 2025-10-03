@@ -91,7 +91,12 @@ const LandingPage = () => {
         zIndex: 1000
       }}>
         <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            width: '100%'
+          }}>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               Geopolitical Intelligence Platform
             </Typography>
@@ -105,25 +110,38 @@ const LandingPage = () => {
         </Container>
       </Box>
 
-      {/* Hero Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
+      {/* Main Content Container */}
+      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
+        
+        {/* Hero Section */}
+        <Box sx={{ 
+          textAlign: 'center', 
+          mb: { xs: 6, sm: 7, md: 8 },
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%'
+        }}>
           <Typography variant="h2" sx={{ 
             fontWeight: 700, 
-            mb: 3,
+            mb: { xs: 2, sm: 3, md: 4 },
             background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+            lineHeight: 1.2
           }}>
             Supply Chain Risk Intelligence
           </Typography>
           
           <Typography variant="h5" sx={{ 
             color: 'text.secondary', 
-            mb: 4,
-            maxWidth: '600px',
-            mx: 'auto'
+            mb: { xs: 3, sm: 4, md: 5 },
+            maxWidth: { xs: '100%', sm: '500px', md: '600px' },
+            mx: 'auto',
+            fontSize: { xs: '1.1rem', sm: '1.3rem', md: '1.5rem' },
+            lineHeight: 1.4
           }}>
             Monitor geopolitical risks affecting your global supply chain with real-time intelligence and actionable insights.
           </Typography>
@@ -134,12 +152,13 @@ const LandingPage = () => {
             endIcon={<ArrowForward />}
             onClick={handleGetStarted}
             sx={{
-              py: 2,
-              px: 4,
-              fontSize: '1.1rem',
+              py: { xs: 1.5, sm: 2 },
+              px: { xs: 3, sm: 4 },
+              fontSize: { xs: '1rem', sm: '1.1rem' },
               fontWeight: 600,
               borderRadius: 2,
               boxShadow: 3,
+              mb: 2,
               '&:hover': {
                 boxShadow: 6,
                 transform: 'translateY(-2px)'
@@ -150,112 +169,245 @@ const LandingPage = () => {
             Start Testing
           </Button>
 
-          <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+          <Typography variant="body2" sx={{ 
+            color: 'text.secondary',
+            fontSize: { xs: '0.875rem', sm: '1rem' }
+          }}>
             Free beta access • No credit card required
           </Typography>
         </Box>
 
         {/* Features Grid */}
-        <Grid container spacing={4} sx={{ mb: 6 }}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ 
-                height: '100%', 
-                textAlign: 'center',
-                p: 3,
-                '&:hover': {
-                  boxShadow: 4,
-                  transform: 'translateY(-4px)'
-                },
-                transition: 'all 0.3s ease'
-              }}>
-                <CardContent>
-                  <Box sx={{ mb: 2 }}>
-                    {feature.icon}
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* What to Expect */}
-        <Paper sx={{ p: 4, mb: 6, bgcolor: 'grey.50' }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
-            What You'll Experience
-          </Typography>
-          
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  1. Quick Setup
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Tell us about your company and supply chain focus
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  2. Interactive Dashboard
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Explore the map-based intelligence platform
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                  3. Risk Insights
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  See how geopolitical events affect supply chains
-                </Typography>
-              </Box>
-            </Grid>
+        <Box sx={{ 
+          mb: { xs: 6, sm: 7, md: 8 },
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%'
+        }}>
+          <Grid container spacing={{ xs: 3, sm: 4 }} sx={{ maxWidth: '100%' }}>
+            {features.map((feature, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card sx={{ 
+                  height: '100%', 
+                  textAlign: 'center',
+                  p: { xs: 2, sm: 3 },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  '&:hover': {
+                    boxShadow: 4,
+                    transform: 'translateY(-4px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}>
+                  <CardContent sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    height: '100%',
+                    justifyContent: 'center'
+                  }}>
+                    <Box sx={{ mb: 2 }}>
+                      {feature.icon}
+                    </Box>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      mb: 1,
+                      fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                    }}>
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      lineHeight: 1.4
+                    }}>
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        </Paper>
+        </Box>
 
-        {/* Testing Info */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        {/* What You'll Experience Section */}
+        <Box sx={{ 
+          mb: { xs: 6, sm: 7, md: 8 },
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%'
+        }}>
+          <Paper sx={{ 
+            p: { xs: 3, sm: 4 }, 
+            bgcolor: 'grey.50',
+            width: '100%',
+            maxWidth: '100%'
+          }}>
+            <Typography variant="h5" sx={{ 
+              fontWeight: 600, 
+              mb: { xs: 3, sm: 4 }, 
+              textAlign: 'center',
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+            }}>
+              What You'll Experience
+            </Typography>
+            
+            <Grid container spacing={{ xs: 3, sm: 4 }} sx={{ justifyContent: 'center' }}>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ 
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    mb: 1,
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}>
+                    1. Quick Setup
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    lineHeight: 1.4
+                  }}>
+                    Tell us about your company and supply chain focus
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ 
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    mb: 1,
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}>
+                    2. Interactive Dashboard
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    lineHeight: 1.4
+                  }}>
+                    Explore the map-based intelligence platform
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box sx={{ 
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    mb: 1,
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                  }}>
+                    3. Risk Insights
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    lineHeight: 1.4
+                  }}>
+                    See how geopolitical events affect supply chains
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Box>
+
+        {/* Testing Info Section */}
+        <Box sx={{ 
+          textAlign: 'center', 
+          mb: { xs: 5, sm: 6, md: 7 },
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%'
+        }}>
+          <Typography variant="h6" sx={{ 
+            fontWeight: 600, 
+            mb: { xs: 2, sm: 3 },
+            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+          }}>
             Beta Testing Program
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ 
+            mb: { xs: 3, sm: 4 },
+            maxWidth: { xs: '100%', sm: '500px', md: '600px' },
+            fontSize: { xs: '1rem', sm: '1.1rem' },
+            lineHeight: 1.4
+          }}>
             Help us improve the platform by testing key features and providing feedback.
           </Typography>
           
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-            <Chip label="Interactive Maps" color="primary" variant="outlined" />
-            <Chip label="Risk Alerts" color="warning" variant="outlined" />
-            <Chip label="Supply Chain Tracking" color="info" variant="outlined" />
-            <Chip label="Real-time Data" color="success" variant="outlined" />
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: { xs: 1, sm: 2 }, 
+            flexWrap: 'wrap',
+            maxWidth: '100%'
+          }}>
+            <Chip 
+              label="Interactive Maps" 
+              color="primary" 
+              variant="outlined" 
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            />
+            <Chip 
+              label="Risk Alerts" 
+              color="warning" 
+              variant="outlined"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            />
+            <Chip 
+              label="Supply Chain Tracking" 
+              color="info" 
+              variant="outlined"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            />
+            <Chip 
+              label="Real-time Data" 
+              color="success" 
+              variant="outlined"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            />
           </Box>
         </Box>
 
-        {/* Final CTA */}
-        <Box sx={{ textAlign: 'center' }}>
+        {/* Final CTA Section */}
+        <Box sx={{ 
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%'
+        }}>
           <Button
             variant="contained"
             size="large"
             endIcon={<ArrowForward />}
             onClick={handleGetStarted}
             sx={{
-              py: 2,
-              px: 6,
-              fontSize: '1.2rem',
+              py: { xs: 1.5, sm: 2 },
+              px: { xs: 4, sm: 6 },
+              fontSize: { xs: '1.1rem', sm: '1.2rem' },
               fontWeight: 600,
               borderRadius: 2,
-              boxShadow: 3
+              boxShadow: 3,
+              '&:hover': {
+                boxShadow: 6,
+                transform: 'translateY(-2px)'
+              },
+              transition: 'all 0.3s ease'
             }}
           >
             Begin Testing
@@ -266,17 +418,30 @@ const LandingPage = () => {
       {/* Footer */}
       <Box sx={{ 
         bgcolor: 'grey.100', 
-        py: 4, 
-        mt: 8,
+        py: { xs: 3, sm: 4 }, 
+        mt: { xs: 6, sm: 7, md: 8 },
         borderTop: '1px solid',
         borderColor: 'divider'
       }}>
         <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 },
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
+            <Typography variant="body2" color="text.secondary" sx={{
+              fontSize: { xs: '0.875rem', sm: '1rem' }
+            }}>
               © 2024 Geopolitical Intelligence Platform. Beta Testing Version.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: { xs: 1, sm: 2 },
+              justifyContent: { xs: 'center', sm: 'flex-end' }
+            }}>
               <Tooltip title="Analytics Dashboard">
                 <IconButton 
                   size="small"
