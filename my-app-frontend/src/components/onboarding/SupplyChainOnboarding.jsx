@@ -52,9 +52,7 @@ const SupplyChainOnboarding = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState({
     userInfo: {
-      name: '',
       company: '',
-      email: '',
       role: ''
     },
     suppliers: [],
@@ -365,29 +363,10 @@ const SupplyChainOnboarding = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Full Name"
-                  value={onboardingData.userInfo.name}
-                  onChange={(e) => updateOnboardingData('userInfo', { name: e.target.value })}
-                  placeholder="Enter your full name"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
                   label="Company Name"
                   value={onboardingData.userInfo.company}
                   onChange={(e) => updateOnboardingData('userInfo', { company: e.target.value })}
                   placeholder="Enter your company name"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Email Address"
-                  type="email"
-                  value={onboardingData.userInfo.email}
-                  onChange={(e) => updateOnboardingData('userInfo', { email: e.target.value })}
-                  placeholder="Enter your email address"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -398,6 +377,11 @@ const SupplyChainOnboarding = () => {
                   onChange={(e) => updateOnboardingData('userInfo', { role: e.target.value })}
                   placeholder="e.g., Supply Chain Manager"
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Note: Your email address ({user?.email}) was collected during signup and will be used for notifications.
+                </Typography>
               </Grid>
             </Grid>
           </Box>
@@ -1162,7 +1146,7 @@ const SupplyChainOnboarding = () => {
   const isStepValid = (step) => {
     switch (step) {
       case 0:
-        return onboardingData.userInfo.name && onboardingData.userInfo.company && onboardingData.userInfo.email;
+        return onboardingData.userInfo.company && onboardingData.userInfo.role;
       case 1:
         return onboardingData.suppliers.length > 0 && 
                onboardingData.suppliers.every(s => s.name && s.officialName);

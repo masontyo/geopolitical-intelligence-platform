@@ -38,6 +38,7 @@ const AuthModal = ({ open, onClose, onAuthSuccess, initialMode = 'login' }) => {
       BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
+        sx: { backgroundColor: 'rgba(0, 0, 0, 0.3)' }
       }}
       sx={{
         display: 'flex',

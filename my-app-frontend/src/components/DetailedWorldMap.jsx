@@ -347,12 +347,8 @@ const DetailedWorldMap = ({
   useOnboardingData = false
 }) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [userLanguage] = useState(getUserLanguage());
-  const [tileProvider] = useState({
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    description: "Standard map with local country names"
-  });
+  const [userLanguage, setUserLanguage] = useState('en'); // Force English for consistent country names
+  const [tileProvider, setTileProvider] = useState(getRecommendedTileProvider('en'));
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState([]);
@@ -1008,6 +1004,12 @@ const DetailedWorldMap = ({
     setSelectedCountry(null);
   };
 
+  const handleLanguageToggle = () => {
+    const newLanguage = userLanguage === 'en' ? 'es' : userLanguage === 'es' ? 'fr' : 'en';
+    setUserLanguage(newLanguage);
+    setTileProvider(getRecommendedTileProvider(newLanguage));
+  };
+
   // Clustered Marker Component (defined inside component to access helper functions)
   const ClusteredMarker = ({ cluster, onSupplierClick, onEventClick, onPortClick }) => {
     if (cluster.length === 1) {
@@ -1219,12 +1221,22 @@ const DetailedWorldMap = ({
     >
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
-          {getUIText('title', userLanguage)}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+            {getUIText('title', userLanguage)}
+          </Typography>
+          <Chip 
+            label={userLanguage.toUpperCase()} 
+            size="small" 
+            color="primary" 
+            variant="outlined"
+            onClick={handleLanguageToggle}
+            sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'primary.light' } }}
+          />
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title={`Language: ${userLanguage.toUpperCase()}`}>
-            <IconButton size="small">
+          <Tooltip title={`Language: ${userLanguage.toUpperCase()} (Click to change)`}>
+            <IconButton size="small" onClick={handleLanguageToggle}>
               <Language />
             </IconButton>
           </Tooltip>
@@ -1409,7 +1421,7 @@ const DetailedWorldMap = ({
       {/* Fixed Legend Overlay */}
       <Box sx={{
         position: 'absolute',
-        top: 10,
+        bottom: 10,
         left: 10,
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
