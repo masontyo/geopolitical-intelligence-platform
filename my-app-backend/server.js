@@ -7,12 +7,12 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
-// Use simple onboarding routes for development
-const onboardingRoutes = process.env.NODE_ENV === 'production' && process.env.MONGODB_URI 
+// Use database onboarding routes when MongoDB is available, otherwise use simple in-memory routes
+const onboardingRoutes = process.env.MONGODB_URI 
   ? require('./routes/onboarding')
   : require('./routes/simpleOnboarding');
 
-console.log('📋 Using', process.env.NODE_ENV === 'production' && process.env.MONGODB_URI ? 'full' : 'simple', 'onboarding routes');
+console.log('📋 Using', process.env.MONGODB_URI ? 'full' : 'simple', 'onboarding routes');
 const userProfileRoutes = require('./routes/userProfile');
 const newsRoutes = require('./routes/news');
 const enhancedNewsRoutes = require('./routes/enhancedNews');

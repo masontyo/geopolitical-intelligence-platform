@@ -35,6 +35,7 @@ import { eventsAPI } from '../services/api';
 import { supplyChainAPI } from '../services/supplyChainService';
 import eventMapService from '../services/eventMapService';
 import { geocodeAddresses, geocodePort, geocodeAddress } from '../services/geocodingService';
+import { useAuth } from '../contexts/AuthContext';
 
 // Component to fit world bounds automatically
 const FitWorldBounds = () => {
@@ -343,9 +344,10 @@ const DetailedWorldMap = ({
   showRelationships = false,
   activeFilters = { suppliers: true, events: true, ports: true, routes: true },
   showCountryRisk = false,
-  userId = 'demo-user',
+  userId = user?.id || 'demo-user',
   useOnboardingData = false
 }) => {
+  const { user } = useAuth();
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [userLanguage, setUserLanguage] = useState('en'); // Force English for consistent country names
   const [tileProvider, setTileProvider] = useState(getRecommendedTileProvider('en'));

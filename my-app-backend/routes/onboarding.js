@@ -2,20 +2,14 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-// Use in-memory model if MongoDB is not connected or MONGODB_URI is not set
+// Use UserOnboarding model (works with both MongoDB and in-memory fallback)
 let UserOnboarding;
 try {
-  if (process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
-    UserOnboarding = require('../models/UserOnboarding');
-    console.log('📝 Using MongoDB UserOnboarding model');
-  } else {
-    UserOnboarding = require('../models/InMemoryUserOnboarding');
-    console.log('📝 Using in-memory UserOnboarding model for development');
-  }
+  UserOnboarding = require('../models/UserOnboarding');
+  console.log('📝 Using UserOnboarding model');
 } catch (error) {
-  // Fallback to in-memory model if there's any issue
-  UserOnboarding = require('../models/InMemoryUserOnboarding');
-  console.log('📝 Fallback to in-memory UserOnboarding model due to error:', error.message);
+  console.error('❌ Error loading UserOnboarding model:', error.message);
+  throw error;
 }
 
 // Use mock AI service for development to avoid dependency issues

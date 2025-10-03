@@ -96,7 +96,7 @@ const SupplyChainOnboarding = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 'demo-user',
+          userId: user?.id || 'demo-user',
           type: 'supply_chain'
         }),
       });
@@ -173,7 +173,7 @@ const SupplyChainOnboarding = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 'demo-user',
+          userId: user?.id || 'demo-user',
           onboardingData: onboardingData,
           type: 'supply_chain'
         }),
@@ -183,7 +183,7 @@ const SupplyChainOnboarding = () => {
       
       if (response.ok) {
         // Store user ID for the dashboard to use
-        localStorage.setItem('currentUserId', 'demo-user');
+        localStorage.setItem('currentUserId', user?.id || 'demo-user');
         navigate('/dashboard');
       } else {
         setError(data.error || 'Failed to complete onboarding');

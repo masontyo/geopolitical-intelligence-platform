@@ -10,7 +10,10 @@ class AIService {
   }
 
   // Get onboarding status for a user
-  async getOnboardingStatus(userId = 'demo-user') {
+  async getOnboardingStatus(userId = null) {
+    if (!userId) {
+      userId = localStorage.getItem('currentUserId') || 'demo-user';
+    }
     try {
       const response = await fetch(`${this.baseURL}/api/onboarding/status/${userId}`);
       if (!response.ok) {

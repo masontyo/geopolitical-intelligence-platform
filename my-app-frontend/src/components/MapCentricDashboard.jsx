@@ -51,17 +51,26 @@ const MapCentricDashboard = () => {
     routes: true
   });
   const [showCountryRisk, setShowCountryRisk] = useState(false);
-  const [userId, setUserId] = useState(localStorage.getItem('currentUserId') || 'demo-user');
+  const { user } = useAuth();
+  const [userId, setUserId] = useState(user?.id || localStorage.getItem('currentUserId') || 'demo-user');
   const [useOnboardingData, setUseOnboardingData] = useState(false);
+
+  // Update userId when user changes
+  useEffect(() => {
+    if (user?.id) {
+      setUserId(user.id);
+      localStorage.setItem('currentUserId', user.id);
+    }
+  }, [user]);
 
   // Check if user has completed onboarding
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
-        const response = await fetch(`/api/onboarding/${userId}`);
+        const response = await fetch(`/api/onboarding/status/${userId}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.onboarding?.onboardingStatus === 'completed') {
+          if (data.status === 'completed') {
             setUseOnboardingData(true);
           }
         }

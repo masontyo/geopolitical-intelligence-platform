@@ -7,7 +7,11 @@ const API_BASE_URL = process.env.REACT_APP_API_URL ||
 
 export const supplyChainAPI = {
   // Get complete supply chain data for a user
-  getSupplyChainData: async (userId = 'demo-user') => {
+  getSupplyChainData: async (userId = null) => {
+    if (!userId) {
+      // Try to get user ID from localStorage or use demo-user as fallback
+      userId = localStorage.getItem('currentUserId') || 'demo-user';
+    }
     try {
       const response = await api.get(`/api/supply-chain/data/${userId}`);
       return response.data;
@@ -18,7 +22,10 @@ export const supplyChainAPI = {
   },
 
   // Get suppliers for map display
-  getSuppliers: async (userId = 'demo-user') => {
+  getSuppliers: async (userId = null) => {
+    if (!userId) {
+      userId = localStorage.getItem('currentUserId') || 'demo-user';
+    }
     try {
       const response = await api.get(`/api/supply-chain/suppliers/${userId}`);
       return response.data;
@@ -29,7 +36,10 @@ export const supplyChainAPI = {
   },
 
   // Get ports for map display
-  getPorts: async (userId = 'demo-user') => {
+  getPorts: async (userId = null) => {
+    if (!userId) {
+      userId = localStorage.getItem('currentUserId') || 'demo-user';
+    }
     try {
       const response = await api.get(`/api/supply-chain/ports/${userId}`);
       return response.data;
@@ -40,7 +50,10 @@ export const supplyChainAPI = {
   },
 
   // Get shipping routes for map display
-  getRoutes: async (userId = 'demo-user') => {
+  getRoutes: async (userId = null) => {
+    if (!userId) {
+      userId = localStorage.getItem('currentUserId') || 'demo-user';
+    }
     try {
       const response = await api.get(`/api/supply-chain/routes/${userId}`);
       return response.data;
@@ -51,7 +64,10 @@ export const supplyChainAPI = {
   },
 
   // Get all supply chain entities for map display
-  getAllSupplyChainEntities: async (userId = 'demo-user') => {
+  getAllSupplyChainEntities: async (userId = null) => {
+    if (!userId) {
+      userId = localStorage.getItem('currentUserId') || 'demo-user';
+    }
     try {
       const [suppliersResponse, portsResponse, routesResponse] = await Promise.all([
         supplyChainAPI.getSuppliers(userId),
