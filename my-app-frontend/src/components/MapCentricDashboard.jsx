@@ -51,7 +51,6 @@ const MapCentricDashboard = () => {
     routes: true
   });
   const [showCountryRisk, setShowCountryRisk] = useState(false);
-  const { user } = useAuth();
   const [userId, setUserId] = useState(user?.id || localStorage.getItem('currentUserId') || 'demo-user');
   const [useOnboardingData, setUseOnboardingData] = useState(false);
 

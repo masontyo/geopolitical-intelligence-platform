@@ -344,7 +344,7 @@ const DetailedWorldMap = ({
   showRelationships = false,
   activeFilters = { suppliers: true, events: true, ports: true, routes: true },
   showCountryRisk = false,
-  userId = user?.id || 'demo-user',
+  userId = 'demo-user',
   useOnboardingData = false
 }) => {
   const { user } = useAuth();
@@ -357,6 +357,9 @@ const DetailedWorldMap = ({
   const [alerts, setAlerts] = useState([]);
   const [ports, setPorts] = useState([]);
   const [routes, setRoutes] = useState([]);
+
+  // Use authenticated user ID or fallback to prop/default
+  const effectiveUserId = user?.id || userId;
 
   // Calculate risk statistics
   const riskStats = Object.values(riskData).reduce((acc, risk) => {
@@ -390,7 +393,7 @@ const DetailedWorldMap = ({
     try {
       // First try to get onboarding data if enabled
       if (useOnboardingData) {
-        const onboardingResponse = await fetch(`/api/onboarding/${userId}`);
+        const onboardingResponse = await fetch(`/api/onboarding/${effectiveUserId}`);
         if (onboardingResponse.ok) {
           const onboardingData = await onboardingResponse.json();
           if (onboardingData.onboarding?.onboardingData?.suppliers) {
@@ -435,7 +438,7 @@ const DetailedWorldMap = ({
       }
 
       // Fallback to API or mock data
-      const response = await supplyChainAPI.getSuppliers(userId);
+      const response = await supplyChainAPI.getSuppliers(effectiveUserId);
       
       if (response.success && response.suppliers && response.suppliers.length > 0) {
         setSuppliers(response.suppliers);
@@ -496,7 +499,7 @@ const DetailedWorldMap = ({
     try {
       // First try to get onboarding data if enabled
       if (useOnboardingData) {
-        const onboardingResponse = await fetch(`/api/onboarding/${userId}`);
+        const onboardingResponse = await fetch(`/api/onboarding/${effectiveUserId}`);
         if (onboardingResponse.ok) {
           const onboardingData = await onboardingResponse.json();
           if (onboardingData.onboarding?.onboardingData?.portsAndRoutes?.ports) {
@@ -536,7 +539,7 @@ const DetailedWorldMap = ({
       }
 
       // Fallback to API or mock data
-      const response = await supplyChainAPI.getPorts(userId);
+      const response = await supplyChainAPI.getPorts(effectiveUserId);
       
       if (response.success && response.ports && response.ports.length > 0) {
         setPorts(response.ports);
@@ -586,7 +589,7 @@ const DetailedWorldMap = ({
     try {
       // First try to get onboarding data if enabled
       if (useOnboardingData) {
-        const onboardingResponse = await fetch(`/api/onboarding/${userId}`);
+        const onboardingResponse = await fetch(`/api/onboarding/${effectiveUserId}`);
         if (onboardingResponse.ok) {
           const onboardingData = await onboardingResponse.json();
           if (onboardingData.onboarding?.onboardingData?.portsAndRoutes?.shippingRoutes) {
@@ -647,7 +650,7 @@ const DetailedWorldMap = ({
       }
 
       // Fallback to API or mock data
-      const response = await supplyChainAPI.getRoutes(userId);
+      const response = await supplyChainAPI.getRoutes(effectiveUserId);
       
       if (response.success && response.routes && response.routes.length > 0) {
         setRoutes(response.routes);
