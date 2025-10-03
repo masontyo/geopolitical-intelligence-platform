@@ -26,7 +26,8 @@ import {
   Divider,
   Grid,
   InputLabel,
-  FormHelperText
+  FormHelperText,
+  CircularProgress
 } from '@mui/material';
 import {
   Business,
@@ -38,12 +39,16 @@ import {
   Add,
   Delete,
   Info,
-  CheckCircle
+  CheckCircle,
+  Logout
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import ProtectedRoute from '../auth/ProtectedRoute';
 
 const SupplyChainOnboarding = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState({
     userInfo: {
@@ -1173,7 +1178,44 @@ const SupplyChainOnboarding = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* Header with user info and logout */}
+      <Box sx={{ 
+        bgcolor: 'primary.main', 
+        color: 'white', 
+        py: 2,
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
+      }}>
+        <Box sx={{ 
+          maxWidth: 'lg', 
+          mx: 'auto', 
+          px: 3,
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Supply Chain Onboarding
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2">
+              {user?.email}
+            </Typography>
+            <Button
+              color="inherit"
+              startIcon={<Logout />}
+              onClick={logout}
+              sx={{ color: 'white' }}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, textAlign: 'center' }}>
         Supply Chain Risk Assessment
       </Typography>
@@ -1239,8 +1281,18 @@ const SupplyChainOnboarding = () => {
           </Typography>
         </Box>
       )}
+      </Box>
     </Box>
   );
 };
 
-export default SupplyChainOnboarding;
+// Wrap the component with ProtectedRoute
+const SupplyChainOnboardingWithAuth = () => {
+  return (
+    <ProtectedRoute>
+      <SupplyChainOnboarding />
+    </ProtectedRoute>
+  );
+};
+
+export default SupplyChainOnboardingWithAuth;

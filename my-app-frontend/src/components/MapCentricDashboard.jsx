@@ -28,15 +28,18 @@ import {
   CheckCircle,
   Timeline,
   Business,
+  Logout,
   LocationOn,
   Visibility,
   VisibilityOff
 } from '@mui/icons-material';
 import DetailedWorldMap from './DetailedWorldMap';
+import { useAuth } from '../contexts/AuthContext';
 
 const MapCentricDashboard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
@@ -329,6 +332,9 @@ const MapCentricDashboard = () => {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Supply Chain Risk Monitor
           </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {user?.email}
+          </Typography>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -337,6 +343,11 @@ const MapCentricDashboard = () => {
               <Warning />
             </IconButton>
           </Badge>
+          <Tooltip title="Logout">
+            <IconButton onClick={logout} color="inherit">
+              <Logout />
+            </IconButton>
+          </Tooltip>
           <Chip
             label={`${alerts.filter(alert => alert.new).length} New Alerts`}
             color="error"

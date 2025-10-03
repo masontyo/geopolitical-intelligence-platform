@@ -4,8 +4,7 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './components/Login';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
 import EnterpriseDashboard from './components/EnterpriseDashboard';
 import MapCentricDashboard from './components/MapCentricDashboard';
@@ -147,10 +146,13 @@ function App() {
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/onboarding" element={<SupplyChainOnboarding />} />
                 
                 {/* Protected routes - require authentication */}
+                <Route path="/onboarding" element={
+                  <ProtectedRoute>
+                    <SupplyChainOnboarding />
+                  </ProtectedRoute>
+                } />
                 
                 <Route path="/dashboard" element={
                   <ProtectedRoute>

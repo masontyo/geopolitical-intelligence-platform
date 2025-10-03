@@ -21,13 +21,19 @@ import {
   Assessment,
   ArrowForward,
   Info,
-  Analytics
+  Analytics,
+  Login
 } from '@mui/icons-material';
+import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './auth/AuthModal';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [startTime] = useState(Date.now());
   const [pageViews, setPageViews] = useState(0);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
 
   // Track page view
   useEffect(() => {
@@ -53,7 +59,24 @@ const LandingPage = () => {
     // Track conversion
     localStorage.setItem('landingPageConversion', 'true');
     
+    if (isAuthenticated) {
+      // User is already authenticated, go to onboarding
+      navigate('/onboarding');
+    } else {
+      // User needs to authenticate first
+      setAuthMode('register');
+      setAuthModalOpen(true);
+    }
+  };
+
+  const handleAuthSuccess = (user) => {
+    // User successfully authenticated, now go to onboarding
     navigate('/onboarding');
+  };
+
+  const handleOpenLogin = () => {
+    setAuthMode('login');
+    setAuthModalOpen(true);
   };
 
   const features = [
@@ -100,12 +123,38 @@ const LandingPage = () => {
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               Geopolitical Intelligence Platform
             </Typography>
-            <Chip 
-              label="Beta Testing" 
-              color="secondary" 
-              size="small"
-              sx={{ color: 'white' }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {isAuthenticated ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2">
+                    Welcome, {user?.email}
+                  </Typography>
+                  <Chip 
+                    label="Signed In" 
+                    color="success" 
+                    size="small"
+                    sx={{ color: 'white' }}
+                  />
+                </Box>
+              ) : (
+                <>
+                  <Button
+                    color="inherit"
+                    startIcon={<Login />}
+                    onClick={handleOpenLogin}
+                    sx={{ color: 'white' }}
+                  >
+                    Sign In
+                  </Button>
+                  <Chip 
+                    label="Beta Testing" 
+                    color="secondary" 
+                    size="small"
+                    sx={{ color: 'white' }}
+                  />
+                </>
+              )}
+            </Box>
           </Box>
         </Container>
       </Box>
@@ -465,6 +514,14 @@ const LandingPage = () => {
           </Box>
         </Container>
       </Box>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+        initialMode={authMode}
+      />
     </Box>
   );
 };
