@@ -70,7 +70,7 @@ const LandingPage = () => {
     {
       icon: <Timeline sx={{ fontSize: 40, color: 'info.main' }} />,
       title: 'Supply Chain Tracking',
-      description: 'Monitor suppliers, ports, and shipping routes'
+      description: 'Monitor suppliers, ports, and shipping routes across your network'
     },
     {
       icon: <Assessment sx={{ fontSize: 40, color: 'success.main' }} />,
@@ -173,7 +173,7 @@ const LandingPage = () => {
             color: 'text.secondary',
             fontSize: { xs: '0.875rem', sm: '1rem' }
           }}>
-            Free beta access • No credit card required
+            Beta testing program • Help shape the future
           </Typography>
         </Box>
 
@@ -189,6 +189,7 @@ const LandingPage = () => {
               <Grid item xs={12} sm={6} md={3} key={index}>
                 <Card sx={{ 
                   height: '100%', 
+                  minHeight: '220px',
                   textAlign: 'center',
                   p: { xs: 2, sm: 3 },
                   display: 'flex',
@@ -206,6 +207,7 @@ const LandingPage = () => {
                     alignItems: 'center',
                     textAlign: 'center',
                     height: '100%',
+                    minHeight: '180px',
                     justifyContent: 'center'
                   }}>
                     <Box sx={{ mb: 2 }}>
