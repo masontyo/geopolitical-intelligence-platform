@@ -561,7 +561,7 @@ class EnhancedNewsService {
       location: analysis.location || 'Global',
       category: analysis.category,
       severity: analysis.severity,
-      date: new Date(contentItem.publishedAt),
+      eventDate: new Date(contentItem.publishedAt),
       source: contentItem.source || {
         name: 'Unknown Source',
         url: contentItem.url,
@@ -787,11 +787,11 @@ class EnhancedNewsService {
     const highTerms = ['sanction', 'protest', 'conflict', 'dispute', 'threat'];
     const mediumTerms = ['policy', 'regulation', 'change', 'announcement'];
     
-    if (criticalTerms.some(term => content.includes(term))) return 'Critical';
-    if (highTerms.some(term => content.includes(term))) return 'High';
-    if (mediumTerms.some(term => content.includes(term))) return 'Medium';
+    if (criticalTerms.some(term => content.includes(term))) return 'critical';
+    if (highTerms.some(term => content.includes(term))) return 'high';
+    if (mediumTerms.some(term => content.includes(term))) return 'medium';
     
-    return 'Low';
+    return 'low';
   }
 
   /**
@@ -1012,12 +1012,18 @@ class EnhancedNewsService {
     
     for (const event of events) {
       try {
+        // Skip events without valid eventDate
+        if (!event.eventDate || !event.eventDate.getTime) {
+          console.warn(`Skipping event without valid eventDate: ${event.title}`);
+          continue;
+        }
+
         // Check if event already exists (avoid duplicates)
         const existingEvent = await GeopoliticalEvent.findOne({
           title: event.title,
-          date: {
-            $gte: new Date(event.date.getTime() - 24 * 60 * 60 * 1000), // Within 24 hours
-            $lte: new Date(event.date.getTime() + 24 * 60 * 60 * 1000)
+          eventDate: {
+            $gte: new Date(event.eventDate.getTime() - 24 * 60 * 60 * 1000), // Within 24 hours
+            $lte: new Date(event.eventDate.getTime() + 24 * 60 * 60 * 1000)
           }
         });
         
