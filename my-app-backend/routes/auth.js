@@ -7,13 +7,20 @@ const router = express.Router();
 // Register new user
 router.post('/register', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
     // Validate input
-    if (!email || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({
-        error: 'Email and password are required',
+        error: 'Name, email and password are required',
         code: 'MISSING_FIELDS'
+      });
+    }
+
+    if (name.length < 2) {
+      return res.status(400).json({
+        error: 'Name must be at least 2 characters long',
+        code: 'NAME_TOO_SHORT'
       });
     }
 
@@ -35,6 +42,7 @@ router.post('/register', async (req, res) => {
 
     // Create new user
     const user = new User({
+      name,
       email,
       passwordHash: password // Will be hashed by pre-save middleware
     });
@@ -57,6 +65,7 @@ router.post('/register', async (req, res) => {
       message: 'User registered successfully',
       user: {
         id: user._id,
+        name: user.name,
         email: user.email,
         createdAt: user.createdAt
       },
@@ -140,6 +149,7 @@ router.post('/login', async (req, res) => {
       message: 'Login successful',
       user: {
         id: user._id,
+        name: user.name,
         email: user.email,
         createdAt: user.createdAt,
         lastLogin: user.lastLogin
@@ -184,6 +194,7 @@ router.get('/me', authenticateToken, (req, res) => {
     res.json({
       user: {
         id: req.user._id,
+        name: req.user.name,
         email: req.user.email,
         createdAt: req.user.createdAt,
         updatedAt: req.user.updatedAt,
@@ -217,6 +228,7 @@ router.post('/refresh', authenticateRefreshToken, async (req, res) => {
       message: 'Token refreshed successfully',
       user: {
         id: req.user._id,
+        name: req.user.name,
         email: req.user.email,
         createdAt: req.user.createdAt,
         lastLogin: req.user.lastLogin

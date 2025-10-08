@@ -16,6 +16,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -49,6 +50,12 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
   const validateForm = () => {
     const errors = {};
 
+    if (!formData.name) {
+      errors.name = 'Name is required';
+    } else if (formData.name.length < 2) {
+      errors.name = 'Name must be at least 2 characters';
+    }
+
     if (!formData.email) {
       errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -78,7 +85,7 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
       return;
     }
 
-    const result = await register(formData.email, formData.password);
+    const result = await register(formData.name, formData.email, formData.password);
     
     if (result.success) {
       onRegisterSuccess?.(result.user);
@@ -113,6 +120,20 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
       <Box component="form" onSubmit={handleSubmit}>
         <TextField
           fullWidth
+          label="Full Name"
+          name="name"
+          type="text"
+          value={formData.name}
+          onChange={handleChange}
+          error={!!formErrors.name}
+          helperText={formErrors.name}
+          margin="normal"
+          autoComplete="name"
+          autoFocus
+        />
+
+        <TextField
+          fullWidth
           label="Email Address"
           name="email"
           type="email"
@@ -122,7 +143,6 @@ const RegisterForm = ({ onSwitchToLogin, onRegisterSuccess }) => {
           helperText={formErrors.email}
           margin="normal"
           autoComplete="email"
-          autoFocus
         />
 
         <TextField

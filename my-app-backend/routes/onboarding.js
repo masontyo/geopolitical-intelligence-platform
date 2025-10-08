@@ -244,16 +244,13 @@ router.post('/complete', async (req, res) => {
       const User = require('../models/User');
       const user = await User.findById(userId);
       
-      // Auto-populate name and email from user registration if not provided
+      // Auto-populate name and email from user registration
       if (!onboardingData.userInfo) {
         onboardingData.userInfo = {};
       }
       if (user) {
+        onboardingData.userInfo.name = user.name;
         onboardingData.userInfo.email = user.email;
-        // Use email as name if name not provided
-        if (!onboardingData.userInfo.name) {
-          onboardingData.userInfo.name = user.email.split('@')[0];
-        }
       }
       
       // Only require company and suppliers from onboarding
