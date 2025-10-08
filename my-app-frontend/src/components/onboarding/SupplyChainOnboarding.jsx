@@ -367,6 +367,7 @@ const SupplyChainOnboarding = () => {
                   value={onboardingData.userInfo.company}
                   onChange={(e) => updateOnboardingData('userInfo', { company: e.target.value })}
                   placeholder="Enter your company name"
+                  required
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -380,7 +381,7 @@ const SupplyChainOnboarding = () => {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Note: Your email address ({user?.email}) was collected during signup and will be used for notifications.
+                  Note: Your email address ({user?.email}) will be used for notifications.
                 </Typography>
               </Grid>
             </Grid>
@@ -1146,7 +1147,7 @@ const SupplyChainOnboarding = () => {
   const isStepValid = (step) => {
     switch (step) {
       case 0:
-        return onboardingData.userInfo.company && onboardingData.userInfo.role;
+        return onboardingData.userInfo.company;
       case 1:
         return onboardingData.suppliers.length > 0 && 
                onboardingData.suppliers.every(s => s.name && s.officialName);

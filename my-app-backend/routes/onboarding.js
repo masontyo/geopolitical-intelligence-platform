@@ -239,9 +239,25 @@ router.post('/complete', async (req, res) => {
     // For supply chain onboarding, validate required fields
     if (type === 'supply_chain') {
       const requiredFields = [];
-      if (!onboardingData?.userInfo?.name) requiredFields.push('name');
+      
+      // Get user data from User model for name and email
+      const User = require('../models/User');
+      const user = await User.findById(userId);
+      
+      // Auto-populate name and email from user registration if not provided
+      if (!onboardingData.userInfo) {
+        onboardingData.userInfo = {};
+      }
+      if (user) {
+        onboardingData.userInfo.email = user.email;
+        // Use email as name if name not provided
+        if (!onboardingData.userInfo.name) {
+          onboardingData.userInfo.name = user.email.split('@')[0];
+        }
+      }
+      
+      // Only require company and suppliers from onboarding
       if (!onboardingData?.userInfo?.company) requiredFields.push('company');
-      if (!onboardingData?.userInfo?.email) requiredFields.push('email');
       if (!onboardingData?.suppliers || onboardingData.suppliers.length === 0) {
         requiredFields.push('at least one supplier');
       }
